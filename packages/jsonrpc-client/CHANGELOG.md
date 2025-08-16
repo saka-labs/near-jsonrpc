@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0](https://github.com/saka-labs/near-jsonrpc/compare/jsonrpc-client-v0.2.0...jsonrpc-client-v0.3.0) (2025-08-16)
+
+
+### Features
+
+* update docs to trigger release ([91c2f27](https://github.com/saka-labs/near-jsonrpc/commit/91c2f270fb17e7c74854d6ca7d44782cb25e2abd))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @saka-labs/jsonrpc-types bumped from 0.2.0 to 0.3.0
+
 ## [0.2.0](https://github.com/joundy/near-jsonrpc/compare/jsonrpc-client-v0.1.0...jsonrpc-client-v0.2.0) (2025-08-04)
 
 ### Features
