@@ -15,8 +15,18 @@
   "pull-request-footer": "---\n\n### 🤖 Automated Release Process\n\nThis PR was generated automatically by [release-please](https://github.com/googleapis/release-please).\n\n**To complete the release:**\n1. Review the changes above\n2. Merge this PR\n3. Packages will be automatically published to npm\n4. GitHub release will be created with tags\n\n**Need to make changes?** Push additional commits to master and this PR will be updated automatically.",
   "plugins": [
     {
+      "type": "linked-versions",
+      "groupName": "near-jsonrpc",
+      "components": [
+        "packages/jsonrpc-types",
+        "packages/jsonrpc-client",
+        "packages/jsonrpc-react-query"
+      ]
+    },
+    {
       "type": "node-workspace",
-      "merge": false
+      "updateAllPackages": true,
+      "merge": true
     }
   ]
 }
