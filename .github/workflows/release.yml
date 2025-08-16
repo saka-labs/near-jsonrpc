@@ -55,3 +55,10 @@ jobs:
         run: |
           cd packages/jsonrpc-client
           npm publish
+      - name: Publish jsonrpc-react-query
+        if: ${{ steps.release.outputs['packages/jsonrpc-react-query--release_created'] }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/jsonrpc-react-query
+          npm publish
