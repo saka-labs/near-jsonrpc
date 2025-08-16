@@ -88,12 +88,12 @@ function parseZod<T>(
  * @example
  * ```typescript
  * import { createClientWithMethods, jsonRpcTransporter, NearRpcEndpoint } from "@saka-labs/jsonrpc-client";
- * import { block, status, query } from "@saka-labs/jsonrpc-types/methods";
+ * import { block, status, query, tx } from "@saka-labs/jsonrpc-types/methods";
  *
  * const transporter = jsonRpcTransporter({ endpoint: NearRpcEndpoint.Mainnet });
  * const client = createClientWithMethods({
  *   transporter,
- *   methods: { block, status, query },
+ *   methods: { block, status, query, tx },
  *   runtimeValidation: { request: true, response: true, error: false }
  * });
  *
