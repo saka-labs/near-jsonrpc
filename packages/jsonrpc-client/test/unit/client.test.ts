@@ -1,5 +1,10 @@
 import { createClient, createClientWithMethods } from "../../src/client";
-import { block, status, gasPrice, query } from "@near-js/jsonrpc-types/methods";
+import {
+  block,
+  status,
+  gasPrice,
+  query,
+} from "@saka-labs/jsonrpc-types/methods";
 import type { Transporter } from "../../src/types";
 
 describe("createClient", () => {

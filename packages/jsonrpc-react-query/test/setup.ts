@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom";
 
 const mockTransporter = jest.fn();
-jest.mock("@near-js/jsonrpc-client", () => ({
+jest.mock("@saka-labs/jsonrpc-client", () => ({
   createClientWithMethods: jest.fn(),
   jsonRpcTransporter: jest.fn(() => mockTransporter),
   NearRpcEndpoint: {

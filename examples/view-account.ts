@@ -9,7 +9,7 @@ import {
   jsonRpcTransporter,
   createClient,
   type RpcClient,
-} from "@near-js/jsonrpc-client";
+} from "@saka-labs/jsonrpc-client";
 
 /**
  * Display account information including balance and storage usage

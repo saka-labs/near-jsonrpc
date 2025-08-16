@@ -1,4 +1,4 @@
-import * as methods from "@near-js/jsonrpc-types/methods";
+import * as methods from "@saka-labs/jsonrpc-types/methods";
 import { z } from "zod/v4";
 import type {
   RpcClient,
@@ -19,7 +19,7 @@ import {
   RequestType,
   ResponseType,
   Method,
-} from "@near-js/jsonrpc-types/types";
+} from "@saka-labs/jsonrpc-types/types";
 import { JSON_RPC_TRANSPORTER_ERROR_CODE } from "./transporter";
 
 /**
@@ -87,8 +87,8 @@ function parseZod<T>(
  *
  * @example
  * ```typescript
- * import { createClientWithMethods, jsonRpcTransporter, NearRpcEndpoint } from "@near-js/jsonrpc-client";
- * import { block, status, query } from "@near-js/jsonrpc-types/methods";
+ * import { createClientWithMethods, jsonRpcTransporter, NearRpcEndpoint } from "@saka-labs/jsonrpc-client";
+ * import { block, status, query } from "@saka-labs/jsonrpc-types/methods";
  *
  * const transporter = jsonRpcTransporter({ endpoint: NearRpcEndpoint.Mainnet });
  * const client = createClientWithMethods({
@@ -179,7 +179,7 @@ export function createClientWithMethods<
  *
  * @example
  * ```typescript
- * import { createClient, jsonRpcTransporter, NearRpcEndpoint } from "@near-js/jsonrpc-client";
+ * import { createClient, jsonRpcTransporter, NearRpcEndpoint } from "@saka-labs/jsonrpc-client";
  *
  * const transporter = jsonRpcTransporter({ endpoint: NearRpcEndpoint.Mainnet });
  * const client = createClient({

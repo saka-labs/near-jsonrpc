@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { createClientWithMethods } from "@near-js/jsonrpc-client";
+import { createClientWithMethods } from "@saka-labs/jsonrpc-client";
 import type {
   Method,
   RequestType,
   ResponseType,
   ErrorType,
-} from "@near-js/jsonrpc-types/types";
+} from "@saka-labs/jsonrpc-types/types";
 import type {
   UseJsonRpcQueryOptions,
   JsonRpcQueryResult,
@@ -23,8 +23,8 @@ import { createMethodQueryKey } from "./query-keys";
  *
  * @example
  * ```tsx
- * import { useJsonRpcQuery } from '@near-js/jsonrpc-react-query';
- * import { block } from '@near-js/jsonrpc-types/methods';
+ * import { useJsonRpcQuery } from '@saka-labs/jsonrpc-react-query';
+ * import { block } from '@saka-labs/jsonrpc-types/methods';
  *
  * function BlockInfo() {
  *   const { data, error, isLoading } = useJsonRpcQuery(

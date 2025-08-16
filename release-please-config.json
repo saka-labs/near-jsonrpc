@@ -2,16 +2,16 @@
   "release-type": "node",
   "packages": {
     "packages/jsonrpc-types": {
-      "package-name": "@near-js/jsonrpc-types"
+      "package-name": "@saka-labs/jsonrpc-types"
     },
     "packages/jsonrpc-client": {
-      "package-name": "@near-js/jsonrpc-client"
+      "package-name": "@saka-labs/jsonrpc-client"
     },
     "packages/jsonrpc-react-query": {
-      "package-name": "@near-js/jsonrpc-react-query"
+      "package-name": "@saka-labs/jsonrpc-react-query"
     }
   },
-  "pull-request-header": "## 🚀 NEAR JSONRPC Release\n\nThis automated release includes updates to the NEAR JSON-RPC packages.\n\n### 📦 Packages Being Released\n- `@near-js/jsonrpc-types`\n- `@near-js/jsonrpc-client`\n- `@near-js/jsonrpc-react-query`\n\n### 🔍 Review Checklist\n- [ ] Version bumps look correct\n- [ ] Changelog entries are accurate\n- [ ] Breaking changes are properly documented\n- [ ] Dependencies between packages are updated correctly",
+  "pull-request-header": "## 🚀 NEAR JSONRPC Release\n\nThis automated release includes updates to the NEAR JSON-RPC packages.\n\n### 📦 Packages Being Released\n- `@saka-labs/jsonrpc-types`\n- `@saka-labs/jsonrpc-client`\n- `@saka-labs/jsonrpc-react-query`\n\n### 🔍 Review Checklist\n- [ ] Version bumps look correct\n- [ ] Changelog entries are accurate\n- [ ] Breaking changes are properly documented\n- [ ] Dependencies between packages are updated correctly",
   "pull-request-footer": "---\n\n### 🤖 Automated Release Process\n\nThis PR was generated automatically by [release-please](https://github.com/googleapis/release-please).\n\n**To complete the release:**\n1. Review the changes above\n2. Merge this PR\n3. Packages will be automatically published to npm\n4. GitHub release will be created with tags\n\n**Need to make changes?** Push additional commits to master and this PR will be updated automatically.",
   "plugins": [
     {

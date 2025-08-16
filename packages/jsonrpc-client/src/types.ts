@@ -1,4 +1,4 @@
-import * as methods from "@near-js/jsonrpc-types/methods";
+import * as methods from "@saka-labs/jsonrpc-types/methods";
 import { z } from "zod/v4";
 import type {
   DefaultRequestType,
@@ -6,7 +6,7 @@ import type {
   Method,
   RequestType,
   ResponseType,
-} from "@near-js/jsonrpc-types/types";
+} from "@saka-labs/jsonrpc-types/types";
 
 export type RuntimeValidationType = "request" | "response" | "error";
 
@@ -116,7 +116,7 @@ export interface CreateClientWithMethodsConfig<
 > {
   /** The transport function to use for sending requests */
   transporter: Transporter;
-  /** Object containing the specific methods to include from "@near-js/jsonrpc-types/methods" */
+  /** Object containing the specific methods to include from "@saka-labs/jsonrpc-types/methods" */
   methods: T;
   /** Runtime validation configuration (optional, defaults to false for all) */
   runtimeValidation?: RuntimeValidationSetting;

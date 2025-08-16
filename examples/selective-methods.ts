@@ -8,8 +8,8 @@
 import {
   createClientWithMethods,
   jsonRpcTransporter,
-} from "@near-js/jsonrpc-client";
-import { block, status, gasPrice } from "@near-js/jsonrpc-types/methods";
+} from "@saka-labs/jsonrpc-client";
+import { block, status, gasPrice } from "@saka-labs/jsonrpc-types/methods";
 
 async function main() {
   const transporter = jsonRpcTransporter({

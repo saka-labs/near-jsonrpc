@@ -25,7 +25,7 @@ export type {
   MethodName,
 } from "./types";
 
-export { jsonRpcTransporter, NearRpcEndpoint } from "@near-js/jsonrpc-client";
+export { jsonRpcTransporter, NearRpcEndpoint } from "@saka-labs/jsonrpc-client";
 
 export type {
   QueryClient,
