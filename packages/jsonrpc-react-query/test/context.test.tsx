@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { JsonRpcQueryProvider, useJsonRpcQueryConfig } from "../src/context";
-import { jsonRpcTransporter, NearRpcEndpoint } from "@near-js/jsonrpc-client";
+import { jsonRpcTransporter, NearRpcEndpoint } from "@saka-labs/jsonrpc-client";
 import type { JsonRpcQueryConfig } from "../src/types";
 
 // Test component that uses the hook

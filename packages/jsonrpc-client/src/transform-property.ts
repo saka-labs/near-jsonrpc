@@ -2,7 +2,7 @@
  * credits: https://github.com/craftgear/snake-camel/blob/master/src/index.ts
  */
 
-import { mappedSnakeCamelProperty } from "@near-js/jsonrpc-types/mapped-properties";
+import { mappedSnakeCamelProperty } from "@saka-labs/jsonrpc-types/mapped-properties";
 
 const mappedCamelSnakeProperty = new Map<string, string>();
 for (const [key, value] of mappedSnakeCamelProperty) {

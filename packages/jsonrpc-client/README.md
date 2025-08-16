@@ -1,11 +1,11 @@
-# @near-js/jsonrpc-client
+# @saka-labs/jsonrpc-client
 
 Type-safe JSON-RPC client for NEAR Protocol.
 
 ## Installation
 
 ```bash
-npm install @near-js/jsonrpc-client
+npm install @saka-labs/jsonrpc-client
 ```
 
 ## Quick Start
@@ -14,8 +14,8 @@ npm install @near-js/jsonrpc-client
 import {
   jsonRpcTransporter,
   createClientWithMethods,
-} from "@near-js/jsonrpc-client";
-import { block, gasPrice, query } from "@near-js/jsonrpc-types/methods";
+} from "@saka-labs/jsonrpc-client";
+import { block, gasPrice, query } from "@saka-labs/jsonrpc-types/methods";
 
 const transporter = jsonRpcTransporter({
   endpoint: "https://rpc.testnet.near.org",
@@ -61,7 +61,7 @@ Creates a transporter function for making JSON-RPC requests to NEAR Protocol.
 #### Example
 
 ```typescript
-import { jsonRpcTransporter, NearRpcEndpoint } from "@near-js/jsonrpc-client";
+import { jsonRpcTransporter, NearRpcEndpoint } from "@saka-labs/jsonrpc-client";
 
 // Using predefined endpoints
 const transporter = jsonRpcTransporter({
@@ -86,7 +86,7 @@ Creates a type-safe JSON-RPC client with all available NEAR Protocol methods.
 #### Example
 
 ```typescript
-import { jsonRpcTransporter, createClient } from "@near-js/jsonrpc-client";
+import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
 
 const transporter = jsonRpcTransporter({
   endpoint: "https://rpc.testnet.near.org",
@@ -115,7 +115,7 @@ Creates a type-safe JSON-RPC client with only specific methods. This is useful f
 #### Parameters
 
 - `config.transporter: Transporter` - The transport layer for making JSON-RPC requests
-- `config.methods: object` - Object containing specific methods from `@near-js/jsonrpc-types/methods`
+- `config.methods: object` - Object containing specific methods from `@saka-labs/jsonrpc-types/methods`
 - `config.runtimeValidation?: boolean | RuntimeValidationConfig` - Optional configuration to enable runtime validation. Can be `true` for all validation or an object for granular control
 
 #### Example
@@ -124,8 +124,8 @@ Creates a type-safe JSON-RPC client with only specific methods. This is useful f
 import {
   jsonRpcTransporter,
   createClientWithMethods,
-} from "@near-js/jsonrpc-client";
-import { block, status, query } from "@near-js/jsonrpc-types/methods";
+} from "@saka-labs/jsonrpc-client";
+import { block, status, query } from "@saka-labs/jsonrpc-types/methods";
 
 const transporter = jsonRpcTransporter({
   endpoint: "https://rpc.testnet.near.org",
@@ -162,7 +162,7 @@ import {
   broadcastTxAsync,
   broadcastTxCommit,
   tx,
-} from "@near-js/jsonrpc-types/methods";
+} from "@saka-labs/jsonrpc-types/methods";
 const txClient = createClientWithMethods({
   transporter,
   methods: { broadcastTxAsync, broadcastTxCommit, tx },
@@ -179,8 +179,8 @@ The client now supports discriminated methods that provide better type safety an
 Instead of using the generic `query` method with a `requestType` parameter, you can now use specific methods:
 
 ```typescript
-import { jsonRpcTransporter, createClient } from "@near-js/jsonrpc-client";
-import { DiscriminateRpcQueryResponse } from "@near-js/jsonrpc-types";
+import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
+import { DiscriminateRpcQueryResponse } from "@saka-labs/jsonrpc-types";
 
 const transporter = jsonRpcTransporter({
   endpoint: "https://rpc.testnet.near.org",
@@ -230,7 +230,7 @@ Use discriminator helpers to safely handle union response types:
 import {
   DiscriminateRpcQueryResponse,
   DiscriminateRpcTransactionResponse,
-} from "@near-js/jsonrpc-types";
+} from "@saka-labs/jsonrpc-types";
 
 // For query responses
 const { result } = await client.queryViewAccount({
@@ -256,7 +256,7 @@ The client supports runtime validation using Zod schemas to validate requests, r
 Set `runtimeValidation: true` to enable all validation types:
 
 ```typescript
-import { jsonRpcTransporter, createClient } from "@near-js/jsonrpc-client";
+import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
 
 const client = createClient({
   transporter: jsonRpcTransporter({ endpoint: "https://rpc.testnet.near.org" }),
@@ -269,7 +269,7 @@ const client = createClient({
 Use an object to control which validation types are enabled:
 
 ```typescript
-import { jsonRpcTransporter, createClient } from "@near-js/jsonrpc-client";
+import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
 
 // Only validate requests (catch invalid input before sending)
 const clientRequestOnly = createClient({
@@ -342,7 +342,7 @@ See the [examples directory](../../examples) for more usage patterns:
 
 ## Related
 
-- [`@near-js/jsonrpc-types`](../jsonrpc-types) - TypeScript types
+- [`@saka-labs/jsonrpc-types`](../jsonrpc-types) - TypeScript types
 - [NEAR JSON-RPC Docs](https://docs.near.org/api/rpc/introduction)
 
 ## License

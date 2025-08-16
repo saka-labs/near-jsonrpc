@@ -9,7 +9,7 @@ import {
   jsonRpcTransporter,
   createClient,
   type RpcClient,
-} from "@near-js/jsonrpc-client";
+} from "@saka-labs/jsonrpc-client";
 
 /**
  * Display network status information

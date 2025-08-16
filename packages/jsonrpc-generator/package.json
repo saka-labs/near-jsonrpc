@@ -1,5 +1,5 @@
 {
-  "name": "@near-js/jsonrpc-generator",
+  "name": "@saka-labs/jsonrpc-generator",
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",

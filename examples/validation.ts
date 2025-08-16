@@ -5,9 +5,9 @@
  * validation enabled, showcasing type safety and Zod schema validation.
  */
 
-import { jsonRpcTransporter, createClient } from "@near-js/jsonrpc-client";
-import type { RpcClient } from "@near-js/jsonrpc-client";
-import type { AccountInfo } from "@near-js/jsonrpc-types/schemas";
+import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
+import type { RpcClient } from "@saka-labs/jsonrpc-client";
+import type { AccountInfo } from "@saka-labs/jsonrpc-types/schemas";
 
 async function validBlockRequestExample(client: RpcClient) {
   console.log("📋 Example 1: Valid Block Request");
