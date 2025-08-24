@@ -1,5 +1,8 @@
-import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
-import { DiscriminateRpcQueryResponse } from "@saka-labs/jsonrpc-types";
+import {
+  jsonRpcTransporter,
+  createClient,
+} from "@saka-labs/near-jsonrpc-client";
+import { DiscriminateRpcQueryResponse } from "@saka-labs/near-jsonrpc-types";
 
 async function main() {
   const transporter = jsonRpcTransporter({

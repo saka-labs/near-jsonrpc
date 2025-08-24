@@ -1,11 +1,11 @@
-# @saka-labs/jsonrpc-types
+# @saka-labs/near-jsonrpc-types
 
 TypeScript types and schemas for NEAR JSON-RPC API.
 
 ## Installation
 
 ```bash
-npm install @saka-labs/jsonrpc-types
+npm install @saka-labs/near-jsonrpc-types
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ import type {
   RpcBlockResponse,
   RpcQueryRequest,
   RpcQueryResponse,
-} from "@saka-labs/jsonrpc-types";
+} from "@saka-labs/near-jsonrpc-types";
 ```
 
 ### Import Method Definitions
@@ -42,7 +42,7 @@ import {
   health,
   networkInfo,
   EXPERIMENTALProtocolConfig,
-} from "@saka-labs/jsonrpc-types/methods";
+} from "@saka-labs/near-jsonrpc-types/methods";
 
 const transporter = jsonRpcTransporter({
   endpoint: "https://rpc.testnet.near.org",
@@ -70,7 +70,7 @@ import type {
   AccountView,
   ValidatorStakeView,
   BlockHeaderView,
-} from "@saka-labs/jsonrpc-types/schemas";
+} from "@saka-labs/near-jsonrpc-types/schemas";
 ```
 
 ### Import Zod Validation Schemas
@@ -83,7 +83,7 @@ import {
   BlockHeaderViewSchema,
   RpcBlockRequestSchema,
   RpcBlockResponseSchema,
-} from "@saka-labs/jsonrpc-types/zod-schemas";
+} from "@saka-labs/near-jsonrpc-types/zod-schemas";
 
 // Validate API responses at runtime
 const account = AccountViewSchema.parse(response);
@@ -93,7 +93,7 @@ const blockRequest = RpcBlockRequestSchema.parse(userInput);
 ### Import Property Mappings
 
 ```typescript
-import { mappedSnakeCamelProperty } from "@saka-labs/jsonrpc-types/mapped-properties";
+import { mappedSnakeCamelProperty } from "@saka-labs/near-jsonrpc-types/mapped-properties";
 
 // Convert between snake_case and camelCase property names
 const camelCase = mappedSnakeCamelProperty.get("account_id"); // "accountId"
@@ -105,7 +105,7 @@ const camelCase = mappedSnakeCamelProperty.get("account_id"); // "accountId"
 import {
   DiscriminateRpcQueryResponse,
   DiscriminateRpcTransactionResponse,
-} from "@saka-labs/jsonrpc-types";
+} from "@saka-labs/near-jsonrpc-types";
 
 // Type-safe discrimination of union response types
 const { result } = await client.queryViewAccount({
@@ -208,8 +208,8 @@ For complete method details, parameter types, and response schemas, see [`/metho
 
 ## Related
 
-- [`@saka-labs/jsonrpc-client`](../jsonrpc-client) - JSON-RPC client
-- [`@saka-labs/jsonrpc-generator`](../jsonrpc-generator) - Code generator
+- [`@saka-labs/near-jsonrpc-client`](../jsonrpc-client) - JSON-RPC client
+- [`@saka-labs/near-jsonrpc-generator`](../jsonrpc-generator) - Code generator
 
 ## License
 

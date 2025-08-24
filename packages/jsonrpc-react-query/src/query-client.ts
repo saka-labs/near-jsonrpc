@@ -1,5 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
-import type { Method } from "@saka-labs/jsonrpc-types/types";
+import type { Method } from "@saka-labs/near-jsonrpc-types/types";
 import { jsonRpcQueryKeys, getMethodQueryKeys } from "./query-keys";
 
 /**
@@ -34,7 +34,7 @@ export const defaultJsonRpcQueryConfig = {
  *
  * @example
  * ```tsx
- * import { createJsonRpcQueryClient } from '@saka-labs/jsonrpc-react-query';
+ * import { createJsonRpcQueryClient } from '@saka-labs/near-jsonrpc-react-query';
  * import { QueryClientProvider } from '@tanstack/react-query';
  *
  * const queryClient = createJsonRpcQueryClient({
@@ -81,8 +81,8 @@ export function createJsonRpcQueryClient(
  * @example
  * ```tsx
  * import { useQueryClient } from '@tanstack/react-query';
- * import { JsonRpcQueryCache } from '@saka-labs/jsonrpc-react-query';
- * import { block, status } from '@saka-labs/jsonrpc-types/methods';
+ * import { JsonRpcQueryCache } from '@saka-labs/near-jsonrpc-react-query';
+ * import { block, status } from '@saka-labs/near-jsonrpc-types/methods';
  *
  * function CacheManagement() {
  *   const queryClient = useQueryClient();

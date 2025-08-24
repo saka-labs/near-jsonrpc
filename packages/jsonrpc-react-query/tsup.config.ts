@@ -9,8 +9,8 @@ export default defineConfig({
   clean: true,
   outDir: "dist",
   external: [
-    "@saka-labs/jsonrpc-client",
-    "@saka-labs/jsonrpc-types",
+    "@saka-labs/near-jsonrpc-client",
+    "@saka-labs/near-jsonrpc-types",
     "@tanstack/react-query",
     "react",
   ],

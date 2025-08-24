@@ -17,9 +17,9 @@ Thank you for your interest in contributing to the NEAR JSON-RPC TypeScript SDK!
 
 This monorepo contains three main packages:
 
-- **[@saka-labs/jsonrpc-client](./packages/jsonrpc-client)** - Type-safe JSON-RPC client
-- **[@saka-labs/jsonrpc-types](./packages/jsonrpc-types)** - TypeScript types and Zod schemas (auto-generated)
-- **[@saka-labs/jsonrpc-generator](./packages/jsonrpc-generator)** - Code generator that creates types from OpenAPI specs
+- **[@saka-labs/near-jsonrpc-client](./packages/jsonrpc-client)** - Type-safe JSON-RPC client
+- **[@saka-labs/near-jsonrpc-types](./packages/jsonrpc-types)** - TypeScript types and Zod schemas (auto-generated)
+- **[@saka-labs/near-jsonrpc-generator](./packages/jsonrpc-generator)** - Code generator that creates types from OpenAPI specs
 
 ### Key Features
 
@@ -168,7 +168,7 @@ For detailed information, see [GENERATOR.md](./GENERATOR.md).
 ### Code Style
 
 - **TypeScript**: Follow existing patterns and conventions
-- **Imports**: Use `@saka-labs/jsonrpc-types` instead of relative paths in the monorepo
+- **Imports**: Use `@saka-labs/near-jsonrpc-types` instead of relative paths in the monorepo
 - **Naming**: Use camelCase for TypeScript, snake_case for JSON-RPC properties
 - **Comments**: Add JSDoc for public APIs
 

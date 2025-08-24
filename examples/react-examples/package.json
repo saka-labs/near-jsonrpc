@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@saka-labs/jsonrpc-client": "*",
-    "@saka-labs/jsonrpc-types": "*",
-    "@saka-labs/jsonrpc-react-query": "*",
+    "@saka-labs/near-jsonrpc-client": "*",
+    "@saka-labs/near-jsonrpc-types": "*",
+    "@saka-labs/near-jsonrpc-react-query": "*",
     "@tanstack/react-query": "^5.84.1",
     "@tanstack/react-query-devtools": "^5.84.1",
     "react": "^19.1.1",

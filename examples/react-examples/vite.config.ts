@@ -13,13 +13,13 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@saka-labs/jsonrpc-react-query": path.resolve(
+      "@saka-labs/near-jsonrpc-react-query": path.resolve(
         "../../packages/jsonrpc-react-query/src"
       ),
-      "@saka-labs/jsonrpc-client": path.resolve(
+      "@saka-labs/near-jsonrpc-client": path.resolve(
         "../../packages/jsonrpc-client/src"
       ),
-      "@saka-labs/jsonrpc-types": path.resolve(
+      "@saka-labs/near-jsonrpc-types": path.resolve(
         "../../packages/jsonrpc-types/src"
       ),
     },

@@ -4,7 +4,7 @@ import {
   status,
   gasPrice,
   query,
-} from "@saka-labs/jsonrpc-types/methods";
+} from "@saka-labs/near-jsonrpc-types/methods";
 import type { Transporter } from "../../src/types";
 
 describe("createClient", () => {

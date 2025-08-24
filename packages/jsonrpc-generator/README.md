@@ -1,10 +1,10 @@
-# @saka-labs/jsonrpc-generator
+# @saka-labs/near-jsonrpc-generator
 
 A sophisticated code generator that creates TypeScript types and Zod validation schemas for NEAR's JSON-RPC API from OpenAPI specifications.
 
 ## Overview
 
-The `@saka-labs/jsonrpc-generator` automatically generates type-safe TypeScript bindings for NEAR's JSON-RPC API by processing the official OpenAPI specification from the nearcore repository. It produces comprehensive TypeScript types, Zod schemas for runtime validation, and property mappings to ensure seamless integration between NEAR's API and TypeScript applications.
+The `@saka-labs/near-jsonrpc-generator` automatically generates type-safe TypeScript bindings for NEAR's JSON-RPC API by processing the official OpenAPI specification from the nearcore repository. It produces comprehensive TypeScript types, Zod schemas for runtime validation, and property mappings to ensure seamless integration between NEAR's API and TypeScript applications.
 
 ## Usage
 
@@ -30,7 +30,7 @@ yarn check-types   # Type checking
 
 ## Generated Output
 
-The generator creates the following files in `@saka-labs/jsonrpc-types/src/`:
+The generator creates the following files in `@saka-labs/near-jsonrpc-types/src/`:
 
 | File                   | Description                                     |
 | ---------------------- | ----------------------------------------------- |
@@ -184,8 +184,8 @@ await validateZodSchema({
 
 ## Related Packages
 
-- [`@saka-labs/jsonrpc-types`](../jsonrpc-types) - Generated types and schemas
-- [`@saka-labs/jsonrpc-client`](../jsonrpc-client) - Type-safe JSON-RPC client
+- [`@saka-labs/near-jsonrpc-types`](../jsonrpc-types) - Generated types and schemas
+- [`@saka-labs/near-jsonrpc-client`](../jsonrpc-client) - Type-safe JSON-RPC client
 
 ## Documentation
 

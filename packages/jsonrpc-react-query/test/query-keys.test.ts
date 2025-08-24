@@ -7,7 +7,7 @@ import {
   block,
   status,
   broadcastTxCommit,
-} from "@saka-labs/jsonrpc-types/methods";
+} from "@saka-labs/near-jsonrpc-types/methods";
 
 describe("jsonRpcQueryKeys", () => {
   describe("all", () => {

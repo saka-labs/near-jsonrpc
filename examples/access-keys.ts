@@ -4,8 +4,11 @@
  * This example demonstrates how to list access keys for a NEAR account.
  */
 
-import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
-import { AccessKeyList } from "@saka-labs/jsonrpc-types/schemas";
+import {
+  jsonRpcTransporter,
+  createClient,
+} from "@saka-labs/near-jsonrpc-client";
+import { AccessKeyList } from "@saka-labs/near-jsonrpc-types/schemas";
 
 async function main() {
   const transporter = jsonRpcTransporter({

@@ -11,7 +11,7 @@ const JsonRpcQueryContext = createContext<JsonRpcQueryConfig | null>(null);
  *
  * @example
  * ```tsx
- * import { JsonRpcQueryProvider, jsonRpcTransporter, NearRpcEndpoint } from '@saka-labs/jsonrpc-react-query';
+ * import { JsonRpcQueryProvider, jsonRpcTransporter, NearRpcEndpoint } from '@saka-labs/near-jsonrpc-react-query';
  *
  * const transporter = jsonRpcTransporter({ endpoint: NearRpcEndpoint.Mainnet });
  *

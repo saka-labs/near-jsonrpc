@@ -4,7 +4,7 @@ import {
   defaultJsonRpcQueryConfig,
   JsonRpcQueryCache,
 } from "../src/query-client";
-import { block, status } from "@saka-labs/jsonrpc-types/methods";
+import { block, status } from "@saka-labs/near-jsonrpc-types/methods";
 
 // Mock QueryClient
 const mockInvalidateQueries = jest.fn();

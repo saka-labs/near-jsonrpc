@@ -1,13 +1,13 @@
-# @saka-labs/jsonrpc-react-query
+# @saka-labs/near-jsonrpc-react-query
 
 A type-safe React Query wrapper for the NEAR JSON-RPC client that provides powerful data fetching, caching, and state management capabilities.
 
 ## Installation
 
 ```bash
-npm install @saka-labs/jsonrpc-react-query @tanstack/react-query
+npm install @saka-labs/near-jsonrpc-react-query @tanstack/react-query
 # or
-yarn add @saka-labs/jsonrpc-react-query @tanstack/react-query
+yarn add @saka-labs/near-jsonrpc-react-query @tanstack/react-query
 ```
 
 ## Quick Start
@@ -23,7 +23,7 @@ import {
   createJsonRpcQueryClient,
   jsonRpcTransporter,
   NearRpcEndpoint,
-} from "@saka-labs/jsonrpc-react-query";
+} from "@saka-labs/near-jsonrpc-react-query";
 
 // Create a query client optimized for JSON-RPC
 const queryClient = createJsonRpcQueryClient();
@@ -49,8 +49,8 @@ function App() {
 
 ```tsx
 import React from "react";
-import { useJsonRpcQuery } from "@saka-labs/jsonrpc-react-query";
-import { block, status } from "@saka-labs/jsonrpc-types/methods";
+import { useJsonRpcQuery } from "@saka-labs/near-jsonrpc-react-query";
+import { block, status } from "@saka-labs/near-jsonrpc-types/methods";
 
 function BlockInfo() {
   // Fetch the latest block
@@ -92,8 +92,8 @@ function BlockInfo() {
 
 ```tsx
 import React from "react";
-import { useJsonRpcMutation } from "@saka-labs/jsonrpc-react-query";
-import { broadcastTxCommit } from "@saka-labs/jsonrpc-types/methods";
+import { useJsonRpcMutation } from "@saka-labs/near-jsonrpc-react-query";
+import { broadcastTxCommit } from "@saka-labs/near-jsonrpc-types/methods";
 
 function SendTransaction() {
   const { mutate, isPending, data, error } = useJsonRpcMutation(
@@ -138,7 +138,7 @@ A hook for fetching data using JSON-RPC methods.
 
 **Parameters:**
 
-- `method`: JSON-RPC method definition from `@saka-labs/jsonrpc-types/methods`
+- `method`: JSON-RPC method definition from `@saka-labs/near-jsonrpc-types/methods`
 - `params`: Parameters for the method
 - `options`: Optional React Query options
 

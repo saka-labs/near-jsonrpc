@@ -1,5 +1,5 @@
 {
-  "name": "@saka-labs/jsonrpc-types",
+  "name": "@saka-labs/near-jsonrpc-types",
   "version": "0.3.0",
   "license": "MIT",
   "main": "./dist/index.js",

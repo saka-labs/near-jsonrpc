@@ -8,5 +8,5 @@ export default defineConfig({
   minify: true,
   clean: true,
   outDir: "dist",
-  external: ["@saka-labs/jsonrpc-types"],
+  external: ["@saka-labs/near-jsonrpc-types"],
 });

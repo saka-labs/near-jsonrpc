@@ -10,7 +10,7 @@
     "check-types": "turbo run check-types --filter='./packages/*'",
     "clean": "rm -rf dist && turbo run clean --filter='./packages/*'",
     "test": "turbo run test --filter='./packages/*'",
-    "generate": "yarn workspace @saka-labs/jsonrpc-generator generate"
+    "generate": "yarn workspace @saka-labs/near-jsonrpc-generator generate"
   },
   "workspaces": [
     "packages/*",

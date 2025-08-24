@@ -8,13 +8,13 @@ import type {
   Transporter,
   ClientMethodReturnType,
   RuntimeValidationSetting,
-} from "@saka-labs/jsonrpc-client";
+} from "@saka-labs/near-jsonrpc-client";
 import type {
   Method,
   RequestType,
   ResponseType,
   ErrorType,
-} from "@saka-labs/jsonrpc-types/types";
+} from "@saka-labs/near-jsonrpc-types/types";
 
 /**
  * Extract the method name from a method object

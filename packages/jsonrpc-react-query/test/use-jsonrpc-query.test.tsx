@@ -5,8 +5,8 @@ import {
   createClientWithMethods,
   jsonRpcTransporter,
   NearRpcEndpoint,
-} from "@saka-labs/jsonrpc-client";
-import { block, status } from "@saka-labs/jsonrpc-types/methods";
+} from "@saka-labs/near-jsonrpc-client";
+import { block, status } from "@saka-labs/near-jsonrpc-types/methods";
 import { useJsonRpcQuery } from "../src/use-jsonrpc-query";
 import { JsonRpcQueryProvider } from "../src/context";
 import type { JsonRpcQueryConfig } from "../src/types";

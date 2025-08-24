@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `@saka-labs/jsonrpc-generator` automatically creates TypeScript types and Zod validation schemas for NEAR's JSON-RPC API from OpenAPI specifications. It fetches the latest API spec from nearcore, processes it into clean TypeScript types, and generates runtime validation schemas to ensure type safety.
+The `@saka-labs/near-jsonrpc-generator` automatically creates TypeScript types and Zod validation schemas for NEAR's JSON-RPC API from OpenAPI specifications. It fetches the latest API spec from nearcore, processes it into clean TypeScript types, and generates runtime validation schemas to ensure type safety.
 
 ## Quick Start
 
@@ -209,8 +209,8 @@ export const mappedSnakeCamelProperty = new Map<string, string>([
 ## Usage Example
 
 ```typescript
-import { query, broadcast_tx_commit } from "@saka-labs/jsonrpc-types";
-import type { RequestType, ResponseType } from "@saka-labs/jsonrpc-types";
+import { query, broadcast_tx_commit } from "@saka-labs/near-jsonrpc-types";
+import type { RequestType, ResponseType } from "@saka-labs/near-jsonrpc-types";
 
 // Type-safe method calls
 const queryRequest: RequestType<typeof query> = {

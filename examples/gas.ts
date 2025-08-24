@@ -4,7 +4,10 @@
  * This example demonstrates how to get the gas price for a NEAR account.
  */
 
-import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
+import {
+  jsonRpcTransporter,
+  createClient,
+} from "@saka-labs/near-jsonrpc-client";
 
 async function main() {
   const transporter = jsonRpcTransporter({

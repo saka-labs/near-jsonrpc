@@ -1,4 +1,4 @@
-import type { Method, RequestType } from "@saka-labs/jsonrpc-types/types";
+import type { Method, RequestType } from "@saka-labs/near-jsonrpc-types/types";
 import type { JsonRpcQueryKeys, MethodName } from "./types";
 
 export const jsonRpcQueryKeys: JsonRpcQueryKeys = {

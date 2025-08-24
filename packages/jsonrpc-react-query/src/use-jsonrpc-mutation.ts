@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { createClientWithMethods } from "@saka-labs/jsonrpc-client";
+import { createClientWithMethods } from "@saka-labs/near-jsonrpc-client";
 import type {
   Method,
   RequestType,
   ResponseType,
   ErrorType,
-} from "@saka-labs/jsonrpc-types/types";
+} from "@saka-labs/near-jsonrpc-types/types";
 import type {
   UseJsonRpcMutationOptions,
   JsonRpcMutationResult,
@@ -21,8 +21,8 @@ import { useJsonRpcQueryConfig } from "./context";
  *
  * @example
  * ```tsx
- * import { useJsonRpcMutation } from '@saka-labs/jsonrpc-react-query';
- * import { broadcastTxCommit } from '@saka-labs/jsonrpc-types/methods';
+ * import { useJsonRpcMutation } from '@saka-labs/near-jsonrpc-react-query';
+ * import { broadcastTxCommit } from '@saka-labs/near-jsonrpc-types/methods';
  *
  * function SendTransaction() {
  *   const { mutate, isPending, error } = useJsonRpcMutation(

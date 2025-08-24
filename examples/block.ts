@@ -4,7 +4,10 @@
  * This example demonstrates how to fetch the latest block information from NEAR.
  */
 
-import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
+import {
+  jsonRpcTransporter,
+  createClient,
+} from "@saka-labs/near-jsonrpc-client";
 
 async function main() {
   const transporter = jsonRpcTransporter({

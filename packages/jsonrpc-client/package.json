@@ -1,5 +1,5 @@
 {
-  "name": "@saka-labs/jsonrpc-client",
+  "name": "@saka-labs/near-jsonrpc-client",
   "version": "0.3.0",
   "license": "MIT",
   "main": "./dist/index.js",
@@ -25,7 +25,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@saka-labs/jsonrpc-types": "0.3.0",
+    "@saka-labs/near-jsonrpc-types": "0.3.0",
     "zod": "^4.0.5"
   },
   "devDependencies": {

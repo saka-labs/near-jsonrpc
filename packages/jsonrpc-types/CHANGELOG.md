@@ -2,10 +2,9 @@
 
 ## [0.3.0](https://github.com/saka-labs/near-jsonrpc/compare/jsonrpc-types-v0.2.0...jsonrpc-types-v0.3.0) (2025-08-16)
 
-
 ### Features
 
-* update package ([67e5253](https://github.com/saka-labs/near-jsonrpc/commit/67e525350a0f1835ceb5b9211a1c662627c7ecb3))
+- update package ([67e5253](https://github.com/saka-labs/near-jsonrpc/commit/67e525350a0f1835ceb5b9211a1c662627c7ecb3))
 
 ## [0.2.0](https://github.com/joundy/near-jsonrpc/compare/jsonrpc-types-v0.1.0...jsonrpc-types-v0.2.0) (2025-08-04)
 
@@ -16,7 +15,7 @@
 - add selective methods and object-based API ([142befc](https://github.com/joundy/near-jsonrpc/commit/142befc05cf02d1d1163c2d19810aa34d8471ede))
 - expand descriminated methods ([9df962c](https://github.com/joundy/near-jsonrpc/commit/9df962c5e29e74e9daf302a40224d7fbbd94e5c1))
 - expand discriminated methods ([bae2f7f](https://github.com/joundy/near-jsonrpc/commit/bae2f7ff79f33c0661aec33f1b191885435da93a))
-- export zod-schemas in @saka-labs/jsonrpc-types ([e632c5d](https://github.com/joundy/near-jsonrpc/commit/e632c5dcf9ea5cb080e30ea05c00c1fa4c5acceb))
+- export zod-schemas in @saka-labs/near-jsonrpc-types ([e632c5d](https://github.com/joundy/near-jsonrpc/commit/e632c5dcf9ea5cb080e30ea05c00c1fa4c5acceb))
 - extends the schema with discrimination helper function ([a66bea2](https://github.com/joundy/near-jsonrpc/commit/a66bea2e9e0ae29ec2cb0413509a0e31c1f62cc4))
 - init add zod schema generator ([06e8b28](https://github.com/joundy/near-jsonrpc/commit/06e8b288c5b27b3370f67231ae688b4ea570d518))
 - init assign query child method (request_type) ([2dcc662](https://github.com/joundy/near-jsonrpc/commit/2dcc6622b86022cfadb9c4f609863cb3df5bb522))

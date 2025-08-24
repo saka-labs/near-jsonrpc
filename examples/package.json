@@ -18,8 +18,8 @@
     "discriminated-helper": "tsx discriminated-helper.ts"
   },
   "devDependencies": {
-    "@saka-labs/jsonrpc-client": "*",
-    "@saka-labs/jsonrpc-types": "*",
+    "@saka-labs/near-jsonrpc-client": "*",
+    "@saka-labs/near-jsonrpc-types": "*",
     "near-api-js": "^6.2.2",
     "tsx": "^4.20.3"
   }

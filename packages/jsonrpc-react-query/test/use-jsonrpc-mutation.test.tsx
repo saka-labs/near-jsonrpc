@@ -5,8 +5,8 @@ import {
   createClientWithMethods,
   jsonRpcTransporter,
   NearRpcEndpoint,
-} from "@saka-labs/jsonrpc-client";
-import { broadcastTxCommit } from "@saka-labs/jsonrpc-types/methods";
+} from "@saka-labs/near-jsonrpc-client";
+import { broadcastTxCommit } from "@saka-labs/near-jsonrpc-types/methods";
 import { useJsonRpcMutation } from "../src/use-jsonrpc-mutation";
 import { JsonRpcQueryProvider } from "../src/context";
 import type { JsonRpcQueryConfig } from "../src/types";

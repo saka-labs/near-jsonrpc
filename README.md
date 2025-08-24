@@ -4,21 +4,24 @@ A modern, type-safe TypeScript SDK for NEAR Protocol's JSON-RPC API.
 
 ## Packages
 
-| Package                                                              | Description                                                |
-| -------------------------------------------------------------------- | ---------------------------------------------------------- |
-| **[@saka-labs/jsonrpc-client](./packages/jsonrpc-client)**           | Type-safe JSON-RPC client                                  |
-| **[@saka-labs/jsonrpc-types](./packages/jsonrpc-types)**             | TypeScript types and schemas                               |
-| **[@saka-labs/jsonrpc-react-query](./packages/jsonrpc-react-query)** | React Query hooks for NEAR JSON-RPC                        |
-| **[@saka-labs/jsonrpc-generator](./packages/jsonrpc-generator)**     | Code generator for types ([Detailed docs](./GENERATOR.md)) |
+| Package                                                                   | Description                                                |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| **[@saka-labs/near-jsonrpc-client](./packages/jsonrpc-client)**           | Type-safe JSON-RPC client                                  |
+| **[@saka-labs/near-jsonrpc-types](./packages/jsonrpc-types)**             | TypeScript types and schemas                               |
+| **[@saka-labs/near-jsonrpc-react-query](./packages/jsonrpc-react-query)** | React Query hooks for NEAR JSON-RPC                        |
+| **[@saka-labs/near-jsonrpc-generator](./packages/jsonrpc-generator)**     | Code generator for types ([Detailed docs](./GENERATOR.md)) |
 
 ## Quick Start
 
 ```bash
-npm install @saka-labs/jsonrpc-client
+npm install @saka-labs/near-jsonrpc-client
 ```
 
 ```typescript
-import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
+import {
+  jsonRpcTransporter,
+  createClient,
+} from "@saka-labs/near-jsonrpc-client";
 
 const transporter = jsonRpcTransporter({
   endpoint: "https://rpc.testnet.near.org",

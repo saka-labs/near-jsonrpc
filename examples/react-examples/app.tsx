@@ -2,7 +2,7 @@
  * NEAR JSON-RPC React Query Demo
  *
  * A beautiful showcase of type-safe NEAR blockchain data fetching
- * using @saka-labs/jsonrpc-react-query with React Query.
+ * using @saka-labs/near-jsonrpc-react-query with React Query.
  */
 
 import React from "react";
@@ -11,14 +11,14 @@ import {
   JsonRpcQueryProvider,
   useJsonRpcQuery,
   jsonRpcTransporter,
-} from "@saka-labs/jsonrpc-react-query";
+} from "@saka-labs/near-jsonrpc-react-query";
 import {
   status,
   block,
   gasPrice,
   query,
-} from "@saka-labs/jsonrpc-types/methods";
-import { DiscriminateRpcQueryResponse } from "@saka-labs/jsonrpc-types";
+} from "@saka-labs/near-jsonrpc-types/methods";
+import { DiscriminateRpcQueryResponse } from "@saka-labs/near-jsonrpc-types";
 import "./styles.css";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -206,7 +206,7 @@ function App() {
 
           <footer className="app-footer">
             <p>
-              Powered by <strong>@saka-labs/jsonrpc-react-query</strong>
+              Powered by <strong>@saka-labs/near-jsonrpc-react-query</strong>
             </p>
           </footer>
         </div>

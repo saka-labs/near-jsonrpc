@@ -5,8 +5,11 @@
  * It covers transaction creation, signing with a keypair, and sending signed_tx_base64 to the network.
  */
 
-import { jsonRpcTransporter, createClient } from "@saka-labs/jsonrpc-client";
-import type { AccessKey } from "@saka-labs/jsonrpc-types/schemas";
+import {
+  jsonRpcTransporter,
+  createClient,
+} from "@saka-labs/near-jsonrpc-client";
+import type { AccessKey } from "@saka-labs/near-jsonrpc-types/schemas";
 import { transactions, utils, KeyPairSigner } from "near-api-js";
 
 // Configuration
@@ -149,7 +152,9 @@ async function sendTransactionExample() {
     console.log("\n💡 This example demonstrates:");
     console.log("   • Creating transactions with near-api-js");
     console.log("   • Signing with keypair");
-    console.log("   • Sending signed_tx_base64 via @saka-labs/jsonrpc-client");
+    console.log(
+      "   • Sending signed_tx_base64 via @saka-labs/near-jsonrpc-client"
+    );
   } catch (error) {
     console.error("❌ Error:", error.message || error);
   }
