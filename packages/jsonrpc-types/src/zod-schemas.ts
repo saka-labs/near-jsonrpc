@@ -5,7 +5,6 @@
  * @generated
  */
 import { z } from "zod/v4";
-import type { Action } from "./schemas";
 
 export const AccessKeySchema = z.object({
     nonce: z.number(),
@@ -67,29 +66,6 @@ export const AccountWithPublicKeySchema = z.object({
     accountId: AccountIdSchema,
     publicKey: z.lazy(() => PublicKeySchema)
 });
-export const ActionSchema: z.ZodType<Action> = z.union([z.object({
-    CreateAccount: z.lazy(() => CreateAccountActionSchema)
-}), z.object({
-    DeployContract: z.lazy(() => DeployContractActionSchema)
-}), z.object({
-    FunctionCall: z.lazy(() => FunctionCallActionSchema)
-}), z.object({
-    Transfer: z.lazy(() => TransferActionSchema)
-}), z.object({
-    Stake: z.lazy(() => StakeActionSchema)
-}), z.object({
-    AddKey: z.lazy(() => AddKeyActionSchema)
-}), z.object({
-    DeleteKey: z.lazy(() => DeleteKeyActionSchema)
-}), z.object({
-    DeleteAccount: z.lazy(() => DeleteAccountActionSchema)
-}), z.object({
-    Delegate: z.lazy(() => SignedDelegateActionSchema)
-}), z.object({
-    DeployGlobalContract: z.lazy(() => DeployGlobalContractActionSchema)
-}), z.object({
-    UseGlobalContract: z.lazy(() => UseGlobalContractActionSchema)
-})]);
 export const ActionCreationConfigViewSchema = z.object({
     addKeyCost: AccessKeyCreationConfigViewSchema,
     createAccountCost: z.lazy(() => FeeSchema),
@@ -955,6 +931,7 @@ export const LimitConfigSchema = z.object({
     maxActionsPerReceipt: z.number(),
     maxArgumentsLength: z.number(),
     maxContractSize: z.number(),
+    maxElementsPerContractTable: z.union([z.number(), z.null()]).optional(),
     maxFunctionsNumberPerContract: z.union([z.number(), z.null()]).optional(),
     maxGasBurnt: z.number(),
     maxLengthMethodName: z.number(),
@@ -971,6 +948,7 @@ export const LimitConfigSchema = z.object({
     maxReceiptSize: z.number(),
     maxRegisterSize: z.number(),
     maxStackHeight: z.number(),
+    maxTablesPerContract: z.union([z.number(), z.null()]).optional(),
     maxTotalLogLength: z.number(),
     maxTotalPrepaidGas: z.number(),
     maxTransactionSize: z.number(),
@@ -1006,7 +984,27 @@ export const NextEpochValidatorInfoSchema = z.object({
     shards: z.array(z.lazy(() => ShardIdSchema)),
     stake: z.string()
 });
-export const NonDelegateActionSchema = ActionSchema;
+export const NonDelegateActionSchema = z.union([z.object({
+    CreateAccount: CreateAccountActionSchema
+}), z.object({
+    DeployContract: DeployContractActionSchema
+}), z.object({
+    FunctionCall: FunctionCallActionSchema
+}), z.object({
+    Transfer: z.lazy(() => TransferActionSchema)
+}), z.object({
+    Stake: z.lazy(() => StakeActionSchema)
+}), z.object({
+    AddKey: AddKeyActionSchema
+}), z.object({
+    DeleteKey: DeleteKeyActionSchema
+}), z.object({
+    DeleteAccount: DeleteAccountActionSchema
+}), z.object({
+    DeployGlobalContract: DeployGlobalContractActionSchema
+}), z.object({
+    UseGlobalContract: z.lazy(() => UseGlobalContractActionSchema)
+})]);
 export const PeerIdSchema = z.lazy(() => PublicKeySchema);
 export const PeerInfoViewSchema = z.object({
     accountId: z.union([AccountIdSchema, z.null()]).optional(),
@@ -1025,7 +1023,7 @@ export const PeerInfoViewSchema = z.object({
     sentBytesPerSec: z.number(),
     trackedShards: z.array(z.lazy(() => ShardIdSchema))
 });
-export const PrepareErrorSchema = z.union([z.literal("Serialization"), z.literal("Deserialization"), z.literal("InternalMemoryDeclared"), z.literal("GasInstrumentation"), z.literal("StackHeightInstrumentation"), z.literal("Instantiate"), z.literal("Memory"), z.literal("TooManyFunctions"), z.literal("TooManyLocals")]);
+export const PrepareErrorSchema = z.union([z.literal("Serialization"), z.literal("Deserialization"), z.literal("InternalMemoryDeclared"), z.literal("GasInstrumentation"), z.literal("StackHeightInstrumentation"), z.literal("Instantiate"), z.literal("Memory"), z.literal("TooManyFunctions"), z.literal("TooManyLocals"), z.literal("TooManyTables"), z.literal("TooManyTableElements")]);
 export const PublicKeySchema = z.string();
 export const Range_of_uint64Schema = z.object({
     end: z.number(),
