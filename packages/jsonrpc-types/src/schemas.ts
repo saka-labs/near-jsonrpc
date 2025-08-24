@@ -94,29 +94,6 @@ export type AccountWithPublicKey = {
     accountId: AccountId;
     publicKey: PublicKey;
 };
-export type Action = {
-    CreateAccount: CreateAccountAction;
-} | {
-    DeployContract: DeployContractAction;
-} | {
-    FunctionCall: FunctionCallAction;
-} | {
-    Transfer: TransferAction;
-} | {
-    Stake: StakeAction;
-} | {
-    AddKey: AddKeyAction;
-} | {
-    DeleteKey: DeleteKeyAction;
-} | {
-    DeleteAccount: DeleteAccountAction;
-} | {
-    Delegate: SignedDelegateAction;
-} | {
-    DeployGlobalContract: DeployGlobalContractAction;
-} | {
-    UseGlobalContract: UseGlobalContractAction;
-};
 export type ActionCreationConfigView = {
     /** @description Base cost of adding a key. */
     addKeyCost: AccessKeyCreationConfigView;
@@ -1869,6 +1846,11 @@ export type LimitConfig = {
      */
     maxContractSize: number;
     /**
+     * Format: uint
+     * @description If present, stores max number of elements in a single contract's table
+     */
+    maxElementsPerContractTable?: number | null;
+    /**
      * Format: uint64
      * @description If present, stores max number of functions in one contract
      */
@@ -1957,6 +1939,11 @@ export type LimitConfig = {
      */
     maxStackHeight: number;
     /**
+     * Format: uint32
+     * @description If present, stores max number of tables declared globally in one contract
+     */
+    maxTablesPerContract?: number | null;
+    /**
      * Format: uint64
      * @description Maximum total length in bytes of all log messages.
      */
@@ -2021,7 +2008,27 @@ export type NextEpochValidatorInfo = {
     shards: ShardId[];
     stake: string;
 };
-export type NonDelegateAction = Action;
+export type NonDelegateAction = {
+    CreateAccount: CreateAccountAction;
+} | {
+    DeployContract: DeployContractAction;
+} | {
+    FunctionCall: FunctionCallAction;
+} | {
+    Transfer: TransferAction;
+} | {
+    Stake: StakeAction;
+} | {
+    AddKey: AddKeyAction;
+} | {
+    DeleteKey: DeleteKeyAction;
+} | {
+    DeleteAccount: DeleteAccountAction;
+} | {
+    DeployGlobalContract: DeployGlobalContractAction;
+} | {
+    UseGlobalContract: UseGlobalContractAction;
+};
 export type PeerId = PublicKey;
 export type PeerInfoView = {
     accountId?: AccountId | (null);
@@ -2050,7 +2057,7 @@ export type PeerInfoView = {
     sentBytesPerSec: number;
     trackedShards: ShardId[];
 };
-export type PrepareError = "Serialization" | "Deserialization" | "InternalMemoryDeclared" | "GasInstrumentation" | "StackHeightInstrumentation" | "Instantiate" | "Memory" | "TooManyFunctions" | "TooManyLocals";
+export type PrepareError = "Serialization" | "Deserialization" | "InternalMemoryDeclared" | "GasInstrumentation" | "StackHeightInstrumentation" | "Instantiate" | "Memory" | "TooManyFunctions" | "TooManyLocals" | "TooManyTables" | "TooManyTableElements";
 export type PublicKey = string;
 export type Range_of_uint64 = {
     /** Format: uint64 */
