@@ -1024,6 +1024,7 @@ export const PeerInfoViewSchema = z.object({
     trackedShards: z.array(z.lazy(() => ShardIdSchema))
 });
 export const PrepareErrorSchema = z.union([z.literal("Serialization"), z.literal("Deserialization"), z.literal("InternalMemoryDeclared"), z.literal("GasInstrumentation"), z.literal("StackHeightInstrumentation"), z.literal("Instantiate"), z.literal("Memory"), z.literal("TooManyFunctions"), z.literal("TooManyLocals"), z.literal("TooManyTables"), z.literal("TooManyTableElements")]);
+export const ProtocolVersionCheckConfigSchema = z.union([z.literal("Next"), z.literal("NextNext")]);
 export const PublicKeySchema = z.string();
 export const Range_of_uint64Schema = z.object({
     end: z.number(),
@@ -1154,6 +1155,7 @@ export const RpcClientConfigResponseSchema = z.object({
     orphanStateWitnessPoolSize: z.number(),
     produceChunkAddTransactionsTimeLimit: z.string(),
     produceEmptyBlocks: z.boolean(),
+    protocolVersionCheck: ProtocolVersionCheckConfigSchema,
     reshardingConfig: MutableConfigValueSchema,
     rpcAddr: z.union([z.string(), z.null()]).optional(),
     saveInvalidWitnesses: z.boolean(),

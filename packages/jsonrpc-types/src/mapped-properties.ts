@@ -384,6 +384,7 @@ export const mappedSnakeCamelProperty = new Map<string, string>([["full_access_c
 ["orphan_state_witness_pool_size", "orphanStateWitnessPoolSize"],
 ["produce_chunk_add_transactions_time_limit", "produceChunkAddTransactionsTimeLimit"],
 ["produce_empty_blocks", "produceEmptyBlocks"],
+["protocol_version_check", "protocolVersionCheck"],
 ["resharding_config", "reshardingConfig"],
 ["rpc_addr", "rpcAddr"],
 ["save_invalid_witnesses", "saveInvalidWitnesses"],
