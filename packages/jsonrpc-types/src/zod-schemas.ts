@@ -1857,6 +1857,7 @@ export const StateItemSchema = z.object({
 export const StateSyncConfigSchema = z.object({
     concurrency: z.lazy(() => SyncConcurrencySchema).optional(),
     dump: z.union([DumpConfigSchema, z.null()]).optional(),
+    partsCompressionLvl: z.number(),
     sync: z.lazy(() => SyncConfigSchema).optional()
 });
 export const StatusSyncInfoSchema = z.object({
