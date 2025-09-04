@@ -485,6 +485,7 @@ export const mappedSnakeCamelProperty = new Map<string, string>([["full_access_c
 ["gas_key", "gasKey"],
 ["key_base64", "keyBase64"],
 ["value_base64", "valueBase64"],
+["parts_compression_lvl", "partsCompressionLvl"],
 ["earliest_block_hash", "earliestBlockHash"],
 ["earliest_block_height", "earliestBlockHeight"],
 ["earliest_block_time", "earliestBlockTime"],
