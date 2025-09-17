@@ -497,6 +497,33 @@ export type ChunkHeaderView = {
     /** @description TODO(2271): deprecated. */
     validatorReward: string;
 };
+export type CloudArchivalReaderConfig = {
+    /** @description Configures the external storage used by the archival node. */
+    cloudStorage: CloudStorageConfig;
+};
+export type CloudArchivalWriterConfig = {
+    /**
+     * @description Determines whether block-related data should be written to cloud storage.
+     * @default false
+     */
+    archiveBlockData: boolean;
+    /** @description Configures the external storage used by the archival node. */
+    cloudStorage: CloudStorageConfig;
+    /**
+     * @description Interval at which the system checks for new blocks or chunks to archive.
+     * @default {
+     *       "nanos": 0,
+     *       "secs": 1
+     *     }
+     */
+    pollingInterval: DurationAsStdSchemaProvider;
+};
+export type CloudStorageConfig = {
+    /** @description Location of a json file with credentials allowing access to the bucket. */
+    credentialsFile?: string | null;
+    /** @description The storage to persist the archival data. */
+    storage: ExternalStorageLocation;
+};
 export type CompilationError = {
     CodeDoesNotExist: {
         accountId: AccountId;
@@ -719,7 +746,7 @@ export type DetailedDebugStatus = {
 };
 export type Direction = "Left" | "Right";
 export type DumpConfig = {
-    /** @description Location of a json file with credentials allowing write access to the bucket. */
+    /** @description Location of a json file with credentials allowing access to the bucket. */
     credentialsFile?: string | null;
     /** @description How often to check if a new epoch has started.
      *     Feel free to set to `None`, defaults are sensible. */
@@ -1940,6 +1967,11 @@ export type RpcClientConfigResponse = {
      * @description Number of threads to execute background migration work in client.
      */
     clientBackgroundMigrationThreads: number;
+    /** @description Configuration for a cloud-based archival reader. */
+    cloudArchivalReader?: CloudArchivalReaderConfig | (null);
+    /** @description Configuration for a cloud-based archival writer. If this config is present, the writer is enabled and
+     *     writes chunk-related data based on the tracked shards. */
+    cloudArchivalWriter?: CloudArchivalWriterConfig | (null);
     /** @description Time between running doomslug timer. */
     doomslugStepPeriod: number[];
     enableMultilineLogging: boolean;
