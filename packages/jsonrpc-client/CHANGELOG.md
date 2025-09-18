@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.2](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-client-v0.4.1...near-jsonrpc-client-v0.4.2) (2025-09-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @saka-labs/near-jsonrpc-types bumped from 0.5.0 to 0.6.0
+
 ## [0.4.1](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-client-v0.4.0...near-jsonrpc-client-v0.4.1) (2025-08-24)
 
 

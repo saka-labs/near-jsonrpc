@@ -1,6 +1,6 @@
 {
   "name": "@saka-labs/near-jsonrpc-react-query",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -24,8 +24,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@saka-labs/near-jsonrpc-client": "0.4.1",
-    "@saka-labs/near-jsonrpc-types": "0.5.0"
+    "@saka-labs/near-jsonrpc-client": "0.4.2",
+    "@saka-labs/near-jsonrpc-types": "0.6.0"
   },
   "peerDependencies": {
     "@tanstack/react-query": "^5.0.0",
