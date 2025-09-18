@@ -509,6 +509,7 @@ export const mappedSnakeCamelProperty = new Map<string, string>([["full_access_c
 ["network_version", "networkVersion"],
 ["validator_stake_struct_version", "validatorStakeStructVersion"],
 ["rustc_version", "rustcVersion"],
+["deterministic_account_ids", "deterministicAccountIds"],
 ["discard_custom_sections", "discardCustomSections"],
 ["eth_implicit_accounts", "ethImplicitAccounts"],
 ["ext_costs", "extCosts"],

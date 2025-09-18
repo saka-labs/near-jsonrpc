@@ -1990,6 +1990,7 @@ export const ViewStateResultSchema = z.object({
     values: z.array(StateItemSchema)
 });
 export const VMConfigViewSchema = z.object({
+    deterministicAccountIds: z.boolean(),
     discardCustomSections: z.boolean(),
     ethImplicitAccounts: z.boolean(),
     extCosts: ExtCostsConfigViewSchema,
