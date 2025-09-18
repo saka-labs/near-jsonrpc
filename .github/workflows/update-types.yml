@@ -2,8 +2,8 @@ name: Update Types
 
 on:
   schedule:
-    # Run daily at 00:00 UTC
-    - cron: "0 0 * * *"
+    # Run weekly on Mondays at 07:00 UTC
+    - cron: "0 7 * * 1"
   workflow_dispatch: # Allow manual triggering
 
 jobs:
