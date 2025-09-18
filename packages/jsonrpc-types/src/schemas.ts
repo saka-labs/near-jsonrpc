@@ -3262,6 +3262,8 @@ export type ViewStateResult = {
     values: StateItem[];
 };
 export type VMConfigView = {
+    /** @description See [VMConfig::deterministic_account_ids](crate::vm::Config::deterministic_account_ids). */
+    deterministicAccountIds: boolean;
     /** @description See [VMConfig::discard_custom_sections](crate::vm::Config::discard_custom_sections). */
     discardCustomSections: boolean;
     /** @description See [VMConfig::eth_implicit_accounts](crate::vm::Config::eth_implicit_accounts). */
