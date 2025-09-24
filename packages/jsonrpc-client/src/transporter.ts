@@ -36,7 +36,15 @@ export function jsonRpcTransporter({
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorText = await response.text();
+        const errorMessage = `HTTP error! Status: ${response.status}`;
+
+        throw new Error(errorMessage, {
+          cause: {
+            statusCode: response.status,
+            responseText: errorText || errorMessage,
+          },
+        });
       }
 
       const data = (await response.json()) as {
@@ -59,7 +67,7 @@ export function jsonRpcTransporter({
             error instanceof Error
               ? error.message
               : "Unknown json rpc trasporter error",
-          data: error,
+          data: error instanceof Error ? error.cause : error,
         },
       };
     }

@@ -88,7 +88,30 @@ describe("jsonRpcTransporter", () => {
       error: {
         code: JSON_RPC_TRANSPORTER_ERROR_CODE,
         message: "Network failed",
-        data: expect.any(Error),
+        data: undefined,
+      },
+    });
+  });
+
+  it("handles HTTP errors and captures response text", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      text: () => Promise.resolve("Internal server error"),
+    });
+
+    const transporter = jsonRpcTransporter({
+      endpoint: NearRpcEndpoint.Testnet,
+    });
+
+    const result = await transporter("status", {});
+
+    expect(result.error).toEqual({
+      code: JSON_RPC_TRANSPORTER_ERROR_CODE,
+      message: "HTTP error! Status: 500",
+      data: {
+        statusCode: 500,
+        responseText: "Internal server error",
       },
     });
   });
