@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.5.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-client-v0.4.2...near-jsonrpc-client-v0.5.0) (2025-09-24)
+
+
+### Features
+
+* enhance HTTP error handling in transporter ([4568c38](https://github.com/saka-labs/near-jsonrpc/commit/4568c385f3adb362b2a12bd70231054d25b3b190))
+
+
+### Bug Fixes
+
+* update package.json exports to match actual dist files ([6b74e91](https://github.com/saka-labs/near-jsonrpc/commit/6b74e919a21157d10da7fd153806a90ba2e63302))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @saka-labs/near-jsonrpc-types bumped from 0.6.0 to 0.6.1
+
 ## [0.4.2](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-client-v0.4.1...near-jsonrpc-client-v0.4.2) (2025-09-18)
 
 

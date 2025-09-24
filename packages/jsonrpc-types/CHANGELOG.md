@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.6.1](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.6.0...near-jsonrpc-types-v0.6.1) (2025-09-24)
+
 ## [0.6.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.5.0...near-jsonrpc-types-v0.6.0) (2025-09-18)
 
 
