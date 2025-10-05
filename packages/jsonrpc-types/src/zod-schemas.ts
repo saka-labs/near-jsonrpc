@@ -27,7 +27,7 @@ export const AccessKeyPermissionSchema = z.union([z.object({
 }), z.literal("FullAccess")]);
 export const AccessKeyPermissionViewSchema = z.union([z.literal("FullAccess"), z.object({
     FunctionCall: z.object({
-        allowance: z.union([z.string(), z.null()]).optional(),
+        allowance: z.union([z.lazy(() => NearTokenSchema), z.null()]).optional(),
         methodNames: z.array(z.string()),
         receiverId: z.string()
     })
@@ -50,15 +50,15 @@ export const AccountIdSchema = z.string();
 export const AccountIdValidityRulesVersionSchema = z.number();
 export const AccountInfoSchema = z.object({
     accountId: AccountIdSchema,
-    amount: z.string(),
+    amount: z.lazy(() => NearTokenSchema),
     publicKey: z.lazy(() => PublicKeySchema)
 });
 export const AccountViewSchema = z.object({
-    amount: z.string(),
+    amount: z.lazy(() => NearTokenSchema),
     codeHash: z.lazy(() => CryptoHashSchema),
     globalContractAccountId: z.union([AccountIdSchema, z.null()]).optional(),
     globalContractHash: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
-    locked: z.string(),
+    locked: z.lazy(() => NearTokenSchema),
     storagePaidAt: z.number(),
     storageUsage: z.number()
 });
@@ -124,7 +124,7 @@ export const ActionErrorKindSchema = z.union([z.object({
 }), z.object({
     LackBalanceForState: z.object({
         accountId: AccountIdSchema,
-        amount: z.string()
+        amount: z.lazy(() => NearTokenSchema)
     })
 }), z.object({
     TriesToUnstake: z.object({
@@ -133,15 +133,15 @@ export const ActionErrorKindSchema = z.union([z.object({
 }), z.object({
     TriesToStake: z.object({
         accountId: AccountIdSchema,
-        balance: z.string(),
-        locked: z.string(),
-        stake: z.string()
+        balance: z.lazy(() => NearTokenSchema),
+        locked: z.lazy(() => NearTokenSchema),
+        stake: z.lazy(() => NearTokenSchema)
     })
 }), z.object({
     InsufficientStake: z.object({
         accountId: AccountIdSchema,
-        minimumStake: z.string(),
-        stake: z.string()
+        minimumStake: z.lazy(() => NearTokenSchema),
+        stake: z.lazy(() => NearTokenSchema)
     })
 }), z.object({
     FunctionCallError: z.lazy(() => FunctionCallErrorSchema)
@@ -225,6 +225,21 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         protocolFeature: z.string(),
         version: z.number()
     })
+}), z.object({
+    InvalidDeterministicStateInitReceiver: z.object({
+        derivedId: AccountIdSchema,
+        receiverId: AccountIdSchema
+    })
+}), z.object({
+    DeterministicStateInitKeyLengthExceeded: z.object({
+        length: z.number(),
+        limit: z.number()
+    })
+}), z.object({
+    DeterministicStateInitValueLengthExceeded: z.object({
+        length: z.number(),
+        limit: z.number()
+    })
 })]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
@@ -233,18 +248,18 @@ export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
 }), z.object({
     FunctionCall: z.object({
         args: z.lazy(() => FunctionArgsSchema),
-        deposit: z.string(),
+        deposit: z.lazy(() => NearTokenSchema),
         gas: z.lazy(() => NearGasSchema),
         methodName: z.string()
     })
 }), z.object({
     Transfer: z.object({
-        deposit: z.string()
+        deposit: z.lazy(() => NearTokenSchema)
     })
 }), z.object({
     Stake: z.object({
         publicKey: z.lazy(() => PublicKeySchema),
-        stake: z.string()
+        stake: z.lazy(() => NearTokenSchema)
     })
 }), z.object({
     AddKey: z.object({
@@ -279,6 +294,12 @@ export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
 }), z.object({
     UseGlobalContractByAccountId: z.object({
         accountId: AccountIdSchema
+    })
+}), z.object({
+    DeterministicStateInit: z.object({
+        code: z.lazy(() => GlobalContractIdentifierViewSchema),
+        data: z.record(z.string(), z.string()),
+        deposit: z.lazy(() => NearTokenSchema)
     })
 })]);
 export const AddKeyActionSchema = z.object({
@@ -324,7 +345,7 @@ export const BlockHeaderViewSchema = z.object({
     chunksIncluded: z.number(),
     epochId: z.lazy(() => CryptoHashSchema),
     epochSyncDataHash: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
-    gasPrice: z.string(),
+    gasPrice: z.lazy(() => NearTokenSchema),
     hash: z.lazy(() => CryptoHashSchema),
     height: z.number(),
     lastDsFinalBlock: z.lazy(() => CryptoHashSchema),
@@ -337,13 +358,13 @@ export const BlockHeaderViewSchema = z.object({
     prevHeight: z.union([z.number(), z.null()]).optional(),
     prevStateRoot: z.lazy(() => CryptoHashSchema),
     randomValue: z.lazy(() => CryptoHashSchema),
-    rentPaid: z.string(),
+    rentPaid: z.lazy(() => NearTokenSchema),
     signature: z.lazy(() => SignatureSchema),
     timestamp: z.number(),
     timestampNanosec: z.string(),
-    totalSupply: z.string(),
+    totalSupply: z.lazy(() => NearTokenSchema),
     validatorProposals: z.array(z.lazy(() => ValidatorStakeViewSchema)),
-    validatorReward: z.string()
+    validatorReward: z.lazy(() => NearTokenSchema)
 });
 export const BlockIdSchema = z.union([z.number(), z.lazy(() => CryptoHashSchema)]);
 export const BlockStatusViewSchema = z.object({
@@ -369,7 +390,7 @@ export const ChunkDistributionUrisSchema = z.object({
     set: z.string()
 });
 export const ChunkHeaderViewSchema = z.object({
-    balanceBurnt: z.string(),
+    balanceBurnt: z.lazy(() => NearTokenSchema),
     bandwidthRequests: z.union([BandwidthRequestsSchema, z.null()]).optional(),
     chunkHash: z.lazy(() => CryptoHashSchema),
     congestionInfo: z.union([z.lazy(() => CongestionInfoViewSchema), z.null()]).optional(),
@@ -383,12 +404,12 @@ export const ChunkHeaderViewSchema = z.object({
     outgoingReceiptsRoot: z.lazy(() => CryptoHashSchema),
     prevBlockHash: z.lazy(() => CryptoHashSchema),
     prevStateRoot: z.lazy(() => CryptoHashSchema),
-    rentPaid: z.string(),
+    rentPaid: z.lazy(() => NearTokenSchema),
     shardId: z.lazy(() => ShardIdSchema),
     signature: z.lazy(() => SignatureSchema),
     txRoot: z.lazy(() => CryptoHashSchema),
     validatorProposals: z.array(z.lazy(() => ValidatorStakeViewSchema)),
-    validatorReward: z.string()
+    validatorReward: z.lazy(() => NearTokenSchema)
 });
 export const CloudArchivalReaderConfigSchema = z.object({
     cloudStorage: z.lazy(() => CloudStorageConfigSchema)
@@ -460,7 +481,7 @@ export const CurrentEpochValidatorInfoSchema = z.object({
     publicKey: z.lazy(() => PublicKeySchema),
     shards: z.array(z.lazy(() => ShardIdSchema)),
     shardsEndorsed: z.array(z.lazy(() => ShardIdSchema)),
-    stake: z.string()
+    stake: z.lazy(() => NearTokenSchema)
 });
 export const DataReceiptCreationConfigViewSchema = z.object({
     baseCost: z.lazy(() => FeeSchema),
@@ -499,6 +520,17 @@ export const DetailedDebugStatusSchema = z.object({
     networkInfo: z.lazy(() => NetworkInfoViewSchema),
     syncStatus: z.string()
 });
+export const DeterministicAccountStateInitSchema = z.object({
+    V1: z.lazy(() => DeterministicAccountStateInitV1Schema)
+});
+export const DeterministicAccountStateInitV1Schema = z.object({
+    code: z.lazy(() => GlobalContractIdentifierSchema),
+    data: z.record(z.string(), z.string())
+});
+export const DeterministicStateInitActionSchema = z.object({
+    deposit: z.lazy(() => NearTokenSchema),
+    stateInit: DeterministicAccountStateInitSchema
+});
 export const DirectionSchema = z.union([z.literal("Left"), z.literal("Right")]);
 export const DumpConfigSchema = z.object({
     credentialsFile: z.union([z.string(), z.null()]).optional(),
@@ -528,7 +560,7 @@ export const ExecutionOutcomeViewSchema = z.object({
     metadata: ExecutionMetadataViewSchema,
     receiptIds: z.array(CryptoHashSchema),
     status: z.lazy(() => ExecutionStatusViewSchema),
-    tokensBurnt: z.string()
+    tokensBurnt: z.lazy(() => NearTokenSchema)
 });
 export const ExecutionOutcomeWithIdViewSchema = z.object({
     blockHash: CryptoHashSchema,
@@ -679,7 +711,7 @@ export const FinalitySchema = z.union([z.literal("optimistic"), z.literal("near-
 export const FunctionArgsSchema = z.string();
 export const FunctionCallActionSchema = z.object({
     args: z.string(),
-    deposit: z.string(),
+    deposit: z.lazy(() => NearTokenSchema),
     gas: z.lazy(() => NearGasSchema),
     methodName: z.string()
 });
@@ -699,12 +731,12 @@ export const FunctionCallErrorSchema = z.union([z.union([z.literal("WasmUnknownE
     ExecutionError: z.string()
 })]);
 export const FunctionCallPermissionSchema = z.object({
-    allowance: z.union([z.string(), z.null()]).optional(),
+    allowance: z.union([z.lazy(() => NearTokenSchema), z.null()]).optional(),
     methodNames: z.array(z.string()),
     receiverId: z.string()
 });
 export const GasKeyViewSchema = z.object({
-    balance: z.number(),
+    balance: z.lazy(() => NearTokenSchema),
     numNonces: z.number(),
     permission: AccessKeyPermissionViewSchema
 });
@@ -723,15 +755,15 @@ export const GenesisConfigSchema = z.object({
     chunkValidatorOnlyKickoutThreshold: z.number(),
     dynamicResharding: z.boolean(),
     epochLength: z.number(),
-    fishermenThreshold: z.string(),
+    fishermenThreshold: z.lazy(() => NearTokenSchema),
     gasLimit: z.lazy(() => NearGasSchema),
     gasPriceAdjustmentRate: z.array(z.number()),
     genesisHeight: z.number(),
     genesisTime: z.string(),
-    maxGasPrice: z.string(),
+    maxGasPrice: z.lazy(() => NearTokenSchema),
     maxInflationRate: z.array(z.number()),
     maxKickoutStakePerc: z.number(),
-    minGasPrice: z.string(),
+    minGasPrice: z.lazy(() => NearTokenSchema),
     minimumStakeDivisor: z.number(),
     minimumStakeRatio: z.array(z.number()),
     minimumValidatorsPerShard: z.number(),
@@ -750,7 +782,7 @@ export const GenesisConfigSchema = z.object({
     shardLayout: z.lazy(() => ShardLayoutSchema),
     shuffleShardAssignmentForChunkProducers: z.boolean(),
     targetValidatorMandatesPerShard: z.number(),
-    totalSupply: z.string(),
+    totalSupply: z.lazy(() => NearTokenSchema),
     transactionValidityPeriod: z.number(),
     useProductionConfig: z.boolean(),
     validators: z.array(AccountInfoSchema)
@@ -762,6 +794,7 @@ export const GlobalContractIdentifierSchema = z.union([z.object({
 }), z.object({
     AccountId: AccountIdSchema
 })]);
+export const GlobalContractIdentifierViewSchema = z.union([CryptoHashSchema, AccountIdSchema]);
 export const HostErrorSchema = z.union([z.literal("BadUTF16"), z.literal("BadUTF8"), z.literal("GasExceeded"), z.literal("GasLimitExceeded"), z.literal("BalanceExceeded"), z.literal("EmptyMethodName"), z.object({
     GuestPanic: z.object({
         panicMsg: z.string()
@@ -867,8 +900,8 @@ export const InvalidAccessKeyErrorSchema = z.union([z.object({
 }), z.literal("RequiresFullAccess"), z.object({
     NotEnoughAllowance: z.object({
         accountId: AccountIdSchema,
-        allowance: z.string(),
-        cost: z.string(),
+        allowance: z.lazy(() => NearTokenSchema),
+        cost: z.lazy(() => NearTokenSchema),
         publicKey: z.lazy(() => PublicKeySchema)
     })
 }), z.literal("DepositWithFunctionCall")]);
@@ -898,13 +931,13 @@ export const InvalidTxErrorSchema = z.union([z.object({
     })
 }), z.literal("InvalidSignature"), z.object({
     NotEnoughBalance: z.object({
-        balance: z.string(),
-        cost: z.string(),
+        balance: z.lazy(() => NearTokenSchema),
+        cost: z.lazy(() => NearTokenSchema),
         signerId: AccountIdSchema
     })
 }), z.object({
     LackBalanceForState: z.object({
-        amount: z.string(),
+        amount: z.lazy(() => NearTokenSchema),
         signerId: AccountIdSchema
     })
 }), z.literal("CostOverflow"), z.literal("InvalidChain"), z.literal("Expired"), z.object({
@@ -982,6 +1015,7 @@ export const MissingTrieValueSchema = z.object({
 export const MissingTrieValueContextSchema = z.union([z.literal("TrieIterator"), z.literal("TriePrefetchingStorage"), z.literal("TrieMemoryPartialStorage"), z.literal("TrieStorage")]);
 export const MutableConfigValueSchema = z.string();
 export const NearGasSchema = z.number();
+export const NearTokenSchema = z.string();
 export const NetworkInfoViewSchema = z.object({
     connectedPeers: z.array(z.lazy(() => PeerInfoViewSchema)),
     knownProducers: z.array(KnownProducerViewSchema),
@@ -995,7 +1029,7 @@ export const NextEpochValidatorInfoSchema = z.object({
     accountId: AccountIdSchema,
     publicKey: z.lazy(() => PublicKeySchema),
     shards: z.array(z.lazy(() => ShardIdSchema)),
-    stake: z.string()
+    stake: NearTokenSchema
 });
 export const NonDelegateActionSchema = z.union([z.object({
     CreateAccount: CreateAccountActionSchema
@@ -1017,6 +1051,8 @@ export const NonDelegateActionSchema = z.union([z.object({
     DeployGlobalContract: DeployGlobalContractActionSchema
 }), z.object({
     UseGlobalContract: z.lazy(() => UseGlobalContractActionSchema)
+}), z.object({
+    DeterministicStateInit: DeterministicStateInitActionSchema
 })]);
 export const PeerIdSchema = z.lazy(() => PublicKeySchema);
 export const PeerInfoViewSchema = z.object({
@@ -1046,7 +1082,7 @@ export const Range_of_uint64Schema = z.object({
 export const ReceiptEnumViewSchema = z.union([z.object({
     Action: z.object({
         actions: z.array(ActionViewSchema),
-        gasPrice: z.string(),
+        gasPrice: NearTokenSchema,
         inputDataIds: z.array(CryptoHashSchema),
         isPromiseYield: z.boolean(),
         outputDataReceivers: z.array(DataReceiverViewSchema),
@@ -1177,6 +1213,7 @@ export const RpcClientConfigResponseSchema = z.object({
     saveLatestWitnesses: z.boolean(),
     saveTrieChanges: z.boolean(),
     saveTxOutcomes: z.boolean(),
+    saveUntrackedPartialChunksParts: z.boolean(),
     skipSyncWait: z.boolean(),
     stateRequestServerThreads: z.number(),
     stateRequestThrottlePeriod: z.array(z.number()),
@@ -1229,7 +1266,7 @@ export const RpcGasPriceRequestSchema = z.object({
     blockId: z.union([BlockIdSchema, z.null()]).optional()
 });
 export const RpcGasPriceResponseSchema = z.object({
-    gasPrice: z.string()
+    gasPrice: NearTokenSchema
 });
 export const RpcHealthRequestSchema = z.null();
 export const RpcHealthResponseSchema = z.null();
@@ -1306,15 +1343,15 @@ export const RpcProtocolConfigResponseSchema = z.object({
     chunkValidatorOnlyKickoutThreshold: z.number(),
     dynamicResharding: z.boolean(),
     epochLength: z.number(),
-    fishermenThreshold: z.string(),
+    fishermenThreshold: NearTokenSchema,
     gasLimit: NearGasSchema,
     gasPriceAdjustmentRate: z.array(z.number()),
     genesisHeight: z.number(),
     genesisTime: z.string(),
-    maxGasPrice: z.string(),
+    maxGasPrice: NearTokenSchema,
     maxInflationRate: z.array(z.number()),
     maxKickoutStakePerc: z.number(),
-    minGasPrice: z.string(),
+    minGasPrice: NearTokenSchema,
     minimumStakeDivisor: z.number(),
     minimumStakeRatio: z.array(z.number()),
     minimumValidatorsPerShard: z.number(),
@@ -1678,7 +1715,7 @@ export const RpcValidatorsOrderedRequestSchema = z.object({
 export const RuntimeConfigViewSchema = z.object({
     accountCreationConfig: AccountCreationConfigViewSchema,
     congestionControlConfig: CongestionControlConfigViewSchema,
-    storageAmountPerByte: z.string(),
+    storageAmountPerByte: NearTokenSchema,
     transactionCosts: z.lazy(() => RuntimeFeesConfigViewSchema),
     wasmConfig: z.lazy(() => VMConfigViewSchema),
     witnessConfig: z.lazy(() => WitnessConfigViewSchema)
@@ -1744,7 +1781,7 @@ export const SlashedValidatorSchema = z.object({
 });
 export const StakeActionSchema = z.object({
     publicKey: PublicKeySchema,
-    stake: z.string()
+    stake: NearTokenSchema
 });
 export const StateChangeCauseViewSchema = z.union([z.object({
     type: z.literal("not_writable_to_disk")
@@ -1792,11 +1829,11 @@ export const StateChangeWithCauseViewSchema = z.object({
 }).and(z.union([z.object({
     change: z.object({
         accountId: AccountIdSchema,
-        amount: z.string(),
+        amount: NearTokenSchema,
         codeHash: CryptoHashSchema,
         globalContractAccountId: z.union([AccountIdSchema, z.null()]).optional(),
         globalContractHash: z.union([CryptoHashSchema, z.null()]).optional(),
-        locked: z.string(),
+        locked: NearTokenSchema,
         storagePaidAt: z.number(),
         storageUsage: z.number()
     }),
@@ -1927,7 +1964,7 @@ export const TrackedShardsConfigSchema = z.union([z.literal("NoShards"), z.objec
     Accounts: z.array(AccountIdSchema)
 })]);
 export const TransferActionSchema = z.object({
-    deposit: z.string()
+    deposit: NearTokenSchema
 });
 export const TxExecutionErrorSchema = z.union([z.object({
     ActionError: ActionErrorSchema
@@ -1953,8 +1990,8 @@ export const ValidatorKickoutReasonSchema = z.union([z.literal("_UnusedSlashed")
     })
 }), z.literal("Unstaked"), z.object({
     NotEnoughStake: z.object({
-        stakeU128: z.string(),
-        thresholdU128: z.string()
+        stakeU128: NearTokenSchema,
+        thresholdU128: NearTokenSchema
     })
 }), z.literal("DidNotGetASeat"), z.object({
     NotEnoughChunkEndorsements: z.object({
@@ -1977,7 +2014,7 @@ export const ValidatorStakeViewSchema = z.object({
 export const ValidatorStakeViewV1Schema = z.object({
     accountId: AccountIdSchema,
     publicKey: PublicKeySchema,
-    stake: z.string()
+    stake: NearTokenSchema
 });
 export const VersionSchema = z.object({
     build: z.string(),
@@ -2005,7 +2042,7 @@ export const VMConfigViewSchema = z.object({
     storageGetMode: StorageGetModeSchema,
     vmKind: z.lazy(() => VMKindSchema)
 });
-export const VMKindSchema = z.union([z.literal("Wasmer0"), z.literal("Wasmtime"), z.literal("Wasmer2"), z.literal("NearVm"), z.literal("NearVm2")]);
+export const VMKindSchema = z.union([z.literal("Wasmer0"), z.literal("Wasmtime"), z.literal("Wasmer2"), z.literal("NearVm")]);
 export const WasmTrapSchema = z.union([z.literal("Unreachable"), z.literal("IncorrectCallIndirectSignature"), z.literal("MemoryOutOfBounds"), z.literal("CallIndirectOOB"), z.literal("IllegalArithmetic"), z.literal("MisalignedAtomicAccess"), z.literal("IndirectCallToNull"), z.literal("StackOverflow"), z.literal("GenericTrap")]);
 export const WitnessConfigViewSchema = z.object({
     combinedTransactionsSizeLimit: z.number(),
