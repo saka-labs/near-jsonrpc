@@ -521,6 +521,8 @@ export const mappedSnakeCamelProperty = new Map<string, string>([["full_access_c
 ["grow_mem_cost", "growMemCost"],
 ["implicit_account_creation", "implicitAccountCreation"],
 ["limit_config", "limitConfig"],
+["linear_op_base_cost", "linearOpBaseCost"],
+["linear_op_unit_cost", "linearOpUnitCost"],
 ["reftypes_bulk_memory", "reftypesBulkMemory"],
 ["regular_op_cost", "regularOpCost"],
 ["saturating_float_to_int", "saturatingFloatToInt"],

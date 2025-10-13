@@ -2036,6 +2036,8 @@ export const VMConfigViewSchema = z.object({
     growMemCost: z.number(),
     implicitAccountCreation: z.boolean(),
     limitConfig: LimitConfigSchema,
+    linearOpBaseCost: z.number(),
+    linearOpUnitCost: z.number(),
     reftypesBulkMemory: z.boolean(),
     regularOpCost: z.number(),
     saturatingFloatToInt: z.boolean(),

@@ -1073,7 +1073,7 @@ export type ExternalStorageConfig = {
 };
 export type ExternalStorageLocation = {
     S3: {
-        /** @description Location of state dumps on S3. */
+        /** @description Location on S3. */
         bucket: string;
         /** @description Data may only be available in certain locations. */
         region: string;
@@ -3343,6 +3343,16 @@ export type VMConfigView = {
      *     TODO: Consider changing this to `VMLimitConfigView` to avoid dependency
      *     on runtime. */
     limitConfig: LimitConfig;
+    /**
+     * Format: uint64
+     * @description Base gas cost of a linear operation
+     */
+    linearOpBaseCost: number;
+    /**
+     * Format: uint64
+     * @description Unit gas cost of a linear operation
+     */
+    linearOpUnitCost: number;
     /** @description See [VMConfig::reftypes_bulk_memory](crate::vm::Config::reftypes_bulk_memory). */
     reftypesBulkMemory: boolean;
     /**
