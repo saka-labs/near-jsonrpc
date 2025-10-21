@@ -1073,7 +1073,7 @@ export type ExternalStorageConfig = {
 };
 export type ExternalStorageLocation = {
     S3: {
-        /** @description Location of state dumps on S3. */
+        /** @description Location on S3. */
         bucket: string;
         /** @description Data may only be available in certain locations. */
         region: string;
@@ -2029,6 +2029,11 @@ export type RpcClientConfigResponse = {
     cloudArchivalWriter?: CloudArchivalWriterConfig | (null);
     /** @description Time between running doomslug timer. */
     doomslugStepPeriod: number[];
+    /** @description If true, transactions for the next chunk will be prepared early, right after the previous chunk's
+     *     post-state is ready. This can help produce chunks faster, for high-throughput chains.
+     *     The current implementation increases latency on low-load chains, which will be fixed in the future.
+     *     The default is disabled. */
+    enableEarlyPrepareTransactions: boolean;
     enableMultilineLogging: boolean;
     /** @description Re-export storage layer statistics as prometheus metrics. */
     enableStatisticsExport: boolean;
@@ -3343,6 +3348,16 @@ export type VMConfigView = {
      *     TODO: Consider changing this to `VMLimitConfigView` to avoid dependency
      *     on runtime. */
     limitConfig: LimitConfig;
+    /**
+     * Format: uint64
+     * @description Base gas cost of a linear operation
+     */
+    linearOpBaseCost: number;
+    /**
+     * Format: uint64
+     * @description Unit gas cost of a linear operation
+     */
+    linearOpUnitCost: number;
     /** @description See [VMConfig::reftypes_bulk_memory](crate::vm::Config::reftypes_bulk_memory). */
     reftypesBulkMemory: boolean;
     /**
