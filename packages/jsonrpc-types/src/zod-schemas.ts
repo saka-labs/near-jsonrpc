@@ -411,17 +411,9 @@ export const ChunkHeaderViewSchema = z.object({
     validatorProposals: z.array(z.lazy(() => ValidatorStakeViewSchema)),
     validatorReward: z.lazy(() => NearTokenSchema)
 });
-export const CloudArchivalReaderConfigSchema = z.object({
-    cloudStorage: z.lazy(() => CloudStorageConfigSchema)
-});
 export const CloudArchivalWriterConfigSchema = z.object({
     archiveBlockData: z.boolean(),
-    cloudStorage: z.lazy(() => CloudStorageConfigSchema),
     pollingInterval: z.lazy(() => DurationAsStdSchemaProviderSchema)
-});
-export const CloudStorageConfigSchema = z.object({
-    credentialsFile: z.union([z.string(), z.null()]).optional(),
-    storage: z.lazy(() => ExternalStorageLocationSchema)
 });
 export const CompilationErrorSchema = z.union([z.object({
     CodeDoesNotExist: z.object({
@@ -1181,7 +1173,6 @@ export const RpcClientConfigResponseSchema = z.object({
     chunkValidationThreads: z.number(),
     chunkWaitMult: z.array(z.number()),
     clientBackgroundMigrationThreads: z.number(),
-    cloudArchivalReader: z.union([CloudArchivalReaderConfigSchema, z.null()]).optional(),
     cloudArchivalWriter: z.union([CloudArchivalWriterConfigSchema, z.null()]).optional(),
     doomslugStepPeriod: z.array(z.number()),
     enableEarlyPrepareTransactions: z.boolean(),
