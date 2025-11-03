@@ -536,18 +536,12 @@ export type ChunkHeaderView = {
      */
     validatorReward: NearToken;
 };
-export type CloudArchivalReaderConfig = {
-    /** @description Configures the external storage used by the archival node. */
-    cloudStorage: CloudStorageConfig;
-};
 export type CloudArchivalWriterConfig = {
     /**
      * @description Determines whether block-related data should be written to cloud storage.
      * @default false
      */
     archiveBlockData: boolean;
-    /** @description Configures the external storage used by the archival node. */
-    cloudStorage: CloudStorageConfig;
     /**
      * @description Interval at which the system checks for new blocks or chunks to archive.
      * @default {
@@ -556,12 +550,6 @@ export type CloudArchivalWriterConfig = {
      *     }
      */
     pollingInterval: DurationAsStdSchemaProvider;
-};
-export type CloudStorageConfig = {
-    /** @description Location of a json file with credentials allowing access to the bucket. */
-    credentialsFile?: string | null;
-    /** @description The storage to persist the archival data. */
-    storage: ExternalStorageLocation;
 };
 export type CompilationError = {
     CodeDoesNotExist: {
@@ -2022,13 +2010,14 @@ export type RpcClientConfigResponse = {
      * @description Number of threads to execute background migration work in client.
      */
     clientBackgroundMigrationThreads: number;
-    /** @description Configuration for a cloud-based archival reader. */
-    cloudArchivalReader?: CloudArchivalReaderConfig | (null);
     /** @description Configuration for a cloud-based archival writer. If this config is present, the writer is enabled and
      *     writes chunk-related data based on the tracked shards. */
     cloudArchivalWriter?: CloudArchivalWriterConfig | (null);
     /** @description Time between running doomslug timer. */
     doomslugStepPeriod: number[];
+    /** @description If true, the runtime will do a dynamic resharding 'dry run' at the last block of each epoch.
+     *     This means calculating tentative boundary accounts for splitting the tracked shards. */
+    dynamicReshardingDryRun: boolean;
     /** @description If true, transactions for the next chunk will be prepared early, right after the previous chunk's
      *     post-state is ready. This can help produce chunks faster, for high-throughput chains.
      *     The current implementation increases latency on low-load chains, which will be fixed in the future.
