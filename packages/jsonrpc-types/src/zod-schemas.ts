@@ -176,6 +176,16 @@ export const ActionErrorKindSchema = z.union([z.object({
     GlobalContractDoesNotExist: z.object({
         identifier: z.lazy(() => GlobalContractIdentifierSchema)
     })
+}), z.object({
+    GasKeyDoesNotExist: z.object({
+        accountId: AccountIdSchema,
+        publicKey: z.lazy(() => PublicKeySchema)
+    })
+}), z.object({
+    GasKeyAlreadyExists: z.object({
+        accountId: AccountIdSchema,
+        publicKey: z.lazy(() => PublicKeySchema)
+    })
 })]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
@@ -240,6 +250,15 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         length: z.number(),
         limit: z.number()
     })
+}), z.object({
+    GasKeyPermissionInvalid: z.object({
+        permission: AccessKeyPermissionSchema
+    })
+}), z.object({
+    GasKeyTooManyNoncesRequested: z.object({
+        limit: z.number(),
+        requestedNonces: z.number()
+    })
 })]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
@@ -301,7 +320,27 @@ export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
         data: z.record(z.string(), z.string()),
         deposit: z.lazy(() => NearTokenSchema)
     })
+}), z.object({
+    AddGasKey: z.object({
+        numNonces: z.number(),
+        permission: AccessKeyPermissionViewSchema,
+        publicKey: z.lazy(() => PublicKeySchema)
+    })
+}), z.object({
+    DeleteGasKey: z.object({
+        publicKey: z.lazy(() => PublicKeySchema)
+    })
+}), z.object({
+    TransferToGasKey: z.object({
+        amount: z.lazy(() => NearTokenSchema),
+        publicKey: z.lazy(() => PublicKeySchema)
+    })
 })]);
+export const AddGasKeyActionSchema = z.object({
+    numNonces: z.number(),
+    permission: AccessKeyPermissionSchema,
+    publicKey: z.lazy(() => PublicKeySchema)
+});
 export const AddKeyActionSchema = z.object({
     accessKey: AccessKeySchema,
     publicKey: z.lazy(() => PublicKeySchema)
@@ -493,6 +532,9 @@ export const DelegateActionSchema = z.object({
 });
 export const DeleteAccountActionSchema = z.object({
     beneficiaryId: AccountIdSchema
+});
+export const DeleteGasKeyActionSchema = z.object({
+    publicKey: z.lazy(() => PublicKeySchema)
 });
 export const DeleteKeyActionSchema = z.object({
     publicKey: z.lazy(() => PublicKeySchema)
@@ -1045,6 +1087,12 @@ export const NonDelegateActionSchema = z.union([z.object({
     UseGlobalContract: z.lazy(() => UseGlobalContractActionSchema)
 }), z.object({
     DeterministicStateInit: DeterministicStateInitActionSchema
+}), z.object({
+    AddGasKey: AddGasKeyActionSchema
+}), z.object({
+    DeleteGasKey: DeleteGasKeyActionSchema
+}), z.object({
+    TransferToGasKey: z.lazy(() => TransferToGasKeyActionSchema)
 })]);
 export const PeerIdSchema = z.lazy(() => PublicKeySchema);
 export const PeerInfoViewSchema = z.object({
@@ -1127,6 +1175,10 @@ export const ReceiptValidationErrorSchema = z.union([z.object({
     ReceiptSizeExceeded: z.object({
         limit: z.number(),
         size: z.number()
+    })
+}), z.object({
+    InvalidRefundTo: z.object({
+        accountId: z.string()
     })
 })]);
 export const ReceiptViewSchema = z.object({
@@ -1958,6 +2010,10 @@ export const TrackedShardsConfigSchema = z.union([z.literal("NoShards"), z.objec
 })]);
 export const TransferActionSchema = z.object({
     deposit: NearTokenSchema
+});
+export const TransferToGasKeyActionSchema = z.object({
+    deposit: NearTokenSchema,
+    publicKey: PublicKeySchema
 });
 export const TxExecutionErrorSchema = z.union([z.object({
     ActionError: ActionErrorSchema

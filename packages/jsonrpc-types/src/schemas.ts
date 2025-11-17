@@ -229,6 +229,16 @@ export type ActionErrorKind = {
     GlobalContractDoesNotExist: {
         identifier: GlobalContractIdentifier;
     };
+} | {
+    GasKeyDoesNotExist: {
+        accountId: AccountId;
+        publicKey: PublicKey;
+    };
+} | {
+    GasKeyAlreadyExists: {
+        accountId: AccountId;
+        publicKey: PublicKey;
+    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -310,6 +320,17 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         /** Format: uint64 */
         limit: number;
     };
+} | {
+    GasKeyPermissionInvalid: {
+        permission: AccessKeyPermission;
+    };
+} | {
+    GasKeyTooManyNoncesRequested: {
+        /** Format: uint32 */
+        limit: number;
+        /** Format: uint32 */
+        requestedNonces: number;
+    };
 };
 export type ActionView = "CreateAccount" | {
     DeployContract: {
@@ -376,6 +397,28 @@ export type ActionView = "CreateAccount" | {
         };
         deposit: NearToken;
     };
+} | {
+    AddGasKey: {
+        /** Format: uint32 */
+        numNonces: number;
+        permission: AccessKeyPermissionView;
+        publicKey: PublicKey;
+    };
+} | {
+    DeleteGasKey: {
+        publicKey: PublicKey;
+    };
+} | {
+    TransferToGasKey: {
+        amount: NearToken;
+        publicKey: PublicKey;
+    };
+};
+export type AddGasKeyAction = {
+    /** Format: uint32 */
+    numNonces: number;
+    permission: AccessKeyPermission;
+    publicKey: PublicKey;
 };
 export type AddKeyAction = {
     /** @description An access key with the permission */
@@ -748,6 +791,9 @@ export type DelegateAction = {
 };
 export type DeleteAccountAction = {
     beneficiaryId: AccountId;
+};
+export type DeleteGasKeyAction = {
+    publicKey: PublicKey;
 };
 export type DeleteKeyAction = {
     /** @description A public key associated with the access_key to be deleted. */
@@ -1830,6 +1876,12 @@ export type NonDelegateAction = {
     UseGlobalContract: UseGlobalContractAction;
 } | {
     DeterministicStateInit: DeterministicStateInitAction;
+} | {
+    AddGasKey: AddGasKeyAction;
+} | {
+    DeleteGasKey: DeleteGasKeyAction;
+} | {
+    TransferToGasKey: TransferToGasKeyAction;
 };
 export type PeerId = PublicKey;
 export type PeerInfoView = {
@@ -1933,6 +1985,10 @@ export type ReceiptValidationError = {
         limit: number;
         /** Format: uint64 */
         size: number;
+    };
+} | {
+    InvalidRefundTo: {
+        accountId: string;
     };
 };
 export type ReceiptView = {
@@ -3241,6 +3297,10 @@ export type TrackedShardsConfig = "NoShards" | {
 };
 export type TransferAction = {
     deposit: NearToken;
+};
+export type TransferToGasKeyAction = {
+    deposit: NearToken;
+    publicKey: PublicKey;
 };
 export type TxExecutionError = {
     ActionError: ActionError;
