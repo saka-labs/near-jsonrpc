@@ -50,10 +50,10 @@ export type AccountCreationConfigView = {
      * Format: uint8
      * @description The minimum length of the top-level account ID that is allowed to be created by any account.
      */
-    minAllowedTopLevelAccountLength?: number;
+    minAllowedTopLevelAccountLength: number;
     /** @description The account ID of the account registrar. This account ID allowed to create top-level
      *     accounts of any valid length. */
-    registrarAccountId?: AccountId;
+    registrarAccountId: AccountId;
 };
 export type AccountDataView = {
     /** @description Account key of the validator signing this AccountData. */
@@ -96,29 +96,29 @@ export type AccountWithPublicKey = {
 };
 export type ActionCreationConfigView = {
     /** @description Base cost of adding a key. */
-    addKeyCost?: AccessKeyCreationConfigView;
+    addKeyCost: AccessKeyCreationConfigView;
     /** @description Base cost of creating an account. */
-    createAccountCost?: Fee;
+    createAccountCost: Fee;
     /** @description Base cost for processing a delegate action.
      *
      *     This is on top of the costs for the actions inside the delegate action. */
-    delegateCost?: Fee;
+    delegateCost: Fee;
     /** @description Base cost of deleting an account. */
-    deleteAccountCost?: Fee;
+    deleteAccountCost: Fee;
     /** @description Base cost of deleting a key. */
-    deleteKeyCost?: Fee;
+    deleteKeyCost: Fee;
     /** @description Base cost of deploying a contract. */
-    deployContractCost?: Fee;
+    deployContractCost: Fee;
     /** @description Cost per byte of deploying a contract. */
-    deployContractCostPerByte?: Fee;
+    deployContractCostPerByte: Fee;
     /** @description Base cost of calling a function. */
-    functionCallCost?: Fee;
+    functionCallCost: Fee;
     /** @description Cost per byte of method name and arguments of calling a function. */
-    functionCallCostPerByte?: Fee;
+    functionCallCostPerByte: Fee;
     /** @description Base cost of staking. */
-    stakeCost?: Fee;
+    stakeCost: Fee;
     /** @description Base cost of making a transfer. */
-    transferCost?: Fee;
+    transferCost: Fee;
 };
 export type ActionError = {
     /**
@@ -520,13 +520,6 @@ export type BlockHeaderView = {
     validatorReward: NearToken;
 };
 export type BlockId = number | CryptoHash;
-export type BlockReference = {
-    blockId: BlockId;
-} | {
-    finality: Finality;
-} | {
-    syncCheckpoint: SyncCheckpoint;
-};
 export type BlockStatusView = {
     hash: CryptoHash;
     /** Format: uint64 */
@@ -544,16 +537,15 @@ export type CatchupStatusView = {
     syncBlockHeight: number;
 };
 export type ChunkDistributionNetworkConfig = {
-    enabled?: boolean;
-    uris?: ChunkDistributionUris;
+    enabled: boolean;
+    uris: ChunkDistributionUris;
 };
 export type ChunkDistributionUris = {
     /** @description URI for pulling chunks from the stream. */
-    get?: string;
+    get: string;
     /** @description URI for publishing chunks to the stream. */
-    set?: string;
+    set: string;
 };
-export type ChunkHash = CryptoHash;
 export type ChunkHeaderView = {
     balanceBurnt: NearToken;
     bandwidthRequests?: BandwidthRequests | (null);
@@ -617,11 +609,11 @@ export type CongestionControlConfigView = {
     /** @description How much gas the chosen allowed shard can send to a 100% congested shard.
      *
      *     See [`CongestionControlConfig`] for more details. */
-    allowedShardOutgoingGas?: NearGas;
+    allowedShardOutgoingGas: NearGas;
     /** @description How much gas in delayed receipts of a shard is 100% incoming congestion.
      *
      *     See [`CongestionControlConfig`] for more details. */
-    maxCongestionIncomingGas?: NearGas;
+    maxCongestionIncomingGas: NearGas;
     /**
      * Format: uint64
      * @description How much memory space of all delayed and buffered receipts in a shard is
@@ -629,56 +621,56 @@ export type CongestionControlConfigView = {
      *
      *     See [`CongestionControlConfig`] for more details.
      */
-    maxCongestionMemoryConsumption?: number;
+    maxCongestionMemoryConsumption: number;
     /**
      * Format: uint64
      * @description How many missed chunks in a row in a shard is considered 100% congested.
      */
-    maxCongestionMissedChunks?: number;
+    maxCongestionMissedChunks: number;
     /** @description How much gas in outgoing buffered receipts of a shard is 100% congested.
      *
      *     Outgoing congestion contributes to overall congestion, which reduces how
      *     much other shards are allowed to forward to this shard. */
-    maxCongestionOutgoingGas?: NearGas;
+    maxCongestionOutgoingGas: NearGas;
     /** @description The maximum amount of gas attached to receipts a shard can forward to
      *     another shard per chunk.
      *
      *     See [`CongestionControlConfig`] for more details. */
-    maxOutgoingGas?: NearGas;
+    maxOutgoingGas: NearGas;
     /** @description The maximum amount of gas in a chunk spent on converting new transactions to
      *     receipts.
      *
      *     See [`CongestionControlConfig`] for more details. */
-    maxTxGas?: NearGas;
+    maxTxGas: NearGas;
     /** @description The minimum gas each shard can send to a shard that is not fully congested.
      *
      *     See [`CongestionControlConfig`] for more details. */
-    minOutgoingGas?: NearGas;
+    minOutgoingGas: NearGas;
     /** @description The minimum amount of gas in a chunk spent on converting new transactions
      *     to receipts, as long as the receiving shard is not congested.
      *
      *     See [`CongestionControlConfig`] for more details. */
-    minTxGas?: NearGas;
+    minTxGas: NearGas;
     /**
      * Format: uint64
      * @description Large size limit for outgoing receipts to a shard, used when it's safe
      *     to send a lot of receipts without making the state witness too large.
      *     It limits the total sum of outgoing receipts, not individual receipts.
      */
-    outgoingReceiptsBigSizeLimit?: number;
+    outgoingReceiptsBigSizeLimit: number;
     /**
      * Format: uint64
      * @description The standard size limit for outgoing receipts aimed at a single shard.
      *     This limit is pretty small to keep the size of source_receipt_proofs under control.
      *     It limits the total sum of outgoing receipts, not individual receipts.
      */
-    outgoingReceiptsUsualSizeLimit?: number;
+    outgoingReceiptsUsualSizeLimit: number;
     /**
      * Format: double
      * @description How much congestion a shard can tolerate before it stops all shards from
      *     accepting new transactions with the receiver set to the congested shard.
      */
-    rejectTxCongestionThreshold?: number;
+    rejectTxCongestionThreshold: number;
 };
 export type CongestionInfoView = {
     /** Format: uint16 */
@@ -761,12 +753,12 @@ export type DataReceiptCreationConfigView = {
      *     NOTE: Any receipt with output dependencies will produce data receipts. Even if it fails.
      *     Even if the last action is not a function call (in case of success it will return empty
      *     value). */
-    baseCost?: Fee;
+    baseCost: Fee;
     /** @description Additional cost per byte sent.
      *     Both `send` and `exec` costs are burned when a function call finishes execution and returns
      *     `N` bytes of data to every output dependency. For each output dependency the cost is
      *     `(send(sir) + exec()) * N`. */
-    costPerByte?: Fee;
+    costPerByte: Fee;
 };
 export type DataReceiverView = {
     dataId: CryptoHash;
@@ -846,7 +838,7 @@ export type DumpConfig = {
      *     Feel free to set to `None`, defaults are sensible. */
     iterationDelay?: DurationAsStdSchemaProvider | (null);
     /** @description Specifies where to write the obtained state parts. */
-    location?: ExternalStorageLocation;
+    location: ExternalStorageLocation;
     /** @description Use in case a node that dumps state to the external storage
      *     gets in trouble. */
     restartDumpForShards?: ShardId[] | null;
@@ -873,7 +865,7 @@ export type EpochSyncConfig = {
      *     (2) the node will reject an epoch sync proof if the provided proof is for an epoch
      *     that is more than this many blocks behind the current block.
      */
-    epochSyncHorizon?: number;
+    epochSyncHorizon: number;
     /**
      * @description If true, the node will ignore epoch sync requests from the network. It is strongly
      *     recommended not to set this flag, because it will prevent other nodes from
@@ -886,228 +878,7 @@ export type EpochSyncConfig = {
     ignoreEpochSyncNetworkRequests: boolean;
     /** @description Timeout for epoch sync requests. The node will continue retrying indefinitely even
      *     if this timeout is exceeded. */
-    timeoutForEpochSync?: DurationAsStdSchemaProvider;
-};
-export type ErrorWrapper_for_GenesisConfigError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: GenesisConfigError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcBlockError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcBlockError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcChunkError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcChunkError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcClientConfigError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcClientConfigError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcGasPriceError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcGasPriceError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcLightClientNextBlockError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcLightClientNextBlockError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcLightClientProofError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcLightClientProofError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcMaintenanceWindowsError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcMaintenanceWindowsError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcNetworkInfoError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcNetworkInfoError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcProtocolConfigError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcProtocolConfigError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcQueryError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcQueryError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcReceiptError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcReceiptError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcSplitStorageInfoError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcSplitStorageInfoError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcStateChangesError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcStateChangesError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcStatusError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcStatusError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcTransactionError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcTransactionError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcValidatorError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcValidatorError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
+    timeoutForEpochSync: DurationAsStdSchemaProvider;
 };
 export type ExecutionMetadataView = {
     gasProfile?: CostGasUsed[] | null;
@@ -1155,159 +926,159 @@ export type ExecutionStatusView = "Unknown" | {
 };
 export type ExtCostsConfigView = {
     /** @description Base cost for multiexp */
-    altBn128G1MultiexpBase?: NearGas;
+    altBn128G1MultiexpBase: NearGas;
     /** @description Per element cost for multiexp */
-    altBn128G1MultiexpElement?: NearGas;
+    altBn128G1MultiexpElement: NearGas;
     /** @description Base cost for sum */
-    altBn128G1SumBase?: NearGas;
+    altBn128G1SumBase: NearGas;
     /** @description Per element cost for sum */
-    altBn128G1SumElement?: NearGas;
+    altBn128G1SumElement: NearGas;
     /** @description Base cost for pairing check */
-    altBn128PairingCheckBase?: NearGas;
+    altBn128PairingCheckBase: NearGas;
     /** @description Per element cost for pairing check */
-    altBn128PairingCheckElement?: NearGas;
+    altBn128PairingCheckElement: NearGas;
     /** @description Base cost for calling a host function. */
-    base?: NearGas;
-    bls12381G1MultiexpBase?: NearGas;
-    bls12381G1MultiexpElement?: NearGas;
-    bls12381G2MultiexpBase?: NearGas;
-    bls12381G2MultiexpElement?: NearGas;
-    bls12381MapFpToG1Base?: NearGas;
-    bls12381MapFpToG1Element?: NearGas;
-    bls12381MapFp2ToG2Base?: NearGas;
-    bls12381MapFp2ToG2Element?: NearGas;
-    bls12381P1DecompressBase?: NearGas;
-    bls12381P1DecompressElement?: NearGas;
-    bls12381P1SumBase?: NearGas;
-    bls12381P1SumElement?: NearGas;
-    bls12381P2DecompressBase?: NearGas;
-    bls12381P2DecompressElement?: NearGas;
-    bls12381P2SumBase?: NearGas;
-    bls12381P2SumElement?: NearGas;
-    bls12381PairingBase?: NearGas;
-    bls12381PairingElement?: NearGas;
-    contractCompileBase?: NearGas;
-    contractCompileBytes?: NearGas;
+    base: NearGas;
+    bls12381G1MultiexpBase: NearGas;
+    bls12381G1MultiexpElement: NearGas;
+    bls12381G2MultiexpBase: NearGas;
+    bls12381G2MultiexpElement: NearGas;
+    bls12381MapFpToG1Base: NearGas;
+    bls12381MapFpToG1Element: NearGas;
+    bls12381MapFp2ToG2Base: NearGas;
+    bls12381MapFp2ToG2Element: NearGas;
+    bls12381P1DecompressBase: NearGas;
+    bls12381P1DecompressElement: NearGas;
+    bls12381P1SumBase: NearGas;
+    bls12381P1SumElement: NearGas;
+    bls12381P2DecompressBase: NearGas;
+    bls12381P2DecompressElement: NearGas;
+    bls12381P2SumBase: NearGas;
+    bls12381P2SumElement: NearGas;
+    bls12381PairingBase: NearGas;
+    bls12381PairingElement: NearGas;
+    contractCompileBase: NearGas;
+    contractCompileBytes: NearGas;
     /** @description Base cost of loading a pre-compiled contract */
-    contractLoadingBase?: NearGas;
+    contractLoadingBase: NearGas;
     /** @description Cost per byte of loading a pre-compiled contract */
-    contractLoadingBytes?: NearGas;
+    contractLoadingBytes: NearGas;
     /** @description Cost of calling ecrecover */
-    ecrecoverBase?: NearGas;
+    ecrecoverBase: NearGas;
     /** @description Cost of getting ed25519 base */
-    ed25519VerifyBase?: NearGas;
+    ed25519VerifyBase: NearGas;
     /** @description Cost of getting ed25519 per byte */
-    ed25519VerifyByte?: NearGas;
+    ed25519VerifyByte: NearGas;
     /** @description Cost of getting sha256 base */
-    keccak256Base?: NearGas;
+    keccak256Base: NearGas;
     /** @description Cost of getting sha256 per byte */
-    keccak256Byte?: NearGas;
+    keccak256Byte: NearGas;
     /** @description Cost of getting sha256 base */
-    keccak512Base?: NearGas;
+    keccak512Base: NearGas;
     /** @description Cost of getting sha256 per byte */
-    keccak512Byte?: NearGas;
+    keccak512Byte: NearGas;
     /** @description Cost for calling logging. */
-    logBase?: NearGas;
+    logBase: NearGas;
     /** @description Cost for logging per byte */
-    logByte?: NearGas;
+    logByte: NearGas;
     /** @description Cost for calling `promise_and` */
-    promiseAndBase?: NearGas;
+    promiseAndBase: NearGas;
     /** @description Cost for calling `promise_and` for each promise */
-    promiseAndPerPromise?: NearGas;
+    promiseAndPerPromise: NearGas;
     /** @description Cost for calling `promise_return` */
-    promiseReturn?: NearGas;
+    promiseReturn: NearGas;
     /** @description Cost for reading trie node from memory */
-    readCachedTrieNode?: NearGas;
+    readCachedTrieNode: NearGas;
     /** @description Base cost for guest memory read */
-    readMemoryBase?: NearGas;
+    readMemoryBase: NearGas;
     /** @description Cost for guest memory read */
-    readMemoryByte?: NearGas;
+    readMemoryByte: NearGas;
     /** @description Base cost for reading from register */
-    readRegisterBase?: NearGas;
+    readRegisterBase: NearGas;
     /** @description Cost for reading byte from register */
-    readRegisterByte?: NearGas;
+    readRegisterByte: NearGas;
     /** @description Cost of getting ripemd160 base */
-    ripemd160Base?: NearGas;
+    ripemd160Base: NearGas;
     /** @description Cost of getting ripemd160 per message block */
-    ripemd160Block?: NearGas;
+    ripemd160Block: NearGas;
     /** @description Cost of getting sha256 base */
-    sha256Base?: NearGas;
+    sha256Base: NearGas;
     /** @description Cost of getting sha256 per byte */
-    sha256Byte?: NearGas;
+    sha256Byte: NearGas;
     /** @description Storage trie check for key existence cost base */
-    storageHasKeyBase?: NearGas;
+    storageHasKeyBase: NearGas;
     /** @description Storage trie check for key existence per key byte */
-    storageHasKeyByte?: NearGas;
+    storageHasKeyByte: NearGas;
     /** @description Create trie range iterator cost per byte of from key. */
-    storageIterCreateFromByte?: NearGas;
+    storageIterCreateFromByte: NearGas;
     /** @description Create trie prefix iterator cost base */
-    storageIterCreatePrefixBase?: NearGas;
+    storageIterCreatePrefixBase: NearGas;
     /** @description Create trie prefix iterator cost per byte. */
-    storageIterCreatePrefixByte?: NearGas;
+    storageIterCreatePrefixByte: NearGas;
     /** @description Create trie range iterator cost base */
-    storageIterCreateRangeBase?: NearGas;
+    storageIterCreateRangeBase: NearGas;
     /** @description Create trie range iterator cost per byte of to key. */
-    storageIterCreateToByte?: NearGas;
+    storageIterCreateToByte: NearGas;
     /** @description Trie iterator per key base cost */
-    storageIterNextBase?: NearGas;
+    storageIterNextBase: NearGas;
     /** @description Trie iterator next key byte cost */
-    storageIterNextKeyByte?: NearGas;
+    storageIterNextKeyByte: NearGas;
     /** @description Trie iterator next key byte cost */
-    storageIterNextValueByte?: NearGas;
+    storageIterNextValueByte: NearGas;
     /** @description Storage trie read key overhead base cost, when doing large reads */
-    storageLargeReadOverheadBase?: NearGas;
+    storageLargeReadOverheadBase: NearGas;
     /** @description Storage trie read key overhead  per-byte cost, when doing large reads */
-    storageLargeReadOverheadByte?: NearGas;
+    storageLargeReadOverheadByte: NearGas;
     /** @description Storage trie read key base cost */
-    storageReadBase?: NearGas;
+    storageReadBase: NearGas;
     /** @description Storage trie read key per byte cost */
-    storageReadKeyByte?: NearGas;
+    storageReadKeyByte: NearGas;
     /** @description Storage trie read value cost per byte cost */
-    storageReadValueByte?: NearGas;
+    storageReadValueByte: NearGas;
     /** @description Remove key from trie base cost */
-    storageRemoveBase?: NearGas;
+    storageRemoveBase: NearGas;
     /** @description Remove key from trie per byte cost */
-    storageRemoveKeyByte?: NearGas;
+    storageRemoveKeyByte: NearGas;
     /** @description Remove key from trie ret value byte cost */
-    storageRemoveRetValueByte?: NearGas;
+    storageRemoveRetValueByte: NearGas;
     /** @description Storage trie write key base cost */
-    storageWriteBase?: NearGas;
+    storageWriteBase: NearGas;
     /** @description Storage trie write cost per byte of evicted value. */
-    storageWriteEvictedByte?: NearGas;
+    storageWriteEvictedByte: NearGas;
     /** @description Storage trie write key per byte cost */
-    storageWriteKeyByte?: NearGas;
+    storageWriteKeyByte: NearGas;
     /** @description Storage trie write value per byte cost */
-    storageWriteValueByte?: NearGas;
+    storageWriteValueByte: NearGas;
     /** @description Cost per reading trie node from DB */
-    touchingTrieNode?: NearGas;
+    touchingTrieNode: NearGas;
     /** @description Base cost of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
-    utf8DecodingBase?: NearGas;
+    utf8DecodingBase: NearGas;
     /** @description Cost per byte of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
-    utf8DecodingByte?: NearGas;
+    utf8DecodingByte: NearGas;
     /** @description Base cost of decoding utf16. It's used for `log_utf16`. */
-    utf16DecodingBase?: NearGas;
+    utf16DecodingBase: NearGas;
     /** @description Cost per byte of decoding utf16. It's used for `log_utf16`. */
-    utf16DecodingByte?: NearGas;
+    utf16DecodingByte: NearGas;
     /** @description Cost of calling `validator_stake`. */
-    validatorStakeBase?: NearGas;
+    validatorStakeBase: NearGas;
     /** @description Cost of calling `validator_total_stake`. */
-    validatorTotalStakeBase?: NearGas;
+    validatorTotalStakeBase: NearGas;
     /** @description Base cost for guest memory write */
-    writeMemoryBase?: NearGas;
+    writeMemoryBase: NearGas;
     /** @description Cost for guest memory write per byte */
-    writeMemoryByte?: NearGas;
+    writeMemoryByte: NearGas;
     /** @description Base cost for writing into register */
-    writeRegisterBase?: NearGas;
+    writeRegisterBase: NearGas;
     /** @description Cost for writing byte into register */
-    writeRegisterByte?: NearGas;
+    writeRegisterByte: NearGas;
     /** @description Base cost for creating a yield promise. */
-    yieldCreateBase?: NearGas;
+    yieldCreateBase: NearGas;
     /** @description Per byte cost of arguments and method name. */
-    yieldCreateByte?: NearGas;
+    yieldCreateByte: NearGas;
     /** @description Base cost for resuming a yield receipt. */
-    yieldResumeBase?: NearGas;
+    yieldResumeBase: NearGas;
     /** @description Per byte cost of resume payload. */
-    yieldResumeByte?: NearGas;
+    yieldResumeByte: NearGas;
 };
 export type ExternalStorageConfig = {
     /**
@@ -1318,7 +1089,7 @@ export type ExternalStorageConfig = {
      */
     externalStorageFallbackThreshold: number;
     /** @description Location of state parts. */
-    location?: ExternalStorageLocation;
+    location: ExternalStorageLocation;
     /**
      * Format: uint8
      * @description When fetching state parts from external storage, throttle fetch requests
@@ -1432,28 +1203,8 @@ export type FunctionCallPermission = {
     /** @description The access key only allows transactions with the given receiver's account id. */
     receiverId: string;
 };
-export type GasKey = {
-    /** @description The balance of the gas key. */
-    balance: NearToken;
-    /**
-     * Format: uint32
-     * @description The number of nonces this gas key has.
-     */
-    numNonces: number;
-    /** @description Defines the permissions for this gas key.
-     *     If this is a `FunctionCallPermission`, the allowance must be None (unlimited). */
-    permission: AccessKeyPermission;
-};
-export type GasKeyInfoView = {
-    gasKey: GasKeyView;
-    publicKey: PublicKey;
-};
-export type GasKeyList = {
-    keys: GasKeyInfoView[];
-};
 export type GasKeyView = {
     balance: NearToken;
-    nonces: number[];
     /** Format: uint32 */
     numNonces: number;
     permission: AccessKeyPermissionView;
@@ -1688,7 +1439,6 @@ export type GenesisConfig = {
     /** @description List of initial validators. */
     validators: AccountInfo[];
 };
-export type GenesisConfigError = null;
 export type GenesisConfigRequest = null;
 export type GlobalContractDeployMode = "CodeHash" | "AccountId";
 export type GlobalContractIdentifier = {
@@ -1805,13 +1555,6 @@ export type HostError = "BadUTF16" | "BadUTF8" | "GasExceeded" | "GasLimitExceed
     Ed25519VerifyInvalidInput: {
         msg: string;
     };
-};
-export type InternalError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
 };
 export type InvalidAccessKeyError = {
     AccessKeyNotFound: {
@@ -1936,22 +1679,22 @@ export type LimitConfig = {
      * @description The initial number of memory pages.
      *     NOTE: It's not a limiter itself, but it's a value we use for initial_memory_pages.
      */
-    initialMemoryPages?: number;
+    initialMemoryPages: number;
     /**
      * Format: uint64
      * @description Max number of actions per receipt.
      */
-    maxActionsPerReceipt?: number;
+    maxActionsPerReceipt: number;
     /**
      * Format: uint64
      * @description Max length of arguments in a function call action.
      */
-    maxArgumentsLength?: number;
+    maxArgumentsLength: number;
     /**
      * Format: uint64
      * @description Max contract size
      */
-    maxContractSize?: number;
+    maxContractSize: number;
     /**
      * Format: uint
      * @description If present, stores max number of elements in a single contract's table
@@ -1963,27 +1706,27 @@ export type LimitConfig = {
      */
     maxFunctionsNumberPerContract?: number | null;
     /** @description Max amount of gas that can be used, excluding gas attached to promises. */
-    maxGasBurnt?: NearGas;
+    maxGasBurnt: NearGas;
     /**
      * Format: uint64
      * @description Max length of any method name (without terminating character).
      */
-    maxLengthMethodName?: number;
+    maxLengthMethodName: number;
     /**
      * Format: uint64
      * @description Max length of returned data
      */
-    maxLengthReturnedData?: number;
+    maxLengthReturnedData: number;
     /**
      * Format: uint64
      * @description Max storage key size
      */
-    maxLengthStorageKey?: number;
+    maxLengthStorageKey: number;
     /**
      * Format: uint64
      * @description Max storage value size
      */
-    maxLengthStorageValue?: number;
+    maxLengthStorageValue: number;
     /**
      * Format: uint64
      * @description If present, stores max number of locals declared globally in one contract
@@ -1993,23 +1736,23 @@ export type LimitConfig = {
      * Format: uint32
      * @description What is the maximal memory pages amount is allowed to have for a contract.
      */
-    maxMemoryPages?: number;
+    maxMemoryPages: number;
     /**
      * Format: uint64
      * @description Max total length of all method names (including terminating character) for a function call
      *     permission access key.
      */
-    maxNumberBytesMethodNames?: number;
+    maxNumberBytesMethodNames: number;
     /**
      * Format: uint64
      * @description Max number of input data dependencies
      */
-    maxNumberInputDataDependencies?: number;
+    maxNumberInputDataDependencies: number;
     /**
      * Format: uint64
      * @description Maximum number of log entries.
      */
-    maxNumberLogs?: number;
+    maxNumberLogs: number;
     /**
      * Format: uint64
      * @description Maximum number of registers that can be used simultaneously.
@@ -2018,22 +1761,22 @@ export type LimitConfig = {
      *     have this number of registers, no subsequent writes to the registers
      *     will succeed even if they replace an existing register.
      */
-    maxNumberRegisters?: number;
+    maxNumberRegisters: number;
     /**
      * Format: uint64
      * @description Max number of promises that a function call can create
      */
-    maxPromisesPerFunctionCallAction?: number;
+    maxPromisesPerFunctionCallAction: number;
     /**
      * Format: uint64
      * @description Max receipt size
      */
-    maxReceiptSize?: number;
+    maxReceiptSize: number;
     /**
      * Format: uint64
      * @description Maximum number of bytes that can be stored in a single register.
      */
-    maxRegisterSize?: number;
+    maxRegisterSize: number;
     /**
      * Format: uint32
      * @description How tall the stack is allowed to grow?
@@ -2041,7 +1784,7 @@ export type LimitConfig = {
      *     See <https://wiki.parity.io/WebAssembly-StackHeight> to find out how the stack frame cost
      *     is calculated.
      */
-    maxStackHeight?: number;
+    maxStackHeight: number;
     /**
      * Format: uint32
      * @description If present, stores max number of tables declared globally in one contract
@@ -2051,34 +1794,34 @@ export type LimitConfig = {
      * Format: uint64
      * @description Maximum total length in bytes of all log messages.
      */
-    maxTotalLogLength?: number;
+    maxTotalLogLength: number;
     /** @description Max total prepaid gas for all function call actions per receipt. */
-    maxTotalPrepaidGas?: NearGas;
+    maxTotalPrepaidGas: NearGas;
     /**
      * Format: uint64
      * @description Max transaction size
      */
-    maxTransactionSize?: number;
+    maxTransactionSize: number;
     /**
      * Format: uint64
      * @description Maximum number of bytes for payload passed over a yield resume.
      */
-    maxYieldPayloadSize?: number;
+    maxYieldPayloadSize: number;
     /**
      * Format: uint
      * @description Hard limit on the size of storage proof generated while executing a single receipt.
      */
-    perReceiptStorageProofSizeLimit?: number;
+    perReceiptStorageProofSizeLimit: number;
     /**
      * Format: uint64
      * @description Limit of memory used by registers.
      */
-    registersMemoryLimit?: number;
+    registersMemoryLimit: number;
     /**
      * Format: uint64
      * @description Number of blocks after which a yielded promise times out.
      */
-    yieldTimeoutLengthInBlocks?: number;
+    yieldTimeoutLengthInBlocks: number;
 };
 export type LogSummaryStyle = "plain" | "colored";
 export type MerklePathItem = {
@@ -2259,20 +2002,6 @@ export type ReceiptView = {
     receiptId: CryptoHash;
     receiverId: AccountId;
 };
-export type RpcBlockError = {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    /** @enum {string} */
-    name: "NOT_SYNCED_YET";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcBlockRequest = {
     blockId: BlockId;
 } | {
@@ -2286,29 +2015,6 @@ export type RpcBlockResponse = {
     chunks: ChunkHeaderView[];
     header: BlockHeaderView;
 };
-export type RpcChunkError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-} | {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        shardId: ShardId;
-    };
-    /** @enum {string} */
-    name: "INVALID_SHARD_ID";
-} | {
-    info: {
-        chunkHash: ChunkHash;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_CHUNK";
-};
 export type RpcChunkRequest = {
     blockId: BlockId;
     shardId: ShardId;
@@ -2321,116 +2027,107 @@ export type RpcChunkResponse = {
     receipts: ReceiptView[];
     transactions: SignedTransactionView[];
 };
-export type RpcClientConfigError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcClientConfigRequest = null;
 export type RpcClientConfigResponse = {
     /** @description Not clear old data, set `true` for archive nodes. */
-    archive?: boolean;
+    archive: boolean;
     /**
      * Format: uint64
      * @description Horizon at which instead of fetching block, fetch full state.
      */
-    blockFetchHorizon?: number;
+    blockFetchHorizon: number;
     /**
      * Format: uint64
      * @description Behind this horizon header fetch kicks in.
      */
-    blockHeaderFetchHorizon?: number;
+    blockHeaderFetchHorizon: number;
     /** @description Duration to check for producing / skipping block. */
-    blockProductionTrackingDelay?: number[];
+    blockProductionTrackingDelay: number[];
     /** @description Time between check to perform catchup. */
-    catchupStepPeriod?: number[];
+    catchupStepPeriod: number[];
     /** @description Chain id for status. */
-    chainId?: string;
+    chainId: string;
     /** @description Optional config for the Chunk Distribution Network feature.
      *     If set to `None` then this node does not participate in the Chunk Distribution Network.
      *     Nodes not participating will still function fine, but possibly with higher
      *     latency due to the need of requesting chunks over the peer-to-peer network. */
     chunkDistributionNetwork?: ChunkDistributionNetworkConfig | (null);
     /** @description Time between checking to re-request chunks. */
-    chunkRequestRetryPeriod?: number[];
+    chunkRequestRetryPeriod: number[];
     /**
      * Format: uint
      * @description Number of threads for ChunkValidationActor pool.
      */
-    chunkValidationThreads?: number;
+    chunkValidationThreads: number;
     /** @description Multiplier for the wait time for all chunks to be received. */
-    chunkWaitMult?: number[];
+    chunkWaitMult: number[];
     /**
      * Format: uint
      * @description Number of threads to execute background migration work in client.
      */
-    clientBackgroundMigrationThreads?: number;
+    clientBackgroundMigrationThreads: number;
     /** @description Configuration for a cloud-based archival writer. If this config is present, the writer is enabled and
      *     writes chunk-related data based on the tracked shards. */
     cloudArchivalWriter?: CloudArchivalWriterConfig | (null);
-    /** @description If true, the node won't forward transactions to next the chunk producers. */
-    disableTxRouting?: boolean;
     /** @description Time between running doomslug timer. */
-    doomslugStepPeriod?: number[];
+    doomslugStepPeriod: number[];
     /** @description If true, the runtime will do a dynamic resharding 'dry run' at the last block of each epoch.
      *     This means calculating tentative boundary accounts for splitting the tracked shards. */
-    dynamicReshardingDryRun?: boolean;
+    dynamicReshardingDryRun: boolean;
     /** @description If true, transactions for the next chunk will be prepared early, right after the previous chunk's
      *     post-state is ready. This can help produce chunks faster, for high-throughput chains.
      *     The current implementation increases latency on low-load chains, which will be fixed in the future.
      *     The default is disabled. */
-    enableEarlyPrepareTransactions?: boolean;
-    enableMultilineLogging?: boolean;
+    enableEarlyPrepareTransactions: boolean;
+    enableMultilineLogging: boolean;
     /** @description Re-export storage layer statistics as prometheus metrics. */
-    enableStatisticsExport?: boolean;
+    enableStatisticsExport: boolean;
     /**
      * Format: uint64
      * @description Epoch length.
      */
-    epochLength?: number;
+    epochLength: number;
     /** @description Options for epoch sync. */
-    epochSync?: EpochSyncConfig;
+    epochSync: EpochSyncConfig;
     /** @description Graceful shutdown at expected block height. */
-    expectedShutdown?: MutableConfigValue;
+    expectedShutdown: MutableConfigValue;
     /** @description Garbage collection configuration. */
-    gc?: GCConfig;
+    gc: GCConfig;
     /**
      * Format: uint64
      * @description Expected increase of header head height per second during header sync
      */
-    headerSyncExpectedHeightPerSecond?: number;
+    headerSyncExpectedHeightPerSecond: number;
     /** @description How much time to wait after initial header sync */
-    headerSyncInitialTimeout?: number[];
+    headerSyncInitialTimeout: number[];
     /** @description How much time to wait after some progress is made in header sync */
-    headerSyncProgressTimeout?: number[];
+    headerSyncProgressTimeout: number[];
     /** @description How much time to wait before banning a peer in header sync if sync is too slow */
-    headerSyncStallBanTimeout?: number[];
+    headerSyncStallBanTimeout: number[];
     /** @description Period between logging summary information. */
-    logSummaryPeriod?: number[];
+    logSummaryPeriod: number[];
     /** @description Enable coloring of the logs */
-    logSummaryStyle?: LogSummaryStyle;
+    logSummaryStyle: LogSummaryStyle;
     /** @description Maximum wait for approvals before producing block. */
-    maxBlockProductionDelay?: number[];
+    maxBlockProductionDelay: number[];
     /** @description Maximum duration before skipping given height. */
-    maxBlockWaitDelay?: number[];
+    maxBlockWaitDelay: number[];
     /** @description Max burnt gas per view method.  If present, overrides value stored in
      *     genesis file.  The value only affects the RPCs without influencing the
      *     protocol thus changing it per-node doesn’t affect the blockchain. */
     maxGasBurntView?: NearGas | (null);
     /** @description Minimum duration before producing block. */
-    minBlockProductionDelay?: number[];
+    minBlockProductionDelay: number[];
     /**
      * Format: uint
      * @description Minimum number of peers to start syncing.
      */
-    minNumPeers?: number;
+    minNumPeers: number;
     /**
      * Format: uint64
      * @description Number of block producer seats
      */
-    numBlockProducerSeats?: number;
+    numBlockProducerSeats: number;
     /**
      * Format: uint64
      * @description Maximum size of state witnesses in the OrphanStateWitnessPool.
@@ -2438,89 +2135,87 @@ export type RpcClientConfigResponse = {
      *     We keep only orphan witnesses which are smaller than this size.
      *     This limits the maximum memory usage of OrphanStateWitnessPool.
      */
-    orphanStateWitnessMaxSize?: number;
+    orphanStateWitnessMaxSize: number;
     /**
      * Format: uint
      * @description OrphanStateWitnessPool keeps instances of ChunkStateWitness which can't be processed
      *     because the previous block isn't available. The witnesses wait in the pool until the
      *     required block appears. This variable controls how many witnesses can be stored in the pool.
      */
-    orphanStateWitnessPoolSize?: number;
+    orphanStateWitnessPoolSize: number;
     /** @description Limit the time of adding transactions to a chunk.
      *     A node produces a chunk by adding transactions from the transaction pool until
      *     some limit is reached. This time limit ensures that adding transactions won't take
      *     longer than the specified duration, which helps to produce the chunk quickly. */
-    produceChunkAddTransactionsTimeLimit?: string;
+    produceChunkAddTransactionsTimeLimit: string;
     /** @description Produce empty blocks, use `false` for testing. */
-    produceEmptyBlocks?: boolean;
+    produceEmptyBlocks: boolean;
     /** @description Determines whether client should exit if the protocol version is not supported
      *     for the next or next next epoch. */
-    protocolVersionCheck?: ProtocolVersionCheckConfig;
-    reshardingConfig?: MutableConfigValue;
+    protocolVersionCheck: ProtocolVersionCheckConfig;
+    reshardingConfig: MutableConfigValue;
     /** @description Listening rpc port for status. */
     rpcAddr?: string | null;
     /** @description Save observed instances of invalid ChunkStateWitness to the database in DBCol::InvalidChunkStateWitnesses.
      *     Saving invalid witnesses is useful for analysis and debugging.
      *     This option can cause extra load on the database and is not recommended for production use. */
-    saveInvalidWitnesses?: boolean;
+    saveInvalidWitnesses: boolean;
     /** @description Save observed instances of ChunkStateWitness to the database in DBCol::LatestChunkStateWitnesses.
      *     Saving the latest witnesses is useful for analysis and debugging.
      *     This option can cause extra load on the database and is not recommended for production use. */
-    saveLatestWitnesses?: boolean;
-    /** @description Whether to persist state changes on disk or not. */
-    saveStateChanges?: boolean;
+    saveLatestWitnesses: boolean;
     /** @description save_trie_changes should be set to true iff
      *     - archive if false - non-archival nodes need trie changes to perform garbage collection
      *     - archive is true, cold_store is configured and migration to split_storage is finished - node
      *     working in split storage mode needs trie changes in order to do garbage collection on hot. */
-    saveTrieChanges?: boolean;
+    saveTrieChanges: boolean;
     /** @description Whether to persist transaction outcomes to disk or not. */
-    saveTxOutcomes?: boolean;
+    saveTxOutcomes: boolean;
     /** @description Whether to persist partial chunk parts for untracked shards or not. */
-    saveUntrackedPartialChunksParts?: boolean;
+    saveUntrackedPartialChunksParts: boolean;
     /** @description Skip waiting for sync (for testing or single node testnet). */
-    skipSyncWait?: boolean;
+    skipSyncWait: boolean;
     /**
      * Format: uint
      * @description Number of threads for StateRequestActor pool.
      */
-    stateRequestServerThreads?: number;
+    stateRequestServerThreads: number;
     /** @description Number of seconds between state requests for view client.
      *     Throttling window for state requests (headers and parts). */
-    stateRequestThrottlePeriod?: number[];
+    stateRequestThrottlePeriod: number[];
     /**
      * Format: uint
      * @description Maximum number of state requests served per throttle period
      */
-    stateRequestsPerThrottlePeriod?: number;
+    stateRequestsPerThrottlePeriod: number;
     /** @description Options for syncing state. */
-    stateSync?: StateSyncConfig;
+    stateSync: StateSyncConfig;
     /** @description Whether to use the State Sync mechanism.
      *     If disabled, the node will do Block Sync instead of State Sync. */
-    stateSyncEnabled?: boolean;
+    stateSyncEnabled: boolean;
     /** @description Additional waiting period after a failed request to external storage */
-    stateSyncExternalBackoff?: number[];
+    stateSyncExternalBackoff: number[];
     /** @description How long to wait for a response from centralized state sync */
-    stateSyncExternalTimeout?: number[];
+    stateSyncExternalTimeout: number[];
     /** @description How long to wait for a response from p2p state sync */
-    stateSyncP2pTimeout?: number[];
+    stateSyncP2pTimeout: number[];
     /** @description How long to wait after a failed state sync request */
-    stateSyncRetryBackoff?: number[];
+    stateSyncRetryBackoff: number[];
     /** @description How often to check that we are not out of sync. */
-    syncCheckPeriod?: number[];
+    syncCheckPeriod: number[];
     /**
      * Format: uint64
      * @description Sync height threshold: below this difference in height don't start syncing.
      */
-    syncHeightThreshold?: number;
+    syncHeightThreshold: number;
     /**
      * Format: uint
      * @description Maximum number of block requests to send to peers to sync
      */
-    syncMaxBlockRequests?: number;
+    syncMaxBlockRequests: number;
     /** @description While syncing, how long to check for each step. */
-    syncStepPeriod?: number[];
-    trackedShardsConfig?: TrackedShardsConfig;
+    syncStepPeriod: number[];
+    trackedShardsConfig: TrackedShardsConfig;
     /**
      * Format: uint64
      * @description Limit of the size of per-shard transaction pool measured in bytes. If not set, the size
@@ -2528,27 +2223,27 @@ export type RpcClientConfigResponse = {
      */
     transactionPoolSizeLimit?: number | null;
     /** Format: uint */
-    transactionRequestHandlerThreads?: number;
+    transactionRequestHandlerThreads: number;
     /**
      * Format: uint64
      * @description Upper bound of the byte size of contract state that is still viewable. None is no limit
      */
     trieViewerStateSizeLimit?: number | null;
     /** @description Time to persist Accounts Id in the router without removing them. */
-    ttlAccountIdRouter?: number[];
+    ttlAccountIdRouter: number[];
     /**
      * Format: uint64
      * @description If the node is not a chunk producer within that many blocks, then route
      *     to upcoming chunk producers.
      */
-    txRoutingHeightHorizon?: number;
+    txRoutingHeightHorizon: number;
     /** @description Version of the binary. */
-    version?: Version;
+    version: Version;
     /**
      * Format: uint
      * @description Number of threads for ViewClientActor pool.
      */
-    viewClientThreads?: number;
+    viewClientThreads: number;
 };
 export type RpcCongestionLevelRequest = {
     blockId: BlockId;
@@ -2560,17 +2255,31 @@ export type RpcCongestionLevelResponse = {
     /** Format: double */
     congestionLevel: number;
 };
-export type RpcGasPriceError = {
-    info: {
-        errorMessage: string;
-    };
+export type RpcError = {
+    cause?: unknown;
+    /**
+     * Format: int64
+     * @description Deprecated please use the `error_struct` instead
+     */
+    code: number;
+    /** @description Deprecated please use the `error_struct` instead */
+    data?: unknown;
+    /** @description Deprecated please use the `error_struct` instead */
+    message: string;
+    name?: unknown;
+} & ({
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: unknown;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: unknown;
     /** @enum {string} */
     name: "INTERNAL_ERROR";
-} | {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-};
+});
 export type RpcGasPriceRequest = {
     blockId?: BlockId | (null);
 };
@@ -2611,23 +2320,6 @@ export type RpcLightClientExecutionProofResponse = {
     outcomeProof: ExecutionOutcomeWithIdView;
     outcomeRootProof: MerklePathItem[];
 };
-export type RpcLightClientNextBlockError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-} | {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        epochId: EpochId;
-    };
-    /** @enum {string} */
-    name: "EPOCH_OUT_OF_BOUNDS";
-};
 export type RpcLightClientNextBlockRequest = {
     lastBlockHash: CryptoHash;
 };
@@ -2641,60 +2333,8 @@ export type RpcLightClientNextBlockResponse = {
     nextBps?: ValidatorStakeView[] | null;
     prevBlockHash?: CryptoHash;
 };
-export type RpcLightClientProofError = {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        executionOutcomeShardId: ShardId;
-        /** Format: uint */
-        numberOrShards: number;
-    };
-    /** @enum {string} */
-    name: "INCONSISTENT_STATE";
-} | {
-    info: {
-        transactionOrReceiptId: CryptoHash;
-    };
-    /** @enum {string} */
-    name: "NOT_CONFIRMED";
-} | {
-    info: {
-        transactionOrReceiptId: CryptoHash;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_TRANSACTION_OR_RECEIPT";
-} | {
-    info: {
-        shardId: ShardId;
-        transactionOrReceiptId: CryptoHash;
-    };
-    /** @enum {string} */
-    name: "UNAVAILABLE_SHARD";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type RpcMaintenanceWindowsError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcMaintenanceWindowsRequest = {
     accountId: AccountId;
-};
-export type RpcNetworkInfoError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
 };
 export type RpcNetworkInfoRequest = null;
 export type RpcNetworkInfoResponse = {
@@ -2715,17 +2355,6 @@ export type RpcPeerInfo = {
     addr?: string | null;
     id: PeerId;
 };
-export type RpcProtocolConfigError = {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcProtocolConfigRequest = {
     blockId: BlockId;
 } | {
@@ -2735,220 +2364,118 @@ export type RpcProtocolConfigRequest = {
 };
 export type RpcProtocolConfigResponse = {
     /** @description Expected number of hidden validators per shard. */
-    avgHiddenValidatorSeatsPerShard?: number[];
+    avgHiddenValidatorSeatsPerShard: number[];
     /**
      * Format: uint8
      * @description Threshold for kicking out block producers, between 0 and 100.
      */
-    blockProducerKickoutThreshold?: number;
+    blockProducerKickoutThreshold: number;
     /** @description ID of the blockchain. This must be unique for every blockchain.
      *     If your testnet blockchains do not have unique chain IDs, you will have a bad time. */
-    chainId?: string;
+    chainId: string;
     /**
      * Format: uint8
      * @description Threshold for kicking out chunk producers, between 0 and 100.
      */
-    chunkProducerKickoutThreshold?: number;
+    chunkProducerKickoutThreshold: number;
     /**
      * Format: uint8
      * @description Threshold for kicking out nodes which are only chunk validators, between 0 and 100.
      */
-    chunkValidatorOnlyKickoutThreshold?: number;
+    chunkValidatorOnlyKickoutThreshold: number;
     /** @description Enable dynamic re-sharding. */
-    dynamicResharding?: boolean;
+    dynamicResharding: boolean;
     /**
      * Format: uint64
      * @description Epoch length counted in block heights.
      */
-    epochLength?: number;
+    epochLength: number;
     /** @description Fishermen stake threshold. */
-    fishermenThreshold?: NearToken;
+    fishermenThreshold: NearToken;
     /** @description Initial gas limit. */
-    gasLimit?: NearGas;
+    gasLimit: NearGas;
     /** @description Gas price adjustment rate */
-    gasPriceAdjustmentRate?: number[];
+    gasPriceAdjustmentRate: number[];
     /**
      * Format: uint64
      * @description Height of genesis block.
      */
-    genesisHeight?: number;
+    genesisHeight: number;
     /**
      * Format: date-time
      * @description Official time of blockchain start.
      */
-    genesisTime?: string;
+    genesisTime: string;
     /** @description Maximum gas price. */
-    maxGasPrice?: NearToken;
+    maxGasPrice: NearToken;
     /** @description Maximum inflation on the total supply every epoch. */
-    maxInflationRate?: number[];
+    maxInflationRate: number[];
     /**
      * Format: uint8
      * @description Max stake percentage of the validators we will kick out.
      */
-    maxKickoutStakePerc?: number;
+    maxKickoutStakePerc: number;
     /** @description Minimum gas price. It is also the initial gas price. */
-    minGasPrice?: NearToken;
+    minGasPrice: NearToken;
     /**
      * Format: uint64
      * @description The minimum stake required for staking is last seat price divided by this number.
      */
-    minimumStakeDivisor?: number;
+    minimumStakeDivisor: number;
     /** @description The lowest ratio s/s_total any block producer can have.
      *     See <https://github.com/near/NEPs/pull/167> for details */
-    minimumStakeRatio?: number[];
+    minimumStakeRatio: number[];
     /**
      * Format: uint64
      * @description The minimum number of validators each shard must have
      */
-    minimumValidatorsPerShard?: number;
+    minimumValidatorsPerShard: number;
     /**
      * Format: uint64
      * @description Number of block producer seats at genesis.
      */
-    numBlockProducerSeats?: number;
+    numBlockProducerSeats: number;
     /** @description Defines number of shards and number of block producer seats per each shard at genesis. */
-    numBlockProducerSeatsPerShard?: number[];
+    numBlockProducerSeatsPerShard: number[];
     /**
      * Format: uint64
      * @description Expected number of blocks per year
      */
-    numBlocksPerYear?: number;
+    numBlocksPerYear: number;
     /** @description Online maximum threshold above which validator gets full reward. */
-    onlineMaxThreshold?: number[];
+    onlineMaxThreshold: number[];
     /** @description Online minimum threshold below which validator doesn't receive reward. */
-    onlineMinThreshold?: number[];
+    onlineMinThreshold: number[];
     /** @description Protocol treasury rate */
-    protocolRewardRate?: number[];
+    protocolRewardRate: number[];
     /** @description Protocol treasury account */
-    protocolTreasuryAccount?: AccountId;
+    protocolTreasuryAccount: AccountId;
     /** @description Threshold of stake that needs to indicate that they ready for upgrade. */
-    protocolUpgradeStakeThreshold?: number[];
+    protocolUpgradeStakeThreshold: number[];
     /**
      * Format: uint32
      * @description Current Protocol Version
      */
-    protocolVersion?: number;
+    protocolVersion: number;
     /** @description Runtime configuration (mostly economics constants). */
-    runtimeConfig?: RuntimeConfigView;
+    runtimeConfig: RuntimeConfigView;
     /** @description Layout information regarding how to split accounts to shards */
-    shardLayout?: ShardLayout;
+    shardLayout: ShardLayout;
     /** @description If true, shuffle the chunk producers across shards. In other words, if
      *     the shard assignments were `[S_0, S_1, S_2, S_3]` where `S_i` represents
      *     the set of chunk producers for shard `i`, if this flag were true, the
      *     shard assignments might become, for example, `[S_2, S_0, S_3, S_1]`. */
-    shuffleShardAssignmentForChunkProducers?: boolean;
+    shuffleShardAssignmentForChunkProducers: boolean;
     /**
      * Format: uint64
      * @description Number of target chunk validator mandates for each shard.
      */
-    targetValidatorMandatesPerShard?: number;
+    targetValidatorMandatesPerShard: number;
     /**
      * Format: uint64
      * @description Number of blocks for which a given transaction is valid
      */
-    transactionValidityPeriod?: number;
-};
-export type RpcQueryError = {
-    /** @enum {string} */
-    name: "NO_SYNCED_BLOCKS";
-} | {
-    info: {
-        requestedShardId: ShardId;
-    };
-    /** @enum {string} */
-    name: "UNAVAILABLE_SHARD";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-    };
-    /** @enum {string} */
-    name: "GARBAGE_COLLECTED_BLOCK";
-} | {
-    info: {
-        blockReference: BlockReference;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        requestedAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "INVALID_ACCOUNT";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        requestedAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_ACCOUNT";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        contractAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "NO_CONTRACT_CODE";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        contractAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "TOO_LARGE_CONTRACT_STATE";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        publicKey: PublicKey;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_ACCESS_KEY";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        publicKey: PublicKey;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_GAS_KEY";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        vmError: string;
-    };
-    /** @enum {string} */
-    name: "CONTRACT_EXECUTION_ERROR";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        identifier: GlobalContractIdentifier;
-    };
-    /** @enum {string} */
-    name: "NO_GLOBAL_CONTRACT_CODE";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
+    transactionValidityPeriod: number;
 };
 export type RpcQueryRequest = ({
     blockId: BlockId;
@@ -2987,19 +2514,6 @@ export type RpcQueryRequest = ({
     blockId: BlockId;
 } & {
     accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
     argsBase64: FunctionArgs;
     methodName: string;
     /** @enum {string} */
@@ -3053,19 +2567,6 @@ export type RpcQueryRequest = ({
     finality: Finality;
 } & {
     accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
     argsBase64: FunctionArgs;
     methodName: string;
     /** @enum {string} */
@@ -3115,19 +2616,6 @@ export type RpcQueryRequest = ({
     accountId: AccountId;
     /** @enum {string} */
     requestType: "view_access_key_list";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
 }) | ({
     syncCheckpoint: SyncCheckpoint;
 } & {
@@ -3153,20 +2641,7 @@ export type RpcQueryResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
-} & (AccountView | ContractCodeView | ViewStateResult | CallResult | AccessKeyView | AccessKeyList | GasKeyView | GasKeyList);
-export type RpcReceiptError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-} | {
-    info: {
-        receiptId: CryptoHash;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_RECEIPT";
-};
+} & (AccountView | ContractCodeView | ViewStateResult | CallResult | AccessKeyView | AccessKeyList);
 export type RpcReceiptRequest = {
     receiptId: CryptoHash;
 };
@@ -3199,13 +2674,6 @@ export type RpcSendTransactionRequest = {
     /** @default EXECUTED_OPTIMISTIC */
     waitUntil: TxExecutionStatus;
 };
-export type RpcSplitStorageInfoError = {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcSplitStorageInfoRequest = Record<string, unknown>;
 export type RpcSplitStorageInfoResponse = {
     /** Format: uint64 */
@@ -3215,20 +2683,6 @@ export type RpcSplitStorageInfoResponse = {
     /** Format: uint64 */
     headHeight?: number | null;
     hotDbKind?: string | null;
-};
-export type RpcStateChangesError = {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    /** @enum {string} */
-    name: "NOT_SYNCED_YET";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
 };
 export type RpcStateChangesInBlockByTypeRequest = ({
     blockId: BlockId;
@@ -3375,28 +2829,6 @@ export type RpcStateChangesInBlockResponse = {
     blockHash: CryptoHash;
     changes: StateChangeWithCauseView[];
 };
-export type RpcStatusError = {
-    /** @enum {string} */
-    name: "NODE_IS_SYNCING";
-} | {
-    info: {
-        elapsed: number[];
-    };
-    /** @enum {string} */
-    name: "NO_NEW_BLOCKS";
-} | {
-    info: {
-        epochId: EpochId;
-    };
-    /** @enum {string} */
-    name: "EPOCH_OUT_OF_BOUNDS";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcStatusRequest = null;
 export type RpcStatusResponse = {
     /** @description Unique chain id. */
@@ -3437,35 +2869,6 @@ export type RpcStatusResponse = {
     /** @description Binary version. */
     version: Version;
 };
-export type RpcTransactionError = {
-    info: Record<string, unknown>;
-    /** @enum {string} */
-    name: "INVALID_TRANSACTION";
-} | {
-    /** @enum {string} */
-    name: "DOES_NOT_TRACK_SHARD";
-} | {
-    info: {
-        transactionHash: CryptoHash;
-    };
-    /** @enum {string} */
-    name: "REQUEST_ROUTED";
-} | {
-    info: {
-        requestedTransactionHash: CryptoHash;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_TRANSACTION";
-} | {
-    info: {
-        debugInfo: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-} | {
-    /** @enum {string} */
-    name: "TIMEOUT_ERROR";
-};
 export type RpcTransactionResponse = {
     finalExecutionStatus: TxExecutionStatus;
 } & (FinalExecutionOutcomeWithReceiptView | FinalExecutionOutcomeView);
@@ -3478,19 +2881,6 @@ export type RpcTransactionStatusRequest = {
     senderAccountId: AccountId;
     txHash: CryptoHash;
 });
-export type RpcValidatorError = {
-    /** @enum {string} */
-    name: "UNKNOWN_EPOCH";
-} | {
-    /** @enum {string} */
-    name: "VALIDATOR_INFO_UNAVAILABLE";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
 export type RpcValidatorRequest = "latest" | {
     epochId: EpochId;
 } | {
@@ -3525,37 +2915,37 @@ export type RpcValidatorsOrderedRequest = {
 };
 export type RuntimeConfigView = {
     /** @description Config that defines rules for account creation. */
-    accountCreationConfig?: AccountCreationConfigView;
+    accountCreationConfig: AccountCreationConfigView;
     /** @description The configuration for congestion control. */
-    congestionControlConfig?: CongestionControlConfigView;
+    congestionControlConfig: CongestionControlConfigView;
     /** @description Amount of yN per byte required to have on the account.  See
      *     <https://nomicon.io/Economics/Economic#state-stake> for details. */
-    storageAmountPerByte?: NearToken;
+    storageAmountPerByte: NearToken;
     /** @description Costs of different actions that need to be performed when sending and
      *     processing transaction and receipts. */
-    transactionCosts?: RuntimeFeesConfigView;
+    transactionCosts: RuntimeFeesConfigView;
     /** @description Config of wasm operations. */
-    wasmConfig?: VMConfigView;
+    wasmConfig: VMConfigView;
     /** @description Configuration specific to ChunkStateWitness. */
-    witnessConfig?: WitnessConfigView;
+    witnessConfig: WitnessConfigView;
 };
 export type RuntimeFeesConfigView = {
     /** @description Describes the cost of creating a certain action, `Action`. Includes all variants. */
-    actionCreationConfig?: ActionCreationConfigView;
+    actionCreationConfig: ActionCreationConfigView;
     /** @description Describes the cost of creating an action receipt, `ActionReceipt`, excluding the actual cost
      *     of actions.
      *     - `send` cost is burned when a receipt is created using `promise_create` or
      *         `promise_batch_create`
      *     - `exec` cost is burned when the receipt is being executed. */
-    actionReceiptCreationConfig?: Fee;
+    actionReceiptCreationConfig: Fee;
     /** @description Fraction of the burnt gas to reward to the contract account for execution. */
-    burntGasReward?: number[];
+    burntGasReward: number[];
     /** @description Describes the cost of creating a data receipt, `DataReceipt`. */
-    dataReceiptCreationConfig?: DataReceiptCreationConfigView;
+    dataReceiptCreationConfig: DataReceiptCreationConfigView;
     /** @description Pessimistic gas price inflation ratio. */
-    pessimisticGasPriceInflationRatio?: number[];
+    pessimisticGasPriceInflationRatio: number[];
     /** @description Describes fees for storage. */
-    storageUsageConfig?: StorageUsageConfigView;
+    storageUsageConfig: StorageUsageConfigView;
 };
 export type ShardId = number;
 export type ShardLayout = {
@@ -3753,7 +3143,7 @@ export type StateChangeWithCauseView = {
 } | {
     change: {
         accountId: AccountId;
-        gasKey: GasKey;
+        gasKey: GasKeyView;
         publicKey: PublicKey;
     };
     /** @enum {string} */
@@ -3851,12 +3241,12 @@ export type StorageUsageConfigView = {
      * Format: uint64
      * @description Number of bytes for an account record, including rounding up for account id.
      */
-    numBytesAccount?: number;
+    numBytesAccount: number;
     /**
      * Format: uint64
      * @description Additional number of bytes for a k/v record
      */
-    numExtraBytesRecord?: number;
+    numExtraBytesRecord: number;
 };
 export type StoreKey = string;
 export type StoreValue = string;
@@ -3868,26 +3258,26 @@ export type SyncConcurrency = {
      *     This is a very disk-heavy task and therefore we set this to a low limit,
      *     or else the rocksdb contention makes the whole server freeze up.
      */
-    apply?: number;
+    apply: number;
     /**
      * Format: uint8
      * @description Maximum number of "apply parts" tasks that can be performed in parallel
      *     during catchup. We set this to a very low value to avoid overloading the
      *     node while it is still performing normal tasks.
      */
-    applyDuringCatchup?: number;
+    applyDuringCatchup: number;
     /**
      * Format: uint8
      * @description Maximum number of outstanding requests for decentralized state sync.
      */
-    peerDownloads?: number;
+    peerDownloads: number;
     /**
      * Format: uint8
      * @description The maximum parallelism to use per shard. This is mostly for fairness, because
      *     the actual rate limiting is done by the TaskTrackers, but this is useful for
      *     balancing the shards a little.
      */
-    perShard?: number;
+    perShard: number;
 };
 export type SyncConfig = "Peers" | {
     ExternalStorage: ExternalStorageConfig;
@@ -3984,52 +3374,52 @@ export type ViewStateResult = {
 };
 export type VMConfigView = {
     /** @description See [VMConfig::deterministic_account_ids](crate::vm::Config::deterministic_account_ids). */
-    deterministicAccountIds?: boolean;
+    deterministicAccountIds: boolean;
     /** @description See [VMConfig::discard_custom_sections](crate::vm::Config::discard_custom_sections). */
-    discardCustomSections?: boolean;
+    discardCustomSections: boolean;
     /** @description See [VMConfig::eth_implicit_accounts](crate::vm::Config::eth_implicit_accounts). */
-    ethImplicitAccounts?: boolean;
+    ethImplicitAccounts: boolean;
     /** @description Costs for runtime externals */
-    extCosts?: ExtCostsConfigView;
+    extCosts: ExtCostsConfigView;
     /** @description See [VMConfig::fix_contract_loading_cost](crate::vm::Config::fix_contract_loading_cost). */
-    fixContractLoadingCost?: boolean;
+    fixContractLoadingCost: boolean;
     /** @description See [VMConfig::global_contract_host_fns](crate::vm::Config::global_contract_host_fns). */
-    globalContractHostFns?: boolean;
+    globalContractHostFns: boolean;
     /**
      * Format: uint32
      * @description Gas cost of a growing memory by single page.
      */
-    growMemCost?: number;
+    growMemCost: number;
     /** @description See [VMConfig::implicit_account_creation](crate::vm::Config::implicit_account_creation). */
-    implicitAccountCreation?: boolean;
+    implicitAccountCreation: boolean;
     /** @description Describes limits for VM and Runtime.
      *
      *     TODO: Consider changing this to `VMLimitConfigView` to avoid dependency
      *     on runtime. */
-    limitConfig?: LimitConfig;
+    limitConfig: LimitConfig;
     /**
      * Format: uint64
      * @description Base gas cost of a linear operation
      */
-    linearOpBaseCost?: number;
+    linearOpBaseCost: number;
     /**
      * Format: uint64
      * @description Unit gas cost of a linear operation
      */
-    linearOpUnitCost?: number;
+    linearOpUnitCost: number;
     /** @description See [VMConfig::reftypes_bulk_memory](crate::vm::Config::reftypes_bulk_memory). */
-    reftypesBulkMemory?: boolean;
+    reftypesBulkMemory: boolean;
     /**
      * Format: uint32
      * @description Gas cost of a regular operation.
      */
-    regularOpCost?: number;
+    regularOpCost: number;
     /** @description See [VMConfig::saturating_float_to_int](crate::vm::Config::saturating_float_to_int). */
-    saturatingFloatToInt?: boolean;
+    saturatingFloatToInt: boolean;
     /** @description See [VMConfig::storage_get_mode](crate::vm::Config::storage_get_mode). */
-    storageGetMode?: StorageGetMode;
+    storageGetMode: StorageGetMode;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
-    vmKind?: VMKind;
+    vmKind: VMKind;
 };
 export type VMKind = "Wasmer0" | "Wasmtime" | "Wasmer2" | "NearVm";
 export type WasmTrap = "Unreachable" | "IncorrectCallIndirectSignature" | "MemoryOutOfBounds" | "CallIndirectOOB" | "IllegalArithmetic" | "MisalignedAtomicAccess" | "IndirectCallToNull" | "StackOverflow" | "GenericTrap";
@@ -4041,22 +3431,22 @@ export type WitnessConfigView = {
      *     A witness contains transactions from both the previous chunk and the current one.
      *     This parameter limits the sum of sizes of transactions from both of those chunks.
      */
-    combinedTransactionsSizeLimit?: number;
+    combinedTransactionsSizeLimit: number;
     /**
      * Format: uint64
      * @description Size limit for storage proof generated while executing receipts in a chunk.
      *     After this limit is reached we defer execution of any new receipts.
      */
-    mainStorageProofSizeSoftLimit?: number;
+    mainStorageProofSizeSoftLimit: number;
     /**
      * Format: uint64
      * @description Soft size limit of storage proof used to validate new transactions in ChunkStateWitness.
      */
-    newTransactionsValidationStateSizeSoftLimit?: number;
+    newTransactionsValidationStateSizeSoftLimit: number;
 };
-export type JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsErrorResponse = Range_of_uint64[];
-export type JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorErrorResponse = ValidatorStakeView[];
-export type JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusErrorResponse = RpcHealthResponse | (null);
+export type JsonRpcResponseForArrayOfRangeOfUint64AndRpcErrorResponse = Range_of_uint64[];
+export type JsonRpcResponseForArrayOfValidatorStakeViewAndRpcErrorResponse = ValidatorStakeView[];
+export type JsonRpcResponseForNullableRpcHealthResponseAndRpcErrorResponse = RpcHealthResponse | (null);
 export type RpcStateChangesInBlockByTypeRequestAccountChanges = ({
     blockId: BlockId;
 } & {
@@ -4297,47 +3687,6 @@ export type RpcQueryRequestViewAccessKeyList = ({
     /** @enum {string} */
     requestType: "view_access_key_list";
 });
-export type RpcQueryRequestViewGasKey = ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-});
-export type RpcQueryRequestViewGasKeyList = ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-});
 export type RpcQueryRequestCallFunction = ({
     blockId: BlockId;
 } & {
@@ -4439,18 +3788,6 @@ export function DiscriminateRpcQueryResponse(obj: RpcQueryResponse): {
         blockHeight: number;
     }
     & AccessKeyList;
-    GasKeyView?: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-    }
-    & GasKeyView;
-    GasKeyList?: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-    }
-    & GasKeyList;
 } {
     let AccountView: ReturnType<typeof DiscriminateRpcQueryResponse>['AccountView'] = undefined
     let ContractCodeView: ReturnType<typeof DiscriminateRpcQueryResponse>['ContractCodeView'] = undefined
@@ -4458,8 +3795,6 @@ export function DiscriminateRpcQueryResponse(obj: RpcQueryResponse): {
     let CallResult: ReturnType<typeof DiscriminateRpcQueryResponse>['CallResult'] = undefined
     let AccessKeyView: ReturnType<typeof DiscriminateRpcQueryResponse>['AccessKeyView'] = undefined
     let AccessKeyList: ReturnType<typeof DiscriminateRpcQueryResponse>['AccessKeyList'] = undefined
-    let GasKeyView: ReturnType<typeof DiscriminateRpcQueryResponse>['GasKeyView'] = undefined
-    let GasKeyList: ReturnType<typeof DiscriminateRpcQueryResponse>['GasKeyList'] = undefined
     if ("amount" in obj && "codeHash" in obj && "locked" in obj && "storagePaidAt" in obj && "storageUsage" in obj) {
         AccountView = obj;
     }
@@ -4478,21 +3813,13 @@ export function DiscriminateRpcQueryResponse(obj: RpcQueryResponse): {
     if ("keys" in obj) {
         AccessKeyList = obj;
     }
-    if ("balance" in obj && "nonces" in obj && "numNonces" in obj && "permission" in obj) {
-        GasKeyView = obj;
-    }
-    if ("keys" in obj) {
-        GasKeyList = obj;
-    }
     return {
         AccountView,
         ContractCodeView,
         ViewStateResult,
         CallResult,
         AccessKeyView,
-        AccessKeyList,
-        GasKeyView,
-        GasKeyList
+        AccessKeyList
     };
 }
 
