@@ -1324,6 +1324,7 @@ export const ReceiptEnumViewSchema = z.union([z.object({
         inputDataIds: z.array(CryptoHashSchema),
         isPromiseYield: z.boolean(),
         outputDataReceivers: z.array(DataReceiverViewSchema),
+        refundTo: z.union([AccountIdSchema, z.null()]).optional(),
         signerId: AccountIdSchema,
         signerPublicKey: PublicKeySchema
     })
@@ -1458,6 +1459,7 @@ export const RpcClientConfigResponseSchema = z.object({
     chunkRequestRetryPeriod: z.array(z.number()).optional(),
     chunkValidationThreads: z.number().optional(),
     chunkWaitMult: z.array(z.number()).optional(),
+    chunksCacheHeightHorizon: z.number().optional(),
     clientBackgroundMigrationThreads: z.number().optional(),
     cloudArchivalWriter: z.union([CloudArchivalWriterConfigSchema, z.null()]).optional(),
     disableTxRouting: z.boolean().optional(),
