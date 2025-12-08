@@ -2185,6 +2185,7 @@ export type ReceiptEnumView = {
         /** @default false */
         isPromiseYield: boolean;
         outputDataReceivers: DataReceiverView[];
+        refundTo?: AccountId | (null);
         signerId: AccountId;
         signerPublicKey: PublicKey;
     };
@@ -2362,6 +2363,13 @@ export type RpcClientConfigResponse = {
     chunkValidationThreads?: number;
     /** @description Multiplier for the wait time for all chunks to be received. */
     chunkWaitMult?: number[];
+    /**
+     * Format: uint64
+     * @description Height horizon for the chunk cache. A chunk is removed from the cache
+     *     if its height + chunks_cache_height_horizon < largest_seen_height.
+     *     The default value is DEFAULT_CHUNKS_CACHE_HEIGHT_HORIZON.
+     */
+    chunksCacheHeightHorizon?: number;
     /**
      * Format: uint
      * @description Number of threads to execute background migration work in client.
@@ -3529,7 +3537,7 @@ export type RuntimeConfigView = {
     /** @description The configuration for congestion control. */
     congestionControlConfig?: CongestionControlConfigView;
     /** @description Amount of yN per byte required to have on the account.  See
-     *     <https://nomicon.io/Economics/Economic#state-stake> for details. */
+     *     <https://nomicon.io/Economics/Economics.html#state-stake> for details. */
     storageAmountPerByte?: NearToken;
     /** @description Costs of different actions that need to be performed when sending and
      *     processing transaction and receipts. */
@@ -3564,6 +3572,8 @@ export type ShardLayout = {
     V1: ShardLayoutV1;
 } | {
     V2: ShardLayoutV2;
+} | {
+    V3: ShardLayoutV3;
 };
 export type ShardLayoutV0 = {
     /**
@@ -3613,6 +3623,17 @@ export type ShardLayoutV2 = {
     } | null;
     /** Format: uint32 */
     version: number;
+};
+export type ShardLayoutV3 = {
+    boundaryAccounts: AccountId[];
+    idToIndexMap: {
+        [key: string]: number;
+    };
+    lastSplit: ShardId;
+    shardIds: ShardId[];
+    shardsSplitMap: {
+        [key: string]: ShardId[];
+    };
 };
 export type ShardUId = {
     /** Format: uint32 */
@@ -4000,7 +4021,7 @@ export type VMConfigView = {
      * @description Gas cost of a growing memory by single page.
      */
     growMemCost?: number;
-    /** @description See [VMConfig::implicit_account_creation](crate::vm::Config::implicit_account_creation). */
+    /** @description Deprecated */
     implicitAccountCreation?: boolean;
     /** @description Describes limits for VM and Runtime.
      *
