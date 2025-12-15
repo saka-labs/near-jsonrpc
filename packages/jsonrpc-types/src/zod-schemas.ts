@@ -584,6 +584,12 @@ export const DurationAsStdSchemaProviderSchema = z.object({
     nanos: z.number(),
     secs: z.number()
 });
+export const DynamicReshardingConfigViewSchema = z.object({
+    maxNumberOfShards: z.number(),
+    memoryUsageThreshold: z.number(),
+    minChildMemoryUsage: z.number(),
+    minEpochsBetweenResharding: z.number()
+});
 export const EpochIdSchema = CryptoHashSchema;
 export const EpochSyncConfigSchema = z.object({
     disableEpochSyncForBootstrapping: z.boolean(),
@@ -1324,6 +1330,7 @@ export const ReceiptEnumViewSchema = z.union([z.object({
         inputDataIds: z.array(CryptoHashSchema),
         isPromiseYield: z.boolean(),
         outputDataReceivers: z.array(DataReceiverViewSchema),
+        refundTo: z.union([AccountIdSchema, z.null()]).optional(),
         signerId: AccountIdSchema,
         signerPublicKey: PublicKeySchema
     })
@@ -1458,6 +1465,7 @@ export const RpcClientConfigResponseSchema = z.object({
     chunkRequestRetryPeriod: z.array(z.number()).optional(),
     chunkValidationThreads: z.number().optional(),
     chunkWaitMult: z.array(z.number()).optional(),
+    chunksCacheHeightHorizon: z.number().optional(),
     clientBackgroundMigrationThreads: z.number().optional(),
     cloudArchivalWriter: z.union([CloudArchivalWriterConfigSchema, z.null()]).optional(),
     disableTxRouting: z.boolean().optional(),
@@ -2247,6 +2255,7 @@ export const RpcValidatorsOrderedRequestSchema = z.object({
 export const RuntimeConfigViewSchema = z.object({
     accountCreationConfig: AccountCreationConfigViewSchema.optional(),
     congestionControlConfig: CongestionControlConfigViewSchema.optional(),
+    dynamicReshardingConfig: DynamicReshardingConfigViewSchema,
     storageAmountPerByte: NearTokenSchema.optional(),
     transactionCosts: z.lazy(() => RuntimeFeesConfigViewSchema).optional(),
     wasmConfig: z.lazy(() => VMConfigViewSchema).optional(),
@@ -2267,6 +2276,8 @@ export const ShardLayoutSchema = z.union([z.object({
     V1: z.lazy(() => ShardLayoutV1Schema)
 }), z.object({
     V2: z.lazy(() => ShardLayoutV2Schema)
+}), z.object({
+    V3: z.lazy(() => ShardLayoutV3Schema)
 })]);
 export const ShardLayoutV0Schema = z.object({
     numShards: z.number(),
@@ -2286,6 +2297,13 @@ export const ShardLayoutV2Schema = z.object({
     shardsParentMap: z.union([z.record(z.string(), ShardIdSchema), z.null()]).optional(),
     shardsSplitMap: z.union([z.record(z.string(), z.array(ShardIdSchema)), z.null()]).optional(),
     version: z.number()
+});
+export const ShardLayoutV3Schema = z.object({
+    boundaryAccounts: z.array(AccountIdSchema),
+    idToIndexMap: z.record(z.string(), z.number()),
+    lastSplit: ShardIdSchema,
+    shardIds: z.array(ShardIdSchema),
+    shardsSplitMap: z.record(z.string(), z.array(ShardIdSchema))
 });
 export const ShardUIdSchema = z.object({
     shardId: z.number(),
