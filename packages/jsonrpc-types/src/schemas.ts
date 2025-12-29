@@ -857,6 +857,36 @@ export type DurationAsStdSchemaProvider = {
     /** Format: int64 */
     secs: number;
 };
+export type DynamicReshardingConfigView = {
+    /**
+     * Format: uint64
+     * @description Maximum number of shards in the network.
+     *
+     *     See [`CongestionControlConfig`] for more details.
+     */
+    maxNumberOfShards: number;
+    /**
+     * Format: uint64
+     * @description Memory threshold over which a shard is marked for a split.
+     *
+     *     See [`CongestionControlConfig`] for more details.
+     */
+    memoryUsageThreshold: number;
+    /**
+     * Format: uint64
+     * @description Minimum memory usage of a child shard.
+     *
+     *     See [`CongestionControlConfig`] for more details.
+     */
+    minChildMemoryUsage: number;
+    /**
+     * Format: uint64
+     * @description Minimum number of epochs until next resharding can be scheduled.
+     *
+     *     See [`CongestionControlConfig`] for more details.
+     */
+    minEpochsBetweenResharding: number;
+};
 export type EpochId = CryptoHash;
 export type EpochSyncConfig = {
     /**
@@ -907,6 +937,19 @@ export type ErrorWrapper_for_RpcBlockError = {
     name: "REQUEST_VALIDATION_ERROR";
 } | {
     cause: RpcBlockError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcCallFunctionError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcCallFunctionError;
     /** @enum {string} */
     name: "HANDLER_ERROR";
 } | {
@@ -1102,6 +1145,97 @@ export type ErrorWrapper_for_RpcValidatorError = {
     name: "REQUEST_VALIDATION_ERROR";
 } | {
     cause: RpcValidatorError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewAccessKeyError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewAccessKeyError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewAccessKeyListError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewAccessKeyListError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewAccountError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewAccountError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewCodeError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewCodeError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewGasKeyError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewGasKeyError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewGasKeyListError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewGasKeyListError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcViewStateError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcViewStateError;
     /** @enum {string} */
     name: "HANDLER_ERROR";
 } | {
@@ -1696,7 +1830,11 @@ export type GlobalContractIdentifier = {
 } | {
     AccountId: AccountId;
 };
-export type GlobalContractIdentifierView = CryptoHash | AccountId;
+export type GlobalContractIdentifierView = {
+    hash: CryptoHash;
+} | {
+    accountId: AccountId;
+};
 export type HostError = "BadUTF16" | "BadUTF8" | "GasExceeded" | "GasLimitExceeded" | "BalanceExceeded" | "EmptyMethodName" | {
     GuestPanic: {
         panicMsg: string;
@@ -2185,6 +2323,7 @@ export type ReceiptEnumView = {
         /** @default false */
         isPromiseYield: boolean;
         outputDataReceivers: DataReceiverView[];
+        refundTo?: AccountId | (null);
         signerId: AccountId;
         signerPublicKey: PublicKey;
     };
@@ -2286,6 +2425,73 @@ export type RpcBlockResponse = {
     chunks: ChunkHeaderView[];
     header: BlockHeaderView;
 };
+export type RpcCallFunctionError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        contractAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "NO_CONTRACT_CODE";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        vmError: FunctionCallError;
+    };
+    /** @enum {string} */
+    name: "CONTRACT_EXECUTION_ERROR";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcCallFunctionRequest = {
+    accountId: AccountId;
+    argsBase64: FunctionArgs;
+    methodName: string;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcCallFunctionResponse = {
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    logs: string[];
+    result: number[];
+};
 export type RpcChunkError = {
     info: {
         errorMessage: string;
@@ -2363,6 +2569,13 @@ export type RpcClientConfigResponse = {
     /** @description Multiplier for the wait time for all chunks to be received. */
     chunkWaitMult?: number[];
     /**
+     * Format: uint64
+     * @description Height horizon for the chunk cache. A chunk is removed from the cache
+     *     if its height + chunks_cache_height_horizon < largest_seen_height.
+     *     The default value is DEFAULT_CHUNKS_CACHE_HEIGHT_HORIZON.
+     */
+    chunksCacheHeightHorizon?: number;
+    /**
      * Format: uint
      * @description Number of threads to execute background migration work in client.
      */
@@ -2374,9 +2587,6 @@ export type RpcClientConfigResponse = {
     disableTxRouting?: boolean;
     /** @description Time between running doomslug timer. */
     doomslugStepPeriod?: number[];
-    /** @description If true, the runtime will do a dynamic resharding 'dry run' at the last block of each epoch.
-     *     This means calculating tentative boundary accounts for splitting the tracked shards. */
-    dynamicReshardingDryRun?: boolean;
     /** @description If true, transactions for the next chunk will be prepared early, right after the previous chunk's
      *     post-state is ready. This can help produce chunks faster, for high-throughput chains.
      *     The current implementation increases latency on low-load chains, which will be fixed in the future.
@@ -2930,6 +3140,7 @@ export type RpcQueryError = {
         blockHash: CryptoHash;
         /** Format: uint64 */
         blockHeight: number;
+        error: FunctionCallError;
         vmError: string;
     };
     /** @enum {string} */
@@ -3523,13 +3734,406 @@ export type RpcValidatorResponse = {
 export type RpcValidatorsOrderedRequest = {
     blockId?: BlockId | (null);
 };
+export type RpcViewAccessKeyError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        publicKey: PublicKey;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCESS_KEY";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewAccessKeyListError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewAccessKeyListRequest = {
+    accountId: AccountId;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewAccessKeyListResponse = {
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    keys: AccessKeyInfoView[];
+};
+export type RpcViewAccessKeyRequest = {
+    accountId: AccountId;
+    publicKey: PublicKey;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewAccessKeyResponse = {
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    /** Format: uint64 */
+    nonce: number;
+    permission: AccessKeyPermissionView;
+};
+export type RpcViewAccountError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewAccountRequest = {
+    accountId: AccountId;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewAccountResponse = {
+    amount: NearToken;
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    codeHash: CryptoHash;
+    globalContractAccountId?: AccountId | (null);
+    globalContractHash?: CryptoHash | (null);
+    locked: NearToken;
+    /**
+     * Format: uint64
+     * @description TODO(2271): deprecated.
+     * @default 0
+     */
+    storagePaidAt: number;
+    /** Format: uint64 */
+    storageUsage: number;
+};
+export type RpcViewCodeError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        contractAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "NO_CONTRACT_CODE";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewCodeRequest = {
+    accountId: AccountId;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewCodeResponse = {
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    codeBase64: string;
+    hash: CryptoHash;
+};
+export type RpcViewGasKeyError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        publicKey: PublicKey;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_GAS_KEY";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewGasKeyListError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewGasKeyListRequest = {
+    accountId: AccountId;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewGasKeyListResponse = {
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    keys: GasKeyInfoView[];
+};
+export type RpcViewGasKeyRequest = {
+    accountId: AccountId;
+    publicKey: PublicKey;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewGasKeyResponse = {
+    balance: NearToken;
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    nonces: number[];
+    /** Format: uint32 */
+    numNonces: number;
+    permission: AccessKeyPermissionView;
+};
+export type RpcViewStateError = {
+    info: {
+        blockReference: BlockReference;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_BLOCK";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "INVALID_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        contractAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "TOO_LARGE_CONTRACT_STATE";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcViewStateRequest = {
+    accountId: AccountId;
+    /** @default false */
+    includeProof: boolean;
+    prefixBase64: StoreKey;
+} & ({
+    blockId: BlockId;
+} | {
+    finality: Finality;
+} | {
+    syncCheckpoint: SyncCheckpoint;
+});
+export type RpcViewStateResponse = {
+    blockHash: CryptoHash;
+    /** Format: uint64 */
+    blockHeight: number;
+    proof?: string[];
+    values: StateItem[];
+};
 export type RuntimeConfigView = {
     /** @description Config that defines rules for account creation. */
     accountCreationConfig?: AccountCreationConfigView;
     /** @description The configuration for congestion control. */
     congestionControlConfig?: CongestionControlConfigView;
+    /**
+     * @description Configuration for dynamic resharding feature.
+     * @default {
+     *       "max_number_of_shards": 999999999999999,
+     *       "memory_usage_threshold": 999999999999999,
+     *       "min_child_memory_usage": 999999999999999,
+     *       "min_epochs_between_resharding": 999999999999999
+     *     }
+     */
+    dynamicReshardingConfig: DynamicReshardingConfigView;
     /** @description Amount of yN per byte required to have on the account.  See
-     *     <https://nomicon.io/Economics/Economic#state-stake> for details. */
+     *     <https://nomicon.io/Economics/Economics.html#state-stake> for details. */
     storageAmountPerByte?: NearToken;
     /** @description Costs of different actions that need to be performed when sending and
      *     processing transaction and receipts. */
@@ -3564,6 +4168,8 @@ export type ShardLayout = {
     V1: ShardLayoutV1;
 } | {
     V2: ShardLayoutV2;
+} | {
+    V3: ShardLayoutV3;
 };
 export type ShardLayoutV0 = {
     /**
@@ -3613,6 +4219,17 @@ export type ShardLayoutV2 = {
     } | null;
     /** Format: uint32 */
     version: number;
+};
+export type ShardLayoutV3 = {
+    boundaryAccounts: AccountId[];
+    idToIndexMap: {
+        [key: string]: number;
+    };
+    lastSplit: ShardId;
+    shardIds: ShardId[];
+    shardsSplitMap: {
+        [key: string]: ShardId[];
+    };
 };
 export type ShardUId = {
     /** Format: uint32 */
@@ -4000,7 +4617,7 @@ export type VMConfigView = {
      * @description Gas cost of a growing memory by single page.
      */
     growMemCost?: number;
-    /** @description See [VMConfig::implicit_account_creation](crate::vm::Config::implicit_account_creation). */
+    /** @description Deprecated */
     implicitAccountCreation?: boolean;
     /** @description Describes limits for VM and Runtime.
      *
