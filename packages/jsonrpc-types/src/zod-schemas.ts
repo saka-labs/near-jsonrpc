@@ -584,6 +584,12 @@ export const DurationAsStdSchemaProviderSchema = z.object({
     nanos: z.number(),
     secs: z.number()
 });
+export const DynamicReshardingConfigViewSchema = z.object({
+    maxNumberOfShards: z.number(),
+    memoryUsageThreshold: z.number(),
+    minChildMemoryUsage: z.number(),
+    minEpochsBetweenResharding: z.number()
+});
 export const EpochIdSchema = CryptoHashSchema;
 export const EpochSyncConfigSchema = z.object({
     disableEpochSyncForBootstrapping: z.boolean(),
@@ -606,6 +612,16 @@ export const ErrorWrapper_for_RpcBlockErrorSchema = z.union([z.object({
     name: z.literal("REQUEST_VALIDATION_ERROR")
 }), z.object({
     cause: z.lazy(() => RpcBlockErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcCallFunctionErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcCallFunctionErrorSchema),
     name: z.literal("HANDLER_ERROR")
 }), z.object({
     cause: z.lazy(() => InternalErrorSchema),
@@ -756,6 +772,76 @@ export const ErrorWrapper_for_RpcValidatorErrorSchema = z.union([z.object({
     name: z.literal("REQUEST_VALIDATION_ERROR")
 }), z.object({
     cause: z.lazy(() => RpcValidatorErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewAccessKeyErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewAccessKeyErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewAccessKeyListErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewAccessKeyListErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewAccountErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewAccountErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewCodeErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewCodeErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewGasKeyErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewGasKeyErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewGasKeyListErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewGasKeyListErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcViewStateErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcViewStateErrorSchema),
     name: z.literal("HANDLER_ERROR")
 }), z.object({
     cause: z.lazy(() => InternalErrorSchema),
@@ -1020,7 +1106,11 @@ export const GlobalContractIdentifierSchema = z.union([z.object({
 }), z.object({
     AccountId: AccountIdSchema
 })]);
-export const GlobalContractIdentifierViewSchema = z.union([CryptoHashSchema, AccountIdSchema]);
+export const GlobalContractIdentifierViewSchema = z.union([z.object({
+    hash: CryptoHashSchema
+}), z.object({
+    accountId: AccountIdSchema
+})]);
 export const HostErrorSchema = z.union([z.literal("BadUTF16"), z.literal("BadUTF8"), z.literal("GasExceeded"), z.literal("GasLimitExceeded"), z.literal("BalanceExceeded"), z.literal("EmptyMethodName"), z.object({
     GuestPanic: z.object({
         panicMsg: z.string()
@@ -1324,6 +1414,7 @@ export const ReceiptEnumViewSchema = z.union([z.object({
         inputDataIds: z.array(CryptoHashSchema),
         isPromiseYield: z.boolean(),
         outputDataReceivers: z.array(DataReceiverViewSchema),
+        refundTo: z.union([AccountIdSchema, z.null()]).optional(),
         signerId: AccountIdSchema,
         signerPublicKey: PublicKeySchema
     })
@@ -1409,6 +1500,62 @@ export const RpcBlockResponseSchema = z.object({
     chunks: z.array(ChunkHeaderViewSchema),
     header: BlockHeaderViewSchema
 });
+export const RpcCallFunctionErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        contractAccountId: AccountIdSchema
+    }),
+    name: z.literal("NO_CONTRACT_CODE")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        vmError: FunctionCallErrorSchema
+    }),
+    name: z.literal("CONTRACT_EXECUTION_ERROR")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcCallFunctionRequestSchema = z.object({
+    accountId: AccountIdSchema,
+    argsBase64: FunctionArgsSchema,
+    methodName: z.string()
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcCallFunctionResponseSchema = z.object({
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    logs: z.array(z.string()),
+    result: z.array(z.number())
+});
 export const RpcChunkErrorSchema = z.union([z.object({
     info: z.object({
         errorMessage: z.string()
@@ -1458,11 +1605,11 @@ export const RpcClientConfigResponseSchema = z.object({
     chunkRequestRetryPeriod: z.array(z.number()).optional(),
     chunkValidationThreads: z.number().optional(),
     chunkWaitMult: z.array(z.number()).optional(),
+    chunksCacheHeightHorizon: z.number().optional(),
     clientBackgroundMigrationThreads: z.number().optional(),
     cloudArchivalWriter: z.union([CloudArchivalWriterConfigSchema, z.null()]).optional(),
     disableTxRouting: z.boolean().optional(),
     doomslugStepPeriod: z.array(z.number()).optional(),
-    dynamicReshardingDryRun: z.boolean().optional(),
     enableEarlyPrepareTransactions: z.boolean().optional(),
     enableMultilineLogging: z.boolean().optional(),
     enableStatisticsExport: z.boolean().optional(),
@@ -1774,6 +1921,7 @@ export const RpcQueryErrorSchema = z.union([z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
         blockHeight: z.number(),
+        error: FunctionCallErrorSchema,
         vmError: z.string()
     }),
     name: z.literal("CONTRACT_EXECUTION_ERROR")
@@ -2244,9 +2392,327 @@ export const RpcValidatorResponseSchema = z.object({
 export const RpcValidatorsOrderedRequestSchema = z.object({
     blockId: z.union([BlockIdSchema, z.null()]).optional()
 });
+export const RpcViewAccessKeyErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        publicKey: PublicKeySchema
+    }),
+    name: z.literal("UNKNOWN_ACCESS_KEY")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewAccessKeyListErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewAccessKeyListRequestSchema = z.object({
+    accountId: AccountIdSchema
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewAccessKeyListResponseSchema = z.object({
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    keys: z.array(AccessKeyInfoViewSchema)
+});
+export const RpcViewAccessKeyRequestSchema = z.object({
+    accountId: AccountIdSchema,
+    publicKey: PublicKeySchema
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewAccessKeyResponseSchema = z.object({
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    nonce: z.number(),
+    permission: AccessKeyPermissionViewSchema
+});
+export const RpcViewAccountErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewAccountRequestSchema = z.object({
+    accountId: AccountIdSchema
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewAccountResponseSchema = z.object({
+    amount: NearTokenSchema,
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    codeHash: CryptoHashSchema,
+    globalContractAccountId: z.union([AccountIdSchema, z.null()]).optional(),
+    globalContractHash: z.union([CryptoHashSchema, z.null()]).optional(),
+    locked: NearTokenSchema,
+    storagePaidAt: z.number(),
+    storageUsage: z.number()
+});
+export const RpcViewCodeErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        contractAccountId: AccountIdSchema
+    }),
+    name: z.literal("NO_CONTRACT_CODE")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewCodeRequestSchema = z.object({
+    accountId: AccountIdSchema
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewCodeResponseSchema = z.object({
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    codeBase64: z.string(),
+    hash: CryptoHashSchema
+});
+export const RpcViewGasKeyErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        publicKey: PublicKeySchema
+    }),
+    name: z.literal("UNKNOWN_GAS_KEY")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewGasKeyListErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewGasKeyListRequestSchema = z.object({
+    accountId: AccountIdSchema
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewGasKeyListResponseSchema = z.object({
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    keys: z.array(GasKeyInfoViewSchema)
+});
+export const RpcViewGasKeyRequestSchema = z.object({
+    accountId: AccountIdSchema,
+    publicKey: PublicKeySchema
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewGasKeyResponseSchema = z.object({
+    balance: NearTokenSchema,
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    nonces: z.array(z.number()),
+    numNonces: z.number(),
+    permission: AccessKeyPermissionViewSchema
+});
+export const RpcViewStateErrorSchema = z.union([z.object({
+    info: z.object({
+        blockReference: BlockReferenceSchema
+    }),
+    name: z.literal("UNKNOWN_BLOCK")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("INVALID_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        contractAccountId: AccountIdSchema
+    }),
+    name: z.literal("TOO_LARGE_CONTRACT_STATE")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcViewStateRequestSchema = z.object({
+    accountId: AccountIdSchema,
+    includeProof: z.boolean(),
+    prefixBase64: z.lazy(() => StoreKeySchema)
+}).and(z.union([z.object({
+    blockId: BlockIdSchema
+}), z.object({
+    finality: FinalitySchema
+}), z.object({
+    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
+})]));
+export const RpcViewStateResponseSchema = z.object({
+    blockHash: CryptoHashSchema,
+    blockHeight: z.number(),
+    proof: z.array(z.string()).optional(),
+    values: z.array(z.lazy(() => StateItemSchema))
+});
 export const RuntimeConfigViewSchema = z.object({
     accountCreationConfig: AccountCreationConfigViewSchema.optional(),
     congestionControlConfig: CongestionControlConfigViewSchema.optional(),
+    dynamicReshardingConfig: DynamicReshardingConfigViewSchema,
     storageAmountPerByte: NearTokenSchema.optional(),
     transactionCosts: z.lazy(() => RuntimeFeesConfigViewSchema).optional(),
     wasmConfig: z.lazy(() => VMConfigViewSchema).optional(),
@@ -2267,6 +2733,8 @@ export const ShardLayoutSchema = z.union([z.object({
     V1: z.lazy(() => ShardLayoutV1Schema)
 }), z.object({
     V2: z.lazy(() => ShardLayoutV2Schema)
+}), z.object({
+    V3: z.lazy(() => ShardLayoutV3Schema)
 })]);
 export const ShardLayoutV0Schema = z.object({
     numShards: z.number(),
@@ -2286,6 +2754,13 @@ export const ShardLayoutV2Schema = z.object({
     shardsParentMap: z.union([z.record(z.string(), ShardIdSchema), z.null()]).optional(),
     shardsSplitMap: z.union([z.record(z.string(), z.array(ShardIdSchema)), z.null()]).optional(),
     version: z.number()
+});
+export const ShardLayoutV3Schema = z.object({
+    boundaryAccounts: z.array(AccountIdSchema),
+    idToIndexMap: z.record(z.string(), z.number()),
+    lastSplit: ShardIdSchema,
+    shardIds: z.array(ShardIdSchema),
+    shardsSplitMap: z.record(z.string(), z.array(ShardIdSchema))
 });
 export const ShardUIdSchema = z.object({
     shardId: z.number(),
