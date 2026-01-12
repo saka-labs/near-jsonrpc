@@ -4641,8 +4641,6 @@ export type VMConfigView = {
      * @description Gas cost of a regular operation.
      */
     regularOpCost?: number;
-    /** @description See [VMConfig::saturating_float_to_int](crate::vm::Config::saturating_float_to_int). */
-    saturatingFloatToInt?: boolean;
     /** @description See [VMConfig::storage_get_mode](crate::vm::Config::storage_get_mode). */
     storageGetMode?: StorageGetMode;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */

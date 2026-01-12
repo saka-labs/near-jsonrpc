@@ -3051,7 +3051,6 @@ export const VMConfigViewSchema = z.object({
     linearOpUnitCost: z.number().optional(),
     reftypesBulkMemory: z.boolean().optional(),
     regularOpCost: z.number().optional(),
-    saturatingFloatToInt: z.boolean().optional(),
     storageGetMode: StorageGetModeSchema.optional(),
     vmKind: z.lazy(() => VMKindSchema).optional()
 });
