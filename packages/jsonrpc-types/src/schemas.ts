@@ -229,16 +229,6 @@ export type ActionErrorKind = {
     GlobalContractDoesNotExist: {
         identifier: GlobalContractIdentifier;
     };
-} | {
-    GasKeyDoesNotExist: {
-        accountId: AccountId;
-        publicKey: PublicKey;
-    };
-} | {
-    GasKeyAlreadyExists: {
-        accountId: AccountId;
-        publicKey: PublicKey;
-    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -320,17 +310,6 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         /** Format: uint64 */
         limit: number;
     };
-} | {
-    GasKeyPermissionInvalid: {
-        permission: AccessKeyPermission;
-    };
-} | {
-    GasKeyTooManyNoncesRequested: {
-        /** Format: uint32 */
-        limit: number;
-        /** Format: uint32 */
-        requestedNonces: number;
-    };
 };
 export type ActionView = "CreateAccount" | {
     DeployContract: {
@@ -397,28 +376,6 @@ export type ActionView = "CreateAccount" | {
         };
         deposit: NearToken;
     };
-} | {
-    AddGasKey: {
-        /** Format: uint32 */
-        numNonces: number;
-        permission: AccessKeyPermissionView;
-        publicKey: PublicKey;
-    };
-} | {
-    DeleteGasKey: {
-        publicKey: PublicKey;
-    };
-} | {
-    TransferToGasKey: {
-        amount: NearToken;
-        publicKey: PublicKey;
-    };
-};
-export type AddGasKeyAction = {
-    /** Format: uint32 */
-    numNonces: number;
-    permission: AccessKeyPermission;
-    publicKey: PublicKey;
 };
 export type AddKeyAction = {
     /** @description An access key with the permission */
@@ -800,9 +757,6 @@ export type DelegateAction = {
 export type DeleteAccountAction = {
     beneficiaryId: AccountId;
 };
-export type DeleteGasKeyAction = {
-    publicKey: PublicKey;
-};
 export type DeleteKeyAction = {
     /** @description A public key associated with the access_key to be deleted. */
     publicKey: PublicKey;
@@ -858,44 +812,33 @@ export type DurationAsStdSchemaProvider = {
     secs: number;
 };
 export type DynamicReshardingConfigView = {
+    /** @description Shards that should **not** be split even when they meet the regular split criteria. */
+    blockSplitShards: ShardId[];
+    /** @description Shards that should be split even when they don't meet the regular split criteria. */
+    forceSplitShards: ShardId[];
     /**
      * Format: uint64
      * @description Maximum number of shards in the network.
-     *
-     *     See [`CongestionControlConfig`] for more details.
      */
     maxNumberOfShards: number;
     /**
      * Format: uint64
      * @description Memory threshold over which a shard is marked for a split.
-     *
-     *     See [`CongestionControlConfig`] for more details.
      */
     memoryUsageThreshold: number;
     /**
      * Format: uint64
      * @description Minimum memory usage of a child shard.
-     *
-     *     See [`CongestionControlConfig`] for more details.
      */
     minChildMemoryUsage: number;
     /**
      * Format: uint64
      * @description Minimum number of epochs until next resharding can be scheduled.
-     *
-     *     See [`CongestionControlConfig`] for more details.
      */
     minEpochsBetweenResharding: number;
 };
 export type EpochId = CryptoHash;
 export type EpochSyncConfig = {
-    /**
-     * @description If true, even if the node started from genesis, it will not perform epoch sync.
-     *     There should be no reason to set this flag in production, because on both mainnet
-     *     and testnet it would be infeasible to catch up from genesis without epoch sync.
-     * @default false
-     */
-    disableEpochSyncForBootstrapping: boolean;
     /**
      * Format: uint64
      * @description This serves as two purposes: (1) the node will not epoch sync and instead resort to
@@ -904,16 +847,6 @@ export type EpochSyncConfig = {
      *     that is more than this many blocks behind the current block.
      */
     epochSyncHorizon?: number;
-    /**
-     * @description If true, the node will ignore epoch sync requests from the network. It is strongly
-     *     recommended not to set this flag, because it will prevent other nodes from
-     *     bootstrapping. This flag is only included as a kill-switch and may be removed in a
-     *     future release. Please note that epoch sync requests are heavily rate limited and
-     *     cached, and therefore should not affect the performance of the node or introduce
-     *     any non-negligible increase in network traffic.
-     * @default false
-     */
-    ignoreEpochSyncNetworkRequests: boolean;
     /** @description Timeout for epoch sync requests. The node will continue retrying indefinitely even
      *     if this timeout is exceeded. */
     timeoutForEpochSync?: DurationAsStdSchemaProvider;
@@ -1197,32 +1130,6 @@ export type ErrorWrapper_for_RpcViewCodeError = {
     name: "REQUEST_VALIDATION_ERROR";
 } | {
     cause: RpcViewCodeError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcViewGasKeyError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcViewGasKeyError;
-    /** @enum {string} */
-    name: "HANDLER_ERROR";
-} | {
-    cause: InternalError;
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type ErrorWrapper_for_RpcViewGasKeyListError = {
-    cause: RpcRequestValidationErrorKind;
-    /** @enum {string} */
-    name: "REQUEST_VALIDATION_ERROR";
-} | {
-    cause: RpcViewGasKeyListError;
     /** @enum {string} */
     name: "HANDLER_ERROR";
 } | {
@@ -1565,32 +1472,6 @@ export type FunctionCallPermission = {
     methodNames: string[];
     /** @description The access key only allows transactions with the given receiver's account id. */
     receiverId: string;
-};
-export type GasKey = {
-    /** @description The balance of the gas key. */
-    balance: NearToken;
-    /**
-     * Format: uint32
-     * @description The number of nonces this gas key has.
-     */
-    numNonces: number;
-    /** @description Defines the permissions for this gas key.
-     *     If this is a `FunctionCallPermission`, the allowance must be None (unlimited). */
-    permission: AccessKeyPermission;
-};
-export type GasKeyInfoView = {
-    gasKey: GasKeyView;
-    publicKey: PublicKey;
-};
-export type GasKeyList = {
-    keys: GasKeyInfoView[];
-};
-export type GasKeyView = {
-    balance: NearToken;
-    nonces: number[];
-    /** Format: uint32 */
-    numNonces: number;
-    permission: AccessKeyPermissionView;
 };
 export type GCConfig = {
     /**
@@ -2271,12 +2152,6 @@ export type NonDelegateAction = {
     UseGlobalContract: UseGlobalContractAction;
 } | {
     DeterministicStateInit: DeterministicStateInitAction;
-} | {
-    AddGasKey: AddGasKeyAction;
-} | {
-    DeleteGasKey: DeleteGasKeyAction;
-} | {
-    TransferToGasKey: TransferToGasKeyAction;
 };
 export type PeerId = PublicKey;
 export type PeerInfoView = {
@@ -3198,19 +3073,6 @@ export type RpcQueryRequest = ({
     blockId: BlockId;
 } & {
     accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
     argsBase64: FunctionArgs;
     methodName: string;
     /** @enum {string} */
@@ -3264,19 +3126,6 @@ export type RpcQueryRequest = ({
     finality: Finality;
 } & {
     accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
     argsBase64: FunctionArgs;
     methodName: string;
     /** @enum {string} */
@@ -3326,19 +3175,6 @@ export type RpcQueryRequest = ({
     accountId: AccountId;
     /** @enum {string} */
     requestType: "view_access_key_list";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
 }) | ({
     syncCheckpoint: SyncCheckpoint;
 } & {
@@ -3364,7 +3200,7 @@ export type RpcQueryResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
-} & (AccountView | ContractCodeView | ViewStateResult | CallResult | AccessKeyView | AccessKeyList | GasKeyView | GasKeyList);
+} & (AccountView | ContractCodeView | ViewStateResult | CallResult | AccessKeyView | AccessKeyList);
 export type RpcReceiptError = {
     info: {
         errorMessage: string;
@@ -3456,21 +3292,9 @@ export type RpcStateChangesInBlockByTypeRequest = ({
 }) | ({
     blockId: BlockId;
 } & {
-    /** @enum {string} */
-    changesType: "single_gas_key_changes";
-    keys: AccountWithPublicKey[];
-}) | ({
-    blockId: BlockId;
-} & {
     accountIds: AccountId[];
     /** @enum {string} */
     changesType: "all_access_key_changes";
-}) | ({
-    blockId: BlockId;
-} & {
-    accountIds: AccountId[];
-    /** @enum {string} */
-    changesType: "all_gas_key_changes";
 }) | ({
     blockId: BlockId;
 } & {
@@ -3499,21 +3323,9 @@ export type RpcStateChangesInBlockByTypeRequest = ({
 }) | ({
     finality: Finality;
 } & {
-    /** @enum {string} */
-    changesType: "single_gas_key_changes";
-    keys: AccountWithPublicKey[];
-}) | ({
-    finality: Finality;
-} & {
     accountIds: AccountId[];
     /** @enum {string} */
     changesType: "all_access_key_changes";
-}) | ({
-    finality: Finality;
-} & {
-    accountIds: AccountId[];
-    /** @enum {string} */
-    changesType: "all_gas_key_changes";
 }) | ({
     finality: Finality;
 } & {
@@ -3542,21 +3354,9 @@ export type RpcStateChangesInBlockByTypeRequest = ({
 }) | ({
     syncCheckpoint: SyncCheckpoint;
 } & {
-    /** @enum {string} */
-    changesType: "single_gas_key_changes";
-    keys: AccountWithPublicKey[];
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
     accountIds: AccountId[];
     /** @enum {string} */
     changesType: "all_access_key_changes";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountIds: AccountId[];
-    /** @enum {string} */
-    changesType: "all_gas_key_changes";
 }) | ({
     syncCheckpoint: SyncCheckpoint;
 } & {
@@ -3952,112 +3752,6 @@ export type RpcViewCodeResponse = {
     codeBase64: string;
     hash: CryptoHash;
 };
-export type RpcViewGasKeyError = {
-    info: {
-        blockReference: BlockReference;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        requestedAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "INVALID_ACCOUNT";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        requestedAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_ACCOUNT";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        publicKey: PublicKey;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_GAS_KEY";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type RpcViewGasKeyListError = {
-    info: {
-        blockReference: BlockReference;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_BLOCK";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        requestedAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "INVALID_ACCOUNT";
-} | {
-    info: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-        requestedAccountId: AccountId;
-    };
-    /** @enum {string} */
-    name: "UNKNOWN_ACCOUNT";
-} | {
-    info: {
-        errorMessage: string;
-    };
-    /** @enum {string} */
-    name: "INTERNAL_ERROR";
-};
-export type RpcViewGasKeyListRequest = {
-    accountId: AccountId;
-} & ({
-    blockId: BlockId;
-} | {
-    finality: Finality;
-} | {
-    syncCheckpoint: SyncCheckpoint;
-});
-export type RpcViewGasKeyListResponse = {
-    blockHash: CryptoHash;
-    /** Format: uint64 */
-    blockHeight: number;
-    keys: GasKeyInfoView[];
-};
-export type RpcViewGasKeyRequest = {
-    accountId: AccountId;
-    publicKey: PublicKey;
-} & ({
-    blockId: BlockId;
-} | {
-    finality: Finality;
-} | {
-    syncCheckpoint: SyncCheckpoint;
-});
-export type RpcViewGasKeyResponse = {
-    balance: NearToken;
-    blockHash: CryptoHash;
-    /** Format: uint64 */
-    blockHeight: number;
-    nonces: number[];
-    /** Format: uint32 */
-    numNonces: number;
-    permission: AccessKeyPermissionView;
-};
 export type RpcViewStateError = {
     info: {
         blockReference: BlockReference;
@@ -4125,6 +3819,8 @@ export type RuntimeConfigView = {
     /**
      * @description Configuration for dynamic resharding feature.
      * @default {
+     *       "block_split_shards": [],
+     *       "force_split_shards": [],
      *       "max_number_of_shards": 999999999999999,
      *       "memory_usage_threshold": 999999999999999,
      *       "min_child_memory_usage": 999999999999999,
@@ -4370,32 +4066,6 @@ export type StateChangeWithCauseView = {
 } | {
     change: {
         accountId: AccountId;
-        gasKey: GasKey;
-        publicKey: PublicKey;
-    };
-    /** @enum {string} */
-    type: "gas_key_update";
-} | {
-    change: {
-        accountId: AccountId;
-        /** Format: uint32 */
-        index: number;
-        /** Format: uint64 */
-        nonce: number;
-        publicKey: PublicKey;
-    };
-    /** @enum {string} */
-    type: "gas_key_nonce_update";
-} | {
-    change: {
-        accountId: AccountId;
-        publicKey: PublicKey;
-    };
-    /** @enum {string} */
-    type: "gas_key_deletion";
-} | {
-    change: {
-        accountId: AccountId;
         keyBase64: StoreKey;
         valueBase64: StoreValue;
     };
@@ -4525,10 +4195,6 @@ export type TrackedShardsConfig = "NoShards" | {
 export type TransferAction = {
     deposit: NearToken;
 };
-export type TransferToGasKeyAction = {
-    deposit: NearToken;
-    publicKey: PublicKey;
-};
 export type TxExecutionError = {
     ActionError: ActionError;
 } | {
@@ -4641,8 +4307,6 @@ export type VMConfigView = {
      * @description Gas cost of a regular operation.
      */
     regularOpCost?: number;
-    /** @description See [VMConfig::saturating_float_to_int](crate::vm::Config::saturating_float_to_int). */
-    saturatingFloatToInt?: boolean;
     /** @description See [VMConfig::storage_get_mode](crate::vm::Config::storage_get_mode). */
     storageGetMode?: StorageGetMode;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
@@ -4712,25 +4376,6 @@ export type RpcStateChangesInBlockByTypeRequestSingleAccessKeyChanges = ({
     changesType: "single_access_key_changes";
     keys: AccountWithPublicKey[];
 });
-export type RpcStateChangesInBlockByTypeRequestSingleGasKeyChanges = ({
-    blockId: BlockId;
-} & {
-    /** @enum {string} */
-    changesType: "single_gas_key_changes";
-    keys: AccountWithPublicKey[];
-}) | ({
-    finality: Finality;
-} & {
-    /** @enum {string} */
-    changesType: "single_gas_key_changes";
-    keys: AccountWithPublicKey[];
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    /** @enum {string} */
-    changesType: "single_gas_key_changes";
-    keys: AccountWithPublicKey[];
-});
 export type RpcStateChangesInBlockByTypeRequestAllAccessKeyChanges = ({
     blockId: BlockId;
 } & {
@@ -4749,25 +4394,6 @@ export type RpcStateChangesInBlockByTypeRequestAllAccessKeyChanges = ({
     accountIds: AccountId[];
     /** @enum {string} */
     changesType: "all_access_key_changes";
-});
-export type RpcStateChangesInBlockByTypeRequestAllGasKeyChanges = ({
-    blockId: BlockId;
-} & {
-    accountIds: AccountId[];
-    /** @enum {string} */
-    changesType: "all_gas_key_changes";
-}) | ({
-    finality: Finality;
-} & {
-    accountIds: AccountId[];
-    /** @enum {string} */
-    changesType: "all_gas_key_changes";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountIds: AccountId[];
-    /** @enum {string} */
-    changesType: "all_gas_key_changes";
 });
 export type RpcStateChangesInBlockByTypeRequestContractCodeChanges = ({
     blockId: BlockId;
@@ -4914,47 +4540,6 @@ export type RpcQueryRequestViewAccessKeyList = ({
     /** @enum {string} */
     requestType: "view_access_key_list";
 });
-export type RpcQueryRequestViewGasKey = ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    requestType: "view_gas_key";
-});
-export type RpcQueryRequestViewGasKeyList = ({
-    blockId: BlockId;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    finality: Finality;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-}) | ({
-    syncCheckpoint: SyncCheckpoint;
-} & {
-    accountId: AccountId;
-    /** @enum {string} */
-    requestType: "view_gas_key_list";
-});
 export type RpcQueryRequestCallFunction = ({
     blockId: BlockId;
 } & {
@@ -5056,18 +4641,6 @@ export function DiscriminateRpcQueryResponse(obj: RpcQueryResponse): {
         blockHeight: number;
     }
     & AccessKeyList;
-    GasKeyView?: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-    }
-    & GasKeyView;
-    GasKeyList?: {
-        blockHash: CryptoHash;
-        /** Format: uint64 */
-        blockHeight: number;
-    }
-    & GasKeyList;
 } {
     let AccountView: ReturnType<typeof DiscriminateRpcQueryResponse>['AccountView'] = undefined
     let ContractCodeView: ReturnType<typeof DiscriminateRpcQueryResponse>['ContractCodeView'] = undefined
@@ -5075,8 +4648,6 @@ export function DiscriminateRpcQueryResponse(obj: RpcQueryResponse): {
     let CallResult: ReturnType<typeof DiscriminateRpcQueryResponse>['CallResult'] = undefined
     let AccessKeyView: ReturnType<typeof DiscriminateRpcQueryResponse>['AccessKeyView'] = undefined
     let AccessKeyList: ReturnType<typeof DiscriminateRpcQueryResponse>['AccessKeyList'] = undefined
-    let GasKeyView: ReturnType<typeof DiscriminateRpcQueryResponse>['GasKeyView'] = undefined
-    let GasKeyList: ReturnType<typeof DiscriminateRpcQueryResponse>['GasKeyList'] = undefined
     if ("amount" in obj && "codeHash" in obj && "locked" in obj && "storagePaidAt" in obj && "storageUsage" in obj) {
         AccountView = obj;
     }
@@ -5095,21 +4666,13 @@ export function DiscriminateRpcQueryResponse(obj: RpcQueryResponse): {
     if ("keys" in obj) {
         AccessKeyList = obj;
     }
-    if ("balance" in obj && "nonces" in obj && "numNonces" in obj && "permission" in obj) {
-        GasKeyView = obj;
-    }
-    if ("keys" in obj) {
-        GasKeyList = obj;
-    }
     return {
         AccountView,
         ContractCodeView,
         ViewStateResult,
         CallResult,
         AccessKeyView,
-        AccessKeyList,
-        GasKeyView,
-        GasKeyList
+        AccessKeyList
     };
 }
 

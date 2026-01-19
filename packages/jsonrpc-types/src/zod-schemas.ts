@@ -176,16 +176,6 @@ export const ActionErrorKindSchema = z.union([z.object({
     GlobalContractDoesNotExist: z.object({
         identifier: z.lazy(() => GlobalContractIdentifierSchema)
     })
-}), z.object({
-    GasKeyDoesNotExist: z.object({
-        accountId: AccountIdSchema,
-        publicKey: z.lazy(() => PublicKeySchema)
-    })
-}), z.object({
-    GasKeyAlreadyExists: z.object({
-        accountId: AccountIdSchema,
-        publicKey: z.lazy(() => PublicKeySchema)
-    })
 })]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
@@ -250,15 +240,6 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         length: z.number(),
         limit: z.number()
     })
-}), z.object({
-    GasKeyPermissionInvalid: z.object({
-        permission: AccessKeyPermissionSchema
-    })
-}), z.object({
-    GasKeyTooManyNoncesRequested: z.object({
-        limit: z.number(),
-        requestedNonces: z.number()
-    })
 })]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
@@ -320,27 +301,7 @@ export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
         data: z.record(z.string(), z.string()),
         deposit: z.lazy(() => NearTokenSchema)
     })
-}), z.object({
-    AddGasKey: z.object({
-        numNonces: z.number(),
-        permission: AccessKeyPermissionViewSchema,
-        publicKey: z.lazy(() => PublicKeySchema)
-    })
-}), z.object({
-    DeleteGasKey: z.object({
-        publicKey: z.lazy(() => PublicKeySchema)
-    })
-}), z.object({
-    TransferToGasKey: z.object({
-        amount: z.lazy(() => NearTokenSchema),
-        publicKey: z.lazy(() => PublicKeySchema)
-    })
 })]);
-export const AddGasKeyActionSchema = z.object({
-    numNonces: z.number(),
-    permission: AccessKeyPermissionSchema,
-    publicKey: z.lazy(() => PublicKeySchema)
-});
 export const AddKeyActionSchema = z.object({
     accessKey: AccessKeySchema,
     publicKey: z.lazy(() => PublicKeySchema)
@@ -541,9 +502,6 @@ export const DelegateActionSchema = z.object({
 export const DeleteAccountActionSchema = z.object({
     beneficiaryId: AccountIdSchema
 });
-export const DeleteGasKeyActionSchema = z.object({
-    publicKey: z.lazy(() => PublicKeySchema)
-});
 export const DeleteKeyActionSchema = z.object({
     publicKey: z.lazy(() => PublicKeySchema)
 });
@@ -585,6 +543,8 @@ export const DurationAsStdSchemaProviderSchema = z.object({
     secs: z.number()
 });
 export const DynamicReshardingConfigViewSchema = z.object({
+    blockSplitShards: z.array(z.lazy(() => ShardIdSchema)),
+    forceSplitShards: z.array(z.lazy(() => ShardIdSchema)),
     maxNumberOfShards: z.number(),
     memoryUsageThreshold: z.number(),
     minChildMemoryUsage: z.number(),
@@ -592,9 +552,7 @@ export const DynamicReshardingConfigViewSchema = z.object({
 });
 export const EpochIdSchema = CryptoHashSchema;
 export const EpochSyncConfigSchema = z.object({
-    disableEpochSyncForBootstrapping: z.boolean(),
     epochSyncHorizon: z.number().optional(),
-    ignoreEpochSyncNetworkRequests: z.boolean(),
     timeoutForEpochSync: DurationAsStdSchemaProviderSchema.optional()
 });
 export const ErrorWrapper_for_GenesisConfigErrorSchema = z.union([z.object({
@@ -817,26 +775,6 @@ export const ErrorWrapper_for_RpcViewCodeErrorSchema = z.union([z.object({
     cause: z.lazy(() => InternalErrorSchema),
     name: z.literal("INTERNAL_ERROR")
 })]);
-export const ErrorWrapper_for_RpcViewGasKeyErrorSchema = z.union([z.object({
-    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
-    name: z.literal("REQUEST_VALIDATION_ERROR")
-}), z.object({
-    cause: z.lazy(() => RpcViewGasKeyErrorSchema),
-    name: z.literal("HANDLER_ERROR")
-}), z.object({
-    cause: z.lazy(() => InternalErrorSchema),
-    name: z.literal("INTERNAL_ERROR")
-})]);
-export const ErrorWrapper_for_RpcViewGasKeyListErrorSchema = z.union([z.object({
-    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
-    name: z.literal("REQUEST_VALIDATION_ERROR")
-}), z.object({
-    cause: z.lazy(() => RpcViewGasKeyListErrorSchema),
-    name: z.literal("HANDLER_ERROR")
-}), z.object({
-    cause: z.lazy(() => InternalErrorSchema),
-    name: z.literal("INTERNAL_ERROR")
-})]);
 export const ErrorWrapper_for_RpcViewStateErrorSchema = z.union([z.object({
     cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
     name: z.literal("REQUEST_VALIDATION_ERROR")
@@ -1032,24 +970,6 @@ export const FunctionCallPermissionSchema = z.object({
     allowance: z.union([z.lazy(() => NearTokenSchema), z.null()]).optional(),
     methodNames: z.array(z.string()),
     receiverId: z.string()
-});
-export const GasKeySchema = z.object({
-    balance: z.lazy(() => NearTokenSchema),
-    numNonces: z.number(),
-    permission: AccessKeyPermissionSchema
-});
-export const GasKeyInfoViewSchema = z.object({
-    gasKey: z.lazy(() => GasKeyViewSchema),
-    publicKey: z.lazy(() => PublicKeySchema)
-});
-export const GasKeyListSchema = z.object({
-    keys: z.array(GasKeyInfoViewSchema)
-});
-export const GasKeyViewSchema = z.object({
-    balance: z.lazy(() => NearTokenSchema),
-    nonces: z.array(z.number()),
-    numNonces: z.number(),
-    permission: AccessKeyPermissionViewSchema
 });
 export const GCConfigSchema = z.object({
     gcBlocksLimit: z.number(),
@@ -1375,12 +1295,6 @@ export const NonDelegateActionSchema = z.union([z.object({
     UseGlobalContract: z.lazy(() => UseGlobalContractActionSchema)
 }), z.object({
     DeterministicStateInit: DeterministicStateInitActionSchema
-}), z.object({
-    AddGasKey: AddGasKeyActionSchema
-}), z.object({
-    DeleteGasKey: DeleteGasKeyActionSchema
-}), z.object({
-    TransferToGasKey: z.lazy(() => TransferToGasKeyActionSchema)
 })]);
 export const PeerIdSchema = z.lazy(() => PublicKeySchema);
 export const PeerInfoViewSchema = z.object({
@@ -1970,17 +1884,6 @@ export const RpcQueryRequestSchema = z.union([z.object({
     blockId: BlockIdSchema
 }).and(z.object({
     accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    requestType: z.literal("view_gas_key")
-})), z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    requestType: z.literal("view_gas_key_list")
-})), z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
     requestType: z.literal("call_function")
@@ -2026,17 +1929,6 @@ export const RpcQueryRequestSchema = z.union([z.object({
     finality: FinalitySchema
 }).and(z.object({
     accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    requestType: z.literal("view_gas_key")
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    requestType: z.literal("view_gas_key_list")
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
     requestType: z.literal("call_function")
@@ -2078,17 +1970,6 @@ export const RpcQueryRequestSchema = z.union([z.object({
 }).and(z.object({
     accountId: AccountIdSchema,
     requestType: z.literal("view_access_key_list")
-})), z.object({
-    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
-}).and(z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    requestType: z.literal("view_gas_key")
-})), z.object({
-    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
-}).and(z.object({
-    accountId: AccountIdSchema,
-    requestType: z.literal("view_gas_key_list")
 })), z.object({
     syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
 }).and(z.object({
@@ -2110,7 +1991,7 @@ export const RpcQueryRequestSchema = z.union([z.object({
 export const RpcQueryResponseSchema = z.object({
     blockHash: CryptoHashSchema,
     blockHeight: z.number()
-}).and(z.union([AccountViewSchema, ContractCodeViewSchema, z.lazy(() => ViewStateResultSchema), CallResultSchema, AccessKeyViewSchema, AccessKeyListSchema, GasKeyViewSchema, GasKeyListSchema]));
+}).and(z.union([AccountViewSchema, ContractCodeViewSchema, z.lazy(() => ViewStateResultSchema), CallResultSchema, AccessKeyViewSchema, AccessKeyListSchema]));
 export const RpcReceiptErrorSchema = z.union([z.object({
     info: z.object({
         errorMessage: z.string()
@@ -2184,18 +2065,8 @@ export const RpcStateChangesInBlockByTypeRequestSchema = z.union([z.object({
 })), z.object({
     blockId: BlockIdSchema
 }).and(z.object({
-    changesType: z.literal("single_gas_key_changes"),
-    keys: z.array(AccountWithPublicKeySchema)
-})), z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
     accountIds: z.array(AccountIdSchema),
     changesType: z.literal("all_access_key_changes")
-})), z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    accountIds: z.array(AccountIdSchema),
-    changesType: z.literal("all_gas_key_changes")
 })), z.object({
     blockId: BlockIdSchema
 }).and(z.object({
@@ -2220,18 +2091,8 @@ export const RpcStateChangesInBlockByTypeRequestSchema = z.union([z.object({
 })), z.object({
     finality: FinalitySchema
 }).and(z.object({
-    changesType: z.literal("single_gas_key_changes"),
-    keys: z.array(AccountWithPublicKeySchema)
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
     accountIds: z.array(AccountIdSchema),
     changesType: z.literal("all_access_key_changes")
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    accountIds: z.array(AccountIdSchema),
-    changesType: z.literal("all_gas_key_changes")
 })), z.object({
     finality: FinalitySchema
 }).and(z.object({
@@ -2256,18 +2117,8 @@ export const RpcStateChangesInBlockByTypeRequestSchema = z.union([z.object({
 })), z.object({
     syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
 }).and(z.object({
-    changesType: z.literal("single_gas_key_changes"),
-    keys: z.array(AccountWithPublicKeySchema)
-})), z.object({
-    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
-}).and(z.object({
     accountIds: z.array(AccountIdSchema),
     changesType: z.literal("all_access_key_changes")
-})), z.object({
-    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
-}).and(z.object({
-    accountIds: z.array(AccountIdSchema),
-    changesType: z.literal("all_gas_key_changes")
 })), z.object({
     syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
 }).and(z.object({
@@ -2571,95 +2422,6 @@ export const RpcViewCodeResponseSchema = z.object({
     codeBase64: z.string(),
     hash: CryptoHashSchema
 });
-export const RpcViewGasKeyErrorSchema = z.union([z.object({
-    info: z.object({
-        blockReference: BlockReferenceSchema
-    }),
-    name: z.literal("UNKNOWN_BLOCK")
-}), z.object({
-    info: z.object({
-        blockHash: CryptoHashSchema,
-        blockHeight: z.number(),
-        requestedAccountId: AccountIdSchema
-    }),
-    name: z.literal("INVALID_ACCOUNT")
-}), z.object({
-    info: z.object({
-        blockHash: CryptoHashSchema,
-        blockHeight: z.number(),
-        requestedAccountId: AccountIdSchema
-    }),
-    name: z.literal("UNKNOWN_ACCOUNT")
-}), z.object({
-    info: z.object({
-        blockHash: CryptoHashSchema,
-        blockHeight: z.number(),
-        publicKey: PublicKeySchema
-    }),
-    name: z.literal("UNKNOWN_GAS_KEY")
-}), z.object({
-    info: z.object({
-        errorMessage: z.string()
-    }),
-    name: z.literal("INTERNAL_ERROR")
-})]);
-export const RpcViewGasKeyListErrorSchema = z.union([z.object({
-    info: z.object({
-        blockReference: BlockReferenceSchema
-    }),
-    name: z.literal("UNKNOWN_BLOCK")
-}), z.object({
-    info: z.object({
-        blockHash: CryptoHashSchema,
-        blockHeight: z.number(),
-        requestedAccountId: AccountIdSchema
-    }),
-    name: z.literal("INVALID_ACCOUNT")
-}), z.object({
-    info: z.object({
-        blockHash: CryptoHashSchema,
-        blockHeight: z.number(),
-        requestedAccountId: AccountIdSchema
-    }),
-    name: z.literal("UNKNOWN_ACCOUNT")
-}), z.object({
-    info: z.object({
-        errorMessage: z.string()
-    }),
-    name: z.literal("INTERNAL_ERROR")
-})]);
-export const RpcViewGasKeyListRequestSchema = z.object({
-    accountId: AccountIdSchema
-}).and(z.union([z.object({
-    blockId: BlockIdSchema
-}), z.object({
-    finality: FinalitySchema
-}), z.object({
-    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
-})]));
-export const RpcViewGasKeyListResponseSchema = z.object({
-    blockHash: CryptoHashSchema,
-    blockHeight: z.number(),
-    keys: z.array(GasKeyInfoViewSchema)
-});
-export const RpcViewGasKeyRequestSchema = z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema
-}).and(z.union([z.object({
-    blockId: BlockIdSchema
-}), z.object({
-    finality: FinalitySchema
-}), z.object({
-    syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
-})]));
-export const RpcViewGasKeyResponseSchema = z.object({
-    balance: NearTokenSchema,
-    blockHash: CryptoHashSchema,
-    blockHeight: z.number(),
-    nonces: z.array(z.number()),
-    numNonces: z.number(),
-    permission: AccessKeyPermissionViewSchema
-});
 export const RpcViewStateErrorSchema = z.union([z.object({
     info: z.object({
         blockReference: BlockReferenceSchema
@@ -2866,27 +2628,6 @@ export const StateChangeWithCauseViewSchema = z.object({
 }), z.object({
     change: z.object({
         accountId: AccountIdSchema,
-        gasKey: GasKeySchema,
-        publicKey: PublicKeySchema
-    }),
-    type: z.literal("gas_key_update")
-}), z.object({
-    change: z.object({
-        accountId: AccountIdSchema,
-        index: z.number(),
-        nonce: z.number(),
-        publicKey: PublicKeySchema
-    }),
-    type: z.literal("gas_key_nonce_update")
-}), z.object({
-    change: z.object({
-        accountId: AccountIdSchema,
-        publicKey: PublicKeySchema
-    }),
-    type: z.literal("gas_key_deletion")
-}), z.object({
-    change: z.object({
-        accountId: AccountIdSchema,
         keyBase64: z.lazy(() => StoreKeySchema),
         valueBase64: z.lazy(() => StoreValueSchema)
     }),
@@ -2973,10 +2714,6 @@ export const TrackedShardsConfigSchema = z.union([z.literal("NoShards"), z.objec
 export const TransferActionSchema = z.object({
     deposit: NearTokenSchema
 });
-export const TransferToGasKeyActionSchema = z.object({
-    deposit: NearTokenSchema,
-    publicKey: PublicKeySchema
-});
 export const TxExecutionErrorSchema = z.union([z.object({
     ActionError: ActionErrorSchema
 }), z.object({
@@ -3051,7 +2788,6 @@ export const VMConfigViewSchema = z.object({
     linearOpUnitCost: z.number().optional(),
     reftypesBulkMemory: z.boolean().optional(),
     regularOpCost: z.number().optional(),
-    saturatingFloatToInt: z.boolean().optional(),
     storageGetMode: StorageGetModeSchema.optional(),
     vmKind: z.lazy(() => VMKindSchema).optional()
 });
@@ -3097,22 +2833,6 @@ export const RpcStateChangesInBlockByTypeRequestSingleAccessKeyChangesSchema = z
     changesType: z.literal("single_access_key_changes"),
     keys: z.array(AccountWithPublicKeySchema)
 }))]);
-export const RpcStateChangesInBlockByTypeRequestSingleGasKeyChangesSchema = z.union([z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    changesType: z.literal("single_gas_key_changes"),
-    keys: z.array(AccountWithPublicKeySchema)
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    changesType: z.literal("single_gas_key_changes"),
-    keys: z.array(AccountWithPublicKeySchema)
-})), z.object({
-    syncCheckpoint: SyncCheckpointSchema
-}).and(z.object({
-    changesType: z.literal("single_gas_key_changes"),
-    keys: z.array(AccountWithPublicKeySchema)
-}))]);
 export const RpcStateChangesInBlockByTypeRequestAllAccessKeyChangesSchema = z.union([z.object({
     blockId: BlockIdSchema
 }).and(z.object({
@@ -3128,22 +2848,6 @@ export const RpcStateChangesInBlockByTypeRequestAllAccessKeyChangesSchema = z.un
 }).and(z.object({
     accountIds: z.array(AccountIdSchema),
     changesType: z.literal("all_access_key_changes")
-}))]);
-export const RpcStateChangesInBlockByTypeRequestAllGasKeyChangesSchema = z.union([z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    accountIds: z.array(AccountIdSchema),
-    changesType: z.literal("all_gas_key_changes")
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    accountIds: z.array(AccountIdSchema),
-    changesType: z.literal("all_gas_key_changes")
-})), z.object({
-    syncCheckpoint: SyncCheckpointSchema
-}).and(z.object({
-    accountIds: z.array(AccountIdSchema),
-    changesType: z.literal("all_gas_key_changes")
 }))]);
 export const RpcStateChangesInBlockByTypeRequestContractCodeChangesSchema = z.union([z.object({
     blockId: BlockIdSchema
@@ -3268,41 +2972,6 @@ export const RpcQueryRequestViewAccessKeyListSchema = z.union([z.object({
 }).and(z.object({
     accountId: AccountIdSchema,
     requestType: z.literal("view_access_key_list")
-}))]);
-export const RpcQueryRequestViewGasKeySchema = z.union([z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    requestType: z.literal("view_gas_key")
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    requestType: z.literal("view_gas_key")
-})), z.object({
-    syncCheckpoint: SyncCheckpointSchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    requestType: z.literal("view_gas_key")
-}))]);
-export const RpcQueryRequestViewGasKeyListSchema = z.union([z.object({
-    blockId: BlockIdSchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    requestType: z.literal("view_gas_key_list")
-})), z.object({
-    finality: FinalitySchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    requestType: z.literal("view_gas_key_list")
-})), z.object({
-    syncCheckpoint: SyncCheckpointSchema
-}).and(z.object({
-    accountId: AccountIdSchema,
-    requestType: z.literal("view_gas_key_list")
 }))]);
 export const RpcQueryRequestCallFunctionSchema = z.union([z.object({
     blockId: BlockIdSchema
