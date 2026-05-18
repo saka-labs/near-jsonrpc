@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.5](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-react-query-v0.4.4...near-jsonrpc-react-query-v0.4.5) (2026-05-18)
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @saka-labs/near-jsonrpc-client bumped from 0.5.1 to 0.5.2
+    * @saka-labs/near-jsonrpc-types bumped from 0.7.0 to 0.8.0
+
 ## [0.4.4](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-react-query-v0.4.3...near-jsonrpc-react-query-v0.4.4) (2025-10-21)
 
 
