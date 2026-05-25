@@ -17,7 +17,7 @@ export const AccessKeyCreationConfigViewSchema = z.object({
 });
 export const AccessKeyInfoViewSchema = z.object({
     accessKey: z.lazy(() => AccessKeyViewSchema),
-    publicKey: z.lazy(() => PublicKeySchema)
+    publicKey: z.lazy(() => KeyHandleSchema)
 });
 export const AccessKeyListSchema = z.object({
     keys: z.array(AccessKeyInfoViewSchema)
@@ -418,6 +418,7 @@ export const BlockHeaderViewSchema = z.object({
     outcomeRoot: z.lazy(() => CryptoHashSchema),
     prevHash: z.lazy(() => CryptoHashSchema),
     prevHeight: z.union([z.number(), z.null()]).optional(),
+    prevLastCertifiedBlockEpochId: z.union([z.lazy(() => EpochIdSchema), z.null()]).optional(),
     prevStateRoot: z.lazy(() => CryptoHashSchema),
     randomValue: z.lazy(() => CryptoHashSchema),
     rentPaid: z.lazy(() => NearTokenSchema),
@@ -1301,6 +1302,7 @@ export const InvalidTxErrorSchema = z.union([z.object({
         signerId: AccountIdSchema
     })
 })]);
+export const KeyHandleSchema = z.string();
 export const KnownProducerViewSchema = z.object({
     accountId: AccountIdSchema,
     nextHops: z.union([z.array(z.lazy(() => PublicKeySchema)), z.null()]).optional(),
@@ -1624,20 +1626,21 @@ export const RpcClientConfigErrorSchema = z.object({
 export const RpcClientConfigRequestSchema = z.null();
 export const RpcClientConfigResponseSchema = z.object({
     archive: z.boolean().optional(),
-    blockFetchHorizon: z.number().optional(),
     blockHeaderFetchHorizon: z.number().optional(),
-    blockProductionTrackingDelay: z.array(z.number()).optional(),
+    blockProductionTrackingDelay: MutableConfigValueSchema.optional(),
     catchupStepPeriod: z.array(z.number()).optional(),
     chainId: z.string().optional(),
     chunkDistributionNetwork: z.union([ChunkDistributionNetworkConfigSchema, z.null()]).optional(),
     chunkRequestRetryPeriod: z.array(z.number()).optional(),
     chunkValidationThreads: z.number().optional(),
-    chunkWaitMult: z.array(z.number()).optional(),
+    chunkWaitMult: MutableConfigValueSchema.optional(),
     chunksCacheHeightHorizon: z.number().optional(),
     clientBackgroundMigrationThreads: z.number().optional(),
     cloudArchivalWriter: z.union([CloudArchivalWriterConfigSchema, z.null()]).optional(),
+    contractCacheWarmingMaxItemCount: z.number().optional(),
+    contractCacheWarmingPoolThreadCount: z.number().optional(),
     disableTxRouting: z.boolean().optional(),
-    doomslugStepPeriod: z.array(z.number()).optional(),
+    doomslugStepPeriod: MutableConfigValueSchema.optional(),
     enableEarlyPrepareTransactions: z.boolean().optional(),
     enableMultilineLogging: z.boolean().optional(),
     enableStatisticsExport: z.boolean().optional(),
@@ -1651,10 +1654,10 @@ export const RpcClientConfigResponseSchema = z.object({
     headerSyncStallBanTimeout: z.array(z.number()).optional(),
     logSummaryPeriod: z.array(z.number()).optional(),
     logSummaryStyle: LogSummaryStyleSchema.optional(),
-    maxBlockProductionDelay: z.array(z.number()).optional(),
-    maxBlockWaitDelay: z.array(z.number()).optional(),
+    maxBlockProductionDelay: MutableConfigValueSchema.optional(),
+    maxBlockWaitDelay: MutableConfigValueSchema.optional(),
     maxGasBurntView: z.union([NearGasSchema, z.null()]).optional(),
-    minBlockProductionDelay: z.array(z.number()).optional(),
+    minBlockProductionDelay: MutableConfigValueSchema.optional(),
     minNumPeers: z.number().optional(),
     numBlockProducerSeats: z.number().optional(),
     orphanStateWitnessMaxSize: z.number().optional(),
@@ -1676,7 +1679,6 @@ export const RpcClientConfigResponseSchema = z.object({
     stateRequestThrottlePeriod: z.array(z.number()).optional(),
     stateRequestsPerThrottlePeriod: z.number().optional(),
     stateSync: z.lazy(() => StateSyncConfigSchema).optional(),
-    stateSyncEnabled: z.boolean().optional(),
     stateSyncExternalBackoff: z.array(z.number()).optional(),
     stateSyncExternalTimeout: z.array(z.number()).optional(),
     stateSyncP2pTimeout: z.array(z.number()).optional(),
@@ -1980,7 +1982,9 @@ export const RpcQueryRequestSchema = z.union([z.object({
     blockId: BlockIdSchema
 }).and(z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([z.lazy(() => StoreKeySchema), z.null()]).optional(),
     includeProof: z.boolean().optional(),
+    limit: z.union([z.number(), z.null()]).optional(),
     prefixBase64: z.lazy(() => StoreKeySchema),
     requestType: z.literal("view_state")
 })), z.object({
@@ -2031,7 +2035,9 @@ export const RpcQueryRequestSchema = z.union([z.object({
     finality: FinalitySchema
 }).and(z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([z.lazy(() => StoreKeySchema), z.null()]).optional(),
     includeProof: z.boolean().optional(),
+    limit: z.union([z.number(), z.null()]).optional(),
     prefixBase64: z.lazy(() => StoreKeySchema),
     requestType: z.literal("view_state")
 })), z.object({
@@ -2082,7 +2088,9 @@ export const RpcQueryRequestSchema = z.union([z.object({
     syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
 }).and(z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([z.lazy(() => StoreKeySchema), z.null()]).optional(),
     includeProof: z.boolean().optional(),
+    limit: z.union([z.number(), z.null()]).optional(),
     prefixBase64: z.lazy(() => StoreKeySchema),
     requestType: z.literal("view_state")
 })), z.object({
@@ -2625,7 +2633,9 @@ export const RpcViewStateErrorSchema = z.union([z.object({
 })]);
 export const RpcViewStateRequestSchema = z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([z.lazy(() => StoreKeySchema), z.null()]),
     includeProof: z.boolean(),
+    limit: z.union([z.number(), z.null()]),
     prefixBase64: z.lazy(() => StoreKeySchema)
 }).and(z.union([z.object({
     blockId: BlockIdSchema
@@ -2637,6 +2647,7 @@ export const RpcViewStateRequestSchema = z.object({
 export const RpcViewStateResponseSchema = z.object({
     blockHash: CryptoHashSchema,
     blockHeight: z.number(),
+    lastKey: z.union([z.lazy(() => StoreKeySchema), z.null()]).optional(),
     proof: z.array(z.string()).optional(),
     values: z.array(z.lazy(() => StateItemSchema))
 });
@@ -2786,13 +2797,13 @@ export const StateChangeWithCauseViewSchema = z.object({
     change: z.object({
         accessKey: AccessKeyViewSchema,
         accountId: AccountIdSchema,
-        publicKey: PublicKeySchema
+        publicKey: KeyHandleSchema
     }),
     type: z.literal("access_key_update")
 }), z.object({
     change: z.object({
         accountId: AccountIdSchema,
-        publicKey: PublicKeySchema
+        publicKey: KeyHandleSchema
     }),
     type: z.literal("access_key_deletion")
 }), z.object({
@@ -2800,7 +2811,7 @@ export const StateChangeWithCauseViewSchema = z.object({
         accountId: AccountIdSchema,
         index: z.number(),
         nonce: z.number(),
-        publicKey: PublicKeySchema
+        publicKey: KeyHandleSchema
     }),
     type: z.literal("gas_key_nonce_update")
 }), z.object({
@@ -2958,11 +2969,11 @@ export const VersionSchema = z.object({
     version: z.string()
 });
 export const ViewStateResultSchema = z.object({
+    lastKey: z.union([StoreKeySchema, z.null()]).optional(),
     proof: z.array(z.string()).optional(),
     values: z.array(StateItemSchema)
 });
 export const VMConfigViewSchema = z.object({
-    deterministicAccountIds: z.boolean().optional(),
     discardCustomSections: z.boolean().optional(),
     ethImplicitAccounts: z.boolean().optional(),
     ethImplicitGlobalContract: z.boolean().optional(),
@@ -3115,21 +3126,27 @@ export const RpcQueryRequestViewStateSchema = z.union([z.object({
     blockId: BlockIdSchema
 }).and(z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([StoreKeySchema, z.null()]).optional(),
     includeProof: z.boolean().optional(),
+    limit: z.union([z.number(), z.null()]).optional(),
     prefixBase64: StoreKeySchema,
     requestType: z.literal("view_state")
 })), z.object({
     finality: FinalitySchema
 }).and(z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([StoreKeySchema, z.null()]).optional(),
     includeProof: z.boolean().optional(),
+    limit: z.union([z.number(), z.null()]).optional(),
     prefixBase64: StoreKeySchema,
     requestType: z.literal("view_state")
 })), z.object({
     syncCheckpoint: SyncCheckpointSchema
 }).and(z.object({
     accountId: AccountIdSchema,
+    afterKeyBase64: z.union([StoreKeySchema, z.null()]).optional(),
     includeProof: z.boolean().optional(),
+    limit: z.union([z.number(), z.null()]).optional(),
     prefixBase64: StoreKeySchema,
     requestType: z.literal("view_state")
 }))]);
