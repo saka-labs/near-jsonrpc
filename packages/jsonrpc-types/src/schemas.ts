@@ -25,7 +25,7 @@ export type AccessKeyCreationConfigView = {
 };
 export type AccessKeyInfoView = {
     accessKey: AccessKeyView;
-    publicKey: PublicKey;
+    publicKey: PublicKeyHandle;
 };
 export type AccessKeyList = {
     keys: AccessKeyInfoView[];
@@ -522,6 +522,7 @@ export type BlockHeaderView = {
     prevHash: CryptoHash;
     /** Format: uint64 */
     prevHeight?: number | null;
+    prevLastCertifiedBlockEpochId?: EpochId | (null);
     prevStateRoot: CryptoHash;
     randomValue: CryptoHash;
     /**
@@ -2339,6 +2340,7 @@ export type PeerInfoView = {
 export type PrepareError = "Serialization" | "Deserialization" | "InternalMemoryDeclared" | "GasInstrumentation" | "StackHeightInstrumentation" | "Instantiate" | "Memory" | "TooManyFunctions" | "TooManyLocals" | "TooManyTables" | "TooManyTableElements" | "FunctionBodyTooLarge" | "InstrumentedCodeTooLarge" | "TooManyBlocksPerFunction" | "TooManyBlocksPerContract" | "TooManyTypes" | "TooManyParamsPerFunction" | "TooManyParamsPerContract" | "OperandStackTooLarge";
 export type ProtocolVersionCheckConfig = "Next" | "NextNext";
 export type PublicKey = string;
+export type PublicKeyHandle = string;
 export type Range_of_uint64 = {
     /** Format: uint64 */
     end: number;
@@ -2573,16 +2575,11 @@ export type RpcClientConfigResponse = {
     archive?: boolean;
     /**
      * Format: uint64
-     * @description Horizon at which instead of fetching block, fetch full state.
-     */
-    blockFetchHorizon?: number;
-    /**
-     * Format: uint64
      * @description Behind this horizon header fetch kicks in.
      */
     blockHeaderFetchHorizon?: number;
     /** @description Duration to check for producing / skipping block. */
-    blockProductionTrackingDelay?: number[];
+    blockProductionTrackingDelay?: MutableConfigValue;
     /** @description Time between check to perform catchup. */
     catchupStepPeriod?: number[];
     /** @description Chain id for status. */
@@ -2600,7 +2597,7 @@ export type RpcClientConfigResponse = {
      */
     chunkValidationThreads?: number;
     /** @description Multiplier for the wait time for all chunks to be received. */
-    chunkWaitMult?: number[];
+    chunkWaitMult?: MutableConfigValue;
     /**
      * Format: uint64
      * @description Height horizon for the chunk cache. A chunk is removed from the cache
@@ -2616,10 +2613,27 @@ export type RpcClientConfigResponse = {
     /** @description Configuration for a cloud-based archival writer. If this config is present, the writer is enabled and
      *     writes chunk-related data based on the tracked shards. */
     cloudArchivalWriter?: CloudArchivalWriterConfig | (null);
+    /**
+     * Format: uint
+     * @description Max warming submissions allowed in the pool's queue. Submissions
+     *     over the cap bump `near_contract_cache_warming_dropped_total`. `0`
+     *     disables warming (same as setting
+     *     `contract_cache_warming_pool_thread_count` to 0).
+     */
+    contractCacheWarmingMaxItemCount?: number;
+    /**
+     * Format: uint
+     * @description Number of worker threads in the contract cache-warming pool. The
+     *     pool runs at the lowest realtime priority of any near pool, so the
+     *     threads yield to chunk application and witness work. Setting this
+     *     to 0 disables warming (the pool is never instantiated). See
+     *     [`contract_cache_warming_max_item_count`] for the other disable knob.
+     */
+    contractCacheWarmingPoolThreadCount?: number;
     /** @description If true, the node won't forward transactions to next the chunk producers. */
     disableTxRouting?: boolean;
     /** @description Time between running doomslug timer. */
-    doomslugStepPeriod?: number[];
+    doomslugStepPeriod?: MutableConfigValue;
     /** @description If true, transactions for the next chunk will be prepared early, right after the previous chunk's
      *     post-state is ready. This can help produce chunks faster, for high-throughput chains.
      *     The current implementation increases latency on low-load chains, which will be fixed in the future.
@@ -2655,15 +2669,15 @@ export type RpcClientConfigResponse = {
     /** @description Enable coloring of the logs */
     logSummaryStyle?: LogSummaryStyle;
     /** @description Maximum wait for approvals before producing block. */
-    maxBlockProductionDelay?: number[];
+    maxBlockProductionDelay?: MutableConfigValue;
     /** @description Maximum duration before skipping given height. */
-    maxBlockWaitDelay?: number[];
+    maxBlockWaitDelay?: MutableConfigValue;
     /** @description Max burnt gas per view method.  If present, overrides value stored in
      *     genesis file.  The value only affects the RPCs without influencing the
      *     protocol thus changing it per-node doesn’t affect the blockchain. */
     maxGasBurntView?: NearGas | (null);
     /** @description Minimum duration before producing block. */
-    minBlockProductionDelay?: number[];
+    minBlockProductionDelay?: MutableConfigValue;
     /**
      * Format: uint
      * @description Minimum number of peers to start syncing.
@@ -2740,9 +2754,6 @@ export type RpcClientConfigResponse = {
     stateRequestsPerThrottlePeriod?: number;
     /** @description Options for syncing state. */
     stateSync?: StateSyncConfig;
-    /** @description Whether to use the State Sync mechanism.
-     *     If disabled, the node will do Block Sync instead of State Sync. */
-    stateSyncEnabled?: boolean;
     /** @description Additional waiting period after a failed request to external storage */
     stateSyncExternalBackoff?: number[];
     /** @description How long to wait for a response from centralized state sync */
@@ -3215,7 +3226,10 @@ export type RpcQueryRequest = ({
     blockId: BlockId;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -3275,7 +3289,10 @@ export type RpcQueryRequest = ({
     finality: Finality;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -3335,7 +3352,10 @@ export type RpcQueryRequest = ({
     syncCheckpoint: SyncCheckpoint;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -4032,8 +4052,15 @@ export type RpcViewStateError = {
 };
 export type RpcViewStateRequest = {
     accountId: AccountId;
+    /** @default null */
+    afterKeyBase64: StoreKey | (null);
     /** @default false */
     includeProof: boolean;
+    /**
+     * Format: uint32
+     * @default null
+     */
+    limit: number | null;
     prefixBase64: StoreKey;
 } & ({
     blockId: BlockId;
@@ -4046,6 +4073,7 @@ export type RpcViewStateResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
+    lastKey?: StoreKey | (null);
     proof?: string[];
     values: StateItem[];
 };
@@ -4282,14 +4310,14 @@ export type StateChangeWithCauseView = {
     change: {
         accessKey: AccessKeyView;
         accountId: AccountId;
-        publicKey: PublicKey;
+        publicKey: PublicKeyHandle;
     };
     /** @enum {string} */
     type: "access_key_update";
 } | {
     change: {
         accountId: AccountId;
-        publicKey: PublicKey;
+        publicKey: PublicKeyHandle;
     };
     /** @enum {string} */
     type: "access_key_deletion";
@@ -4300,7 +4328,7 @@ export type StateChangeWithCauseView = {
         index: number;
         /** Format: uint64 */
         nonce: number;
-        publicKey: PublicKey;
+        publicKey: PublicKeyHandle;
     };
     /** @enum {string} */
     type: "gas_key_nonce_update";
@@ -4523,12 +4551,11 @@ export type Version = {
     version: string;
 };
 export type ViewStateResult = {
+    lastKey?: StoreKey | (null);
     proof?: string[];
     values: StateItem[];
 };
 export type VMConfigView = {
-    /** @description See [VMConfig::deterministic_account_ids](crate::vm::Config::deterministic_account_ids). */
-    deterministicAccountIds?: boolean;
     /** @description See [VMConfig::discard_custom_sections](crate::vm::Config::discard_custom_sections). */
     discardCustomSections?: boolean;
     /** @description See [VMConfig::eth_implicit_accounts](crate::vm::Config::eth_implicit_accounts). */
@@ -4753,7 +4780,10 @@ export type RpcQueryRequestViewState = ({
     blockId: BlockId;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -4761,7 +4791,10 @@ export type RpcQueryRequestViewState = ({
     finality: Finality;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -4769,7 +4802,10 @@ export type RpcQueryRequestViewState = ({
     syncCheckpoint: SyncCheckpoint;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
