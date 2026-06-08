@@ -25,7 +25,7 @@ export type AccessKeyCreationConfigView = {
 };
 export type AccessKeyInfoView = {
     accessKey: AccessKeyView;
-    publicKey: PublicKey;
+    publicKey: PublicKeyHandle;
 };
 export type AccessKeyList = {
     keys: AccessKeyInfoView[];
@@ -522,6 +522,7 @@ export type BlockHeaderView = {
     prevHash: CryptoHash;
     /** Format: uint64 */
     prevHeight?: number | null;
+    prevLastCertifiedBlockEpochId?: EpochId | (null);
     prevStateRoot: CryptoHash;
     randomValue: CryptoHash;
     /**
@@ -1422,6 +1423,9 @@ export type ExtCostsConfigView = {
     yieldCreateBase?: NearGas;
     /** @description Per byte cost of arguments and method name. */
     yieldCreateByte?: NearGas;
+    /** @description Base cost for creating a yield promise with a user-provided yield ID
+     *     (covers the additional trie writes for the yield_id<->data_id mapping). */
+    yieldCreateWithIdBase?: NearGas;
     /** @description Base cost for resuming a yield receipt. */
     yieldResumeBase?: NearGas;
     /** @description Per byte cost of resume payload. */
@@ -2339,6 +2343,7 @@ export type PeerInfoView = {
 export type PrepareError = "Serialization" | "Deserialization" | "InternalMemoryDeclared" | "GasInstrumentation" | "StackHeightInstrumentation" | "Instantiate" | "Memory" | "TooManyFunctions" | "TooManyLocals" | "TooManyTables" | "TooManyTableElements" | "FunctionBodyTooLarge" | "InstrumentedCodeTooLarge" | "TooManyBlocksPerFunction" | "TooManyBlocksPerContract" | "TooManyTypes" | "TooManyParamsPerFunction" | "TooManyParamsPerContract" | "OperandStackTooLarge";
 export type ProtocolVersionCheckConfig = "Next" | "NextNext";
 export type PublicKey = string;
+export type PublicKeyHandle = string;
 export type Range_of_uint64 = {
     /** Format: uint64 */
     end: number;
@@ -2573,16 +2578,11 @@ export type RpcClientConfigResponse = {
     archive?: boolean;
     /**
      * Format: uint64
-     * @description Horizon at which instead of fetching block, fetch full state.
-     */
-    blockFetchHorizon?: number;
-    /**
-     * Format: uint64
      * @description Behind this horizon header fetch kicks in.
      */
     blockHeaderFetchHorizon?: number;
     /** @description Duration to check for producing / skipping block. */
-    blockProductionTrackingDelay?: number[];
+    blockProductionTrackingDelay?: MutableConfigValue;
     /** @description Time between check to perform catchup. */
     catchupStepPeriod?: number[];
     /** @description Chain id for status. */
@@ -2600,7 +2600,7 @@ export type RpcClientConfigResponse = {
      */
     chunkValidationThreads?: number;
     /** @description Multiplier for the wait time for all chunks to be received. */
-    chunkWaitMult?: number[];
+    chunkWaitMult?: MutableConfigValue;
     /**
      * Format: uint64
      * @description Height horizon for the chunk cache. A chunk is removed from the cache
@@ -2619,7 +2619,7 @@ export type RpcClientConfigResponse = {
     /** @description If true, the node won't forward transactions to next the chunk producers. */
     disableTxRouting?: boolean;
     /** @description Time between running doomslug timer. */
-    doomslugStepPeriod?: number[];
+    doomslugStepPeriod?: MutableConfigValue;
     /** @description If true, transactions for the next chunk will be prepared early, right after the previous chunk's
      *     post-state is ready. This can help produce chunks faster, for high-throughput chains.
      *     The current implementation increases latency on low-load chains, which will be fixed in the future.
@@ -2655,15 +2655,15 @@ export type RpcClientConfigResponse = {
     /** @description Enable coloring of the logs */
     logSummaryStyle?: LogSummaryStyle;
     /** @description Maximum wait for approvals before producing block. */
-    maxBlockProductionDelay?: number[];
+    maxBlockProductionDelay?: MutableConfigValue;
     /** @description Maximum duration before skipping given height. */
-    maxBlockWaitDelay?: number[];
+    maxBlockWaitDelay?: MutableConfigValue;
     /** @description Max burnt gas per view method.  If present, overrides value stored in
      *     genesis file.  The value only affects the RPCs without influencing the
      *     protocol thus changing it per-node doesn’t affect the blockchain. */
     maxGasBurntView?: NearGas | (null);
     /** @description Minimum duration before producing block. */
-    minBlockProductionDelay?: number[];
+    minBlockProductionDelay?: MutableConfigValue;
     /**
      * Format: uint
      * @description Minimum number of peers to start syncing.
@@ -2699,6 +2699,41 @@ export type RpcClientConfigResponse = {
     /** @description Determines whether client should exit if the protocol version is not supported
      *     for the next or next next epoch. */
     protocolVersionCheck?: ProtocolVersionCheckConfig;
+    /**
+     * Format: uint64
+     * @description Max `±window` accepted on `EXPERIMENTAL_receipt_to_tx` requests.
+     *     Caps caller's `window`. Applies to pre-first-scan `CenterOut`
+     *     against caller's literal hint; ancestor scans use
+     *     `receipt_to_tx_max_hop_distance` instead. Operators raising this
+     *     should also raise `receipt_to_tx_max_hop_distance` so backward reach
+     *     matches caller's wider hint scope. Requests with `window` over this
+     *     rejected with `WindowTooLarge`.
+     */
+    receiptToTxMaxHintWindow?: number;
+    /**
+     * Format: uint64
+     * @description Max block-distance ancestor scan walks per hop once any scan in
+     *     walk refreshed `current_height`. Subsequent column-miss scans visit
+     *     `h, h-1, ..., h-max_hop_distance` from most-recent scan-refreshed
+     *     anchor, regardless of column hits between. Anchor included —
+     *     same-shard local receipts execute in same block as producing
+     *     outcome. Raise if cold archival traffic shows ancestor misses —
+     *     gap = scan-refreshed anchor to producer-outcome height of receipt
+     *     with missing column row (column hits don't reset anchor). Default
+     *     20 (matches `receipt_to_tx_max_hint_window`).
+     */
+    receiptToTxMaxHopDistance?: number;
+    /**
+     * Format: uint64
+     * @description Per-request ceiling on outcome rows the `EXPERIMENTAL_receipt_to_tx`
+     *     hint-fallback scanner reads across hops + shards. Caps cold-RocksDB
+     *     worst case on unauthenticated public endpoint. Default 20_000.
+     *     Operators serving cold archival traffic with deep walks or sparse
+     *     outcomes may raise; benchmark first (see TODO in
+     *     `view_client_actor.rs`). Mid-scan exhaustion fails with
+     *     `BudgetExceeded { scanned, limit }`.
+     */
+    receiptToTxMaxOutcomesPerRequest?: number;
     reshardingConfig?: MutableConfigValue;
     /** @description Listening rpc port for status. */
     rpcAddr?: string | null;
@@ -2740,9 +2775,6 @@ export type RpcClientConfigResponse = {
     stateRequestsPerThrottlePeriod?: number;
     /** @description Options for syncing state. */
     stateSync?: StateSyncConfig;
-    /** @description Whether to use the State Sync mechanism.
-     *     If disabled, the node will do Block Sync instead of State Sync. */
-    stateSyncEnabled?: boolean;
     /** @description Additional waiting period after a failed request to external storage */
     stateSyncExternalBackoff?: number[];
     /** @description How long to wait for a response from centralized state sync */
@@ -3215,7 +3247,10 @@ export type RpcQueryRequest = ({
     blockId: BlockId;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -3275,7 +3310,10 @@ export type RpcQueryRequest = ({
     finality: Finality;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -3335,7 +3373,10 @@ export type RpcQueryRequest = ({
     syncCheckpoint: SyncCheckpoint;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -3439,9 +3480,71 @@ export type RpcReceiptToTxError = {
     };
     /** @enum {string} */
     name: "INTERNAL_ERROR";
+} | {
+    /** @enum {string} */
+    name: "OUTCOMES_NOT_STORED";
+} | {
+    info: {
+        /** Format: uint64 */
+        maximum: number;
+        /** Format: uint64 */
+        requested: number;
+    };
+    /** @enum {string} */
+    name: "WINDOW_TOO_LARGE";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "MALFORMED_HINT";
+} | {
+    info: {
+        /** Format: uint64 */
+        limit: number;
+        /** Format: uint64 */
+        scanned: number;
+    };
+    /** @enum {string} */
+    name: "BUDGET_EXCEEDED";
 };
 export type RpcReceiptToTxRequest = {
+    /**
+     * Format: uint64
+     * @description Block height near where receipt was created. Enables hint fallback
+     *     scan on column miss. Anchor refreshes to each scan-resolved parent's
+     *     exact execution height; later ancestors bounded via causality
+     *     (emit before execute), so subsequent column-miss scans go
+     *     `Ancestor`. Bump `receipt_to_tx_max_hop_distance` if cold archival
+     *     gaps exceed default 20.
+     *
+     *     Cold-storage cost: per-row latency orders of magnitude over hot. To
+     *     bound request cost:
+     *       - Supply `block_height` within parent's `±window` (default 5).
+     *       - Supply `shard_id`. Omit → all-shards enumeration until walker
+     *         crosses `FromReceipt` hop, multiplying cold-read cost.
+     *       - Don't widen `window` beyond indexer's accuracy; budget shared
+     *         across full ancestry walk.
+     *
+     *     Receipt-id-only queries against periods with `save_receipt_to_tx`
+     *     disabled stay unsupported: column never written, no self-locating.
+     */
+    blockHeight?: number | null;
     receiptId: CryptoHash;
+    /** @description Shard hint. Narrows scan to this shard at hint height. Omit to
+     *     enumerate all tracked shards (higher cost). After walker crosses a
+     *     receipt-origin hop, shard derived from parent's predecessor account
+     *     and hint no longer applies. Best-effort across resharding: layout
+     *     shifts can miss producer, walk returns `UnknownReceipt`. */
+    shardId?: ShardId | (null);
+    /**
+     * Format: uint64
+     * @description Pre-first-scan width: `±window` heights around hint. Caps at
+     *     `receipt_to_tx_max_hint_window` (default 20). Ignored after first
+     *     scan-resolved hop — walker switches to `Ancestor` mode at
+     *     `receipt_to_tx_max_hop_distance` width.
+     */
+    window?: number | null;
 };
 export type RpcReceiptToTxResponse = {
     senderAccountId: AccountId;
@@ -4032,8 +4135,15 @@ export type RpcViewStateError = {
 };
 export type RpcViewStateRequest = {
     accountId: AccountId;
+    /** @default null */
+    afterKeyBase64: StoreKey | (null);
     /** @default false */
     includeProof: boolean;
+    /**
+     * Format: uint32
+     * @default null
+     */
+    limit: number | null;
     prefixBase64: StoreKey;
 } & ({
     blockId: BlockId;
@@ -4046,6 +4156,7 @@ export type RpcViewStateResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
+    lastKey?: StoreKey | (null);
     proof?: string[];
     values: StateItem[];
 };
@@ -4078,6 +4189,9 @@ export type RuntimeFeesConfigView = {
     burntGasReward?: number[];
     /** @description Describes the cost of creating a data receipt, `DataReceipt`. */
     dataReceiptCreationConfig?: DataReceiptCreationConfigView;
+    /** @description Describes the extra cost of verifying an ML-DSA-65 signature above the
+     *     cost of verifying the standard signature types. */
+    mlDsa65VerificationCost?: NearGas;
     /** @description Pessimistic gas price inflation ratio. */
     pessimisticGasPriceInflationRatio?: number[];
     /** @description Describes fees for storage. */
@@ -4282,14 +4396,14 @@ export type StateChangeWithCauseView = {
     change: {
         accessKey: AccessKeyView;
         accountId: AccountId;
-        publicKey: PublicKey;
+        publicKey: PublicKeyHandle;
     };
     /** @enum {string} */
     type: "access_key_update";
 } | {
     change: {
         accountId: AccountId;
-        publicKey: PublicKey;
+        publicKey: PublicKeyHandle;
     };
     /** @enum {string} */
     type: "access_key_deletion";
@@ -4300,7 +4414,7 @@ export type StateChangeWithCauseView = {
         index: number;
         /** Format: uint64 */
         nonce: number;
-        publicKey: PublicKey;
+        publicKey: PublicKeyHandle;
     };
     /** @enum {string} */
     type: "gas_key_nonce_update";
@@ -4523,12 +4637,15 @@ export type Version = {
     version: string;
 };
 export type ViewStateResult = {
+    lastKey?: StoreKey | (null);
     proof?: string[];
     values: StateItem[];
 };
 export type VMConfigView = {
-    /** @description See [VMConfig::deterministic_account_ids](crate::vm::Config::deterministic_account_ids). */
-    deterministicAccountIds?: boolean;
+    /** @description See [VMConfig::bls12381_not_in_group_fix](crate::vm::Config::bls12381_not_in_group_fix). */
+    bls12381NotInGroupFix?: boolean;
+    /** @description See [VMConfig::chain_id_host_fn](crate::vm::Config::chain_id_host_fn). */
+    chainIdHostFn?: boolean;
     /** @description See [VMConfig::discard_custom_sections](crate::vm::Config::discard_custom_sections). */
     discardCustomSections?: boolean;
     /** @description See [VMConfig::eth_implicit_accounts](crate::vm::Config::eth_implicit_accounts). */
@@ -4580,6 +4697,8 @@ export type VMConfigView = {
     storageGetMode?: StorageGetMode;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
     vmKind?: VMKind;
+    /** @description See [VMConfig::yield_with_id_host_fns](crate::vm::Config::yield_with_id_host_fns). */
+    yieldWithIdHostFns?: boolean;
 };
 export type VMKind = "Wasmer0" | "Wasmtime" | "Wasmer2" | "NearVm";
 export type WasmTrap = "Unreachable" | "IncorrectCallIndirectSignature" | "MemoryOutOfBounds" | "CallIndirectOOB" | "IllegalArithmetic" | "MisalignedAtomicAccess" | "IndirectCallToNull" | "StackOverflow" | "GenericTrap";
@@ -4753,7 +4872,10 @@ export type RpcQueryRequestViewState = ({
     blockId: BlockId;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -4761,7 +4883,10 @@ export type RpcQueryRequestViewState = ({
     finality: Finality;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
@@ -4769,7 +4894,10 @@ export type RpcQueryRequestViewState = ({
     syncCheckpoint: SyncCheckpoint;
 } & {
     accountId: AccountId;
+    afterKeyBase64?: StoreKey | (null);
     includeProof?: boolean;
+    /** Format: uint32 */
+    limit?: number | null;
     prefixBase64: StoreKey;
     /** @enum {string} */
     requestType: "view_state";
