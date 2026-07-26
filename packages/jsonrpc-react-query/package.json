@@ -7,6 +7,8 @@
     "url": "git+https://github.com/saka-labs/near-jsonrpc.git",
     "directory": "packages/jsonrpc-react-query"
   },
+  "homepage": "https://github.com/saka-labs/near-jsonrpc/tree/master/packages/jsonrpc-react-query#readme",
+  "bugs": "https://github.com/saka-labs/near-jsonrpc/issues",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
