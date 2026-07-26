@@ -2,16 +2,13 @@
   "release-type": "node",
   "packages": {
     "packages/jsonrpc-types": {
-      "package-name": "@saka-labs/near-jsonrpc-types",
-      "release-as": "0.9.0"
+      "package-name": "@saka-labs/near-jsonrpc-types"
     },
     "packages/jsonrpc-client": {
-      "package-name": "@saka-labs/near-jsonrpc-client",
-      "release-as": "0.9.0"
+      "package-name": "@saka-labs/near-jsonrpc-client"
     },
     "packages/jsonrpc-react-query": {
-      "package-name": "@saka-labs/near-jsonrpc-react-query",
-      "release-as": "0.9.0"
+      "package-name": "@saka-labs/near-jsonrpc-react-query"
     }
   },
   "pull-request-header": "## 🚀 NEAR JSONRPC Release\n\nThis automated release includes updates to the NEAR JSON-RPC packages.\n\n### 📦 Packages Being Released\n- `@saka-labs/near-jsonrpc-types`\n- `@saka-labs/near-jsonrpc-client`\n- `@saka-labs/near-jsonrpc-react-query`\n\n### 🔍 Review Checklist\n- [ ] Version bumps look correct\n- [ ] Changelog entries are accurate\n- [ ] Breaking changes are properly documented\n- [ ] Dependencies between packages are updated correctly",
