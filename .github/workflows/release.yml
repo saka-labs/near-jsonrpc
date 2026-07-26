@@ -10,6 +10,7 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+  id-token: write # npm trusted publishing (OIDC)
 
 jobs:
   release-please:
@@ -38,6 +39,11 @@ jobs:
         if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         run: corepack enable
 
+      # Trusted publishing needs npm >= 11.5.1; Node 22 ships npm 10.x
+      - name: Upgrade npm
+        if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         run: yarn install --frozen-lockfile
@@ -48,22 +54,16 @@ jobs:
 
       - name: Publish jsonrpc-types
         if: ${{ steps.release.outputs['packages/jsonrpc-types--release_created'] || env.FORCE_PUBLISH == 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/jsonrpc-types
           npm publish
       - name: Publish jsonrpc-client
         if: ${{ steps.release.outputs['packages/jsonrpc-client--release_created'] || env.FORCE_PUBLISH == 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/jsonrpc-client
           npm publish
       - name: Publish jsonrpc-react-query
         if: ${{ steps.release.outputs['packages/jsonrpc-react-query--release_created'] || env.FORCE_PUBLISH == 'true' }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/jsonrpc-react-query
           npm publish

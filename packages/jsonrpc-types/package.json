@@ -2,6 +2,11 @@
   "name": "@saka-labs/near-jsonrpc-types",
   "version": "0.8.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saka-labs/near-jsonrpc.git",
+    "directory": "packages/jsonrpc-types"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
