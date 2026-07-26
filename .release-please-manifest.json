@@ -1,5 +1,5 @@
 {
-  "packages/jsonrpc-types": "0.8.0",
-  "packages/jsonrpc-client": "0.5.2",
-  "packages/jsonrpc-react-query": "0.4.5"
+  "packages/jsonrpc-types": "0.9.0",
+  "packages/jsonrpc-client": "0.9.0",
+  "packages/jsonrpc-react-query": "0.9.0"
 }

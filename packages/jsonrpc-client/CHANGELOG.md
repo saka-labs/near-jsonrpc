@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-client-v0.5.2...near-jsonrpc-client-v0.9.0) (2026-07-26)
+
+
+### Miscellaneous Chores
+
+* add homepage and bugs links to published packages ([de57b32](https://github.com/saka-labs/near-jsonrpc/commit/de57b32182b2253d40ab40fd00f2b47f1dc56567))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @saka-labs/near-jsonrpc-types bumped from 0.8.0 to 0.9.0
+
 ## [0.5.2](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-client-v0.5.1...near-jsonrpc-client-v0.5.2) (2026-07-26)
 
 
