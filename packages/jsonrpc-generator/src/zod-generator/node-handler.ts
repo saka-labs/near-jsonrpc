@@ -171,7 +171,16 @@ export function handleTupleType(
     convertTypeNodeToZod(element, context)
   );
 
-  return createZodTuple(zodTypes);
+  const tuple = createZodTuple(zodTypes);
+
+  // zod v4's $ZodTuple reads item._zod.optin at construction time, which
+  // forces z.lazy items immediately — before forward-referenced schemas are
+  // declared. Defer construction of the whole tuple instead.
+  if (zodTypes.some((zodType) => zodType.includes("z.lazy("))) {
+    return `z.lazy(() => ${tuple})`;
+  }
+
+  return tuple;
 }
 
 /**

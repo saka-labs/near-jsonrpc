@@ -37,12 +37,45 @@ function processPropertyRenaming(
 }
 
 /**
+ * Removes `unknown` members from union types.
+ * An empty schema `{}` in the spec's anyOf (e.g. RpcTransactionResponse)
+ * is emitted by openapi-typescript as `unknown`, which collapses the whole
+ * union (`A | B | unknown` = `unknown`) and breaks discriminator narrowing
+ * and the generated Zod schemas.
+ */
+function stripUnknownFromUnions(property: PropertySignature) {
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const typeNode = property.getTypeNodeOrThrow();
+    const unions = typeNode.isKind(SyntaxKind.UnionType)
+      ? [typeNode, ...typeNode.getDescendantsOfKind(SyntaxKind.UnionType)]
+      : typeNode.getDescendantsOfKind(SyntaxKind.UnionType);
+
+    for (const union of unions) {
+      const members = union.getTypeNodes();
+      const kept = members.filter(
+        (m) => m.getKind() !== SyntaxKind.UnknownKeyword
+      );
+      if (kept.length > 0 && kept.length < members.length) {
+        union.replaceWithText(kept.map((m) => m.getText()).join(" | "));
+        // replaceWithText invalidates descendant nodes, restart the scan
+        changed = true;
+        break;
+      }
+    }
+  }
+}
+
+/**
  * Processes a single schema property and returns its schema type
  */
 function processSchemaProperty(
   property: PropertySignature,
   mappedSnakeCamelProperty: Map<string, string>
 ) {
+  stripUnknownFromUnions(property);
+
   const propertyDescendants = property.getDescendantsOfKind(
     SyntaxKind.PropertySignature
   );
