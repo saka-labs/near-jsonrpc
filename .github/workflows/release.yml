@@ -3,6 +3,8 @@ name: Release
 on:
   push:
     branches: [master]
+  # ponytail: manual re-run for when a release got tagged but npm publish failed
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -12,51 +14,54 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    env:
+      FORCE_PUBLISH: ${{ github.event_name == 'workflow_dispatch' }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
+        if: github.event_name == 'push'
         with:
           config-file: release-please-config.json
 
       - name: Checkout repository
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: "https://registry.npmjs.org"
 
       - name: Enable corepack
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         run: corepack enable
 
       - name: Install dependencies
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         run: yarn install --frozen-lockfile
 
       - name: Build packages
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.releases_created || env.FORCE_PUBLISH == 'true' }}
         run: yarn build
 
       - name: Publish jsonrpc-types
-        if: ${{ steps.release.outputs['packages/jsonrpc-types--release_created'] }}
+        if: ${{ steps.release.outputs['packages/jsonrpc-types--release_created'] || env.FORCE_PUBLISH == 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/jsonrpc-types
           npm publish
       - name: Publish jsonrpc-client
-        if: ${{ steps.release.outputs['packages/jsonrpc-client--release_created'] }}
+        if: ${{ steps.release.outputs['packages/jsonrpc-client--release_created'] || env.FORCE_PUBLISH == 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/jsonrpc-client
           npm publish
       - name: Publish jsonrpc-react-query
-        if: ${{ steps.release.outputs['packages/jsonrpc-react-query--release_created'] }}
+        if: ${{ steps.release.outputs['packages/jsonrpc-react-query--release_created'] || env.FORCE_PUBLISH == 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
