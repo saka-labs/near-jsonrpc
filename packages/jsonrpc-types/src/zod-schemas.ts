@@ -26,10 +26,10 @@ export const AccessKeyListSchema = z.object({
 export const AccessKeyPermissionSchema = z.union([z.object({
     FunctionCall: z.lazy(() => FunctionCallPermissionSchema)
 }), z.literal("FullAccess"), z.object({
-    GasKeyFunctionCall: z.tuple([
+    GasKeyFunctionCall: z.lazy(() => z.tuple([
         z.lazy(() => GasKeyInfoSchema),
         z.lazy(() => FunctionCallPermissionSchema)
-    ])
+    ]))
 }), z.object({
     GasKeyFullAccess: z.lazy(() => GasKeyInfoSchema)
 })]);
@@ -305,7 +305,7 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         limit: z.number(),
         numberOfDeployActions: z.number()
     })
-})]);
+}), z.literal("FunctionCallEmptyMethodName")]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
         code: z.string()
@@ -440,10 +440,10 @@ export const BlockHeaderViewSchema = z.object({
     prevStateRoot: z.lazy(() => CryptoHashSchema),
     randomValue: z.lazy(() => CryptoHashSchema),
     rentPaid: z.lazy(() => NearTokenSchema),
-    shardSplit: z.union([z.tuple([
+    shardSplit: z.union([z.lazy(() => z.tuple([
         z.lazy(() => ShardIdSchema),
         AccountIdSchema
-    ]), z.null()]).optional(),
+    ])), z.null()]).optional(),
     signature: z.lazy(() => SignatureSchema),
     spiceChunkEndorsementStats: z.union([z.array(z.lazy(() => SpiceChunkEndorsementStatsSchema)), z.null()]).optional(),
     timestamp: z.number(),
@@ -2442,11 +2442,12 @@ export const RpcTransactionErrorSchema = z.union([z.object({
     }),
     name: z.literal("INTERNAL_ERROR")
 }), z.object({
+    info: z.union([z.lazy(() => TimeoutErrorCauseSchema), z.null()]).optional(),
     name: z.literal("TIMEOUT_ERROR")
 })]);
 export const RpcTransactionResponseSchema = z.object({
     finalExecutionStatus: z.lazy(() => TxExecutionStatusSchema)
-}).and(z.union([FinalExecutionOutcomeWithReceiptViewSchema, FinalExecutionOutcomeViewSchema, z.unknown()]));
+}).and(z.union([FinalExecutionOutcomeWithReceiptViewSchema, FinalExecutionOutcomeViewSchema]));
 export const RpcTransactionStatusRequestSchema = z.object({
     waitUntil: z.lazy(() => TxExecutionStatusSchema)
 }).and(z.union([z.object({
@@ -2965,6 +2966,18 @@ export const Tier1ProxyViewSchema = z.object({
     addr: z.string(),
     peerId: PublicKeySchema
 });
+export const TimeoutErrorCauseSchema = z.union([z.object({
+    cause: z.literal("NOT_OBSERVED")
+}), z.object({
+    cause: z.literal("PENDING"),
+    status: RpcTransactionResponseSchema
+}), z.object({
+    cause: z.literal("DOES_NOT_TRACK_SHARD"),
+    shardId: ShardIdSchema
+}), z.object({
+    cause: z.literal("ERROR"),
+    debugInfo: z.string()
+})]);
 export const TrackedShardsConfigSchema = z.union([z.literal("NoShards"), z.object({
     Shards: z.array(ShardUIdSchema)
 }), z.literal("AllShards"), z.object({

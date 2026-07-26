@@ -67,8 +67,12 @@ export type AccessKeyPermissionView = "FullAccess" | {
     };
 };
 export type AccessKeyView = {
-    /** Format: uint64 */
+    /**
+     * Format: uint64
+     * @description Current nonce; each transaction signed with this key must use a strictly greater value.
+     */
     nonce: number;
+    /** @description Access scope: full access, or a function-call permission with an optional allowance and method/receiver limits. */
     permission: AccessKeyPermissionView;
 };
 export type AccountContractView = {
@@ -109,18 +113,26 @@ export type AccountInfo = {
     publicKey: PublicKey;
 };
 export type AccountView = {
+    /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
     amount: NearToken;
+    /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
     codeHash: CryptoHash;
+    /** @description Set when the account uses a global contract referenced by the deploying account id. */
     globalContractAccountId?: AccountId | (null);
+    /** @description Set when the account uses a global contract referenced by code hash. */
     globalContractHash?: CryptoHash | (null);
+    /** @description Staked balance locked for validation, in yoctoNEAR. */
     locked: NearToken;
     /**
      * Format: uint64
-     * @description TODO(2271): deprecated.
+     * @description Deprecated and unused. TODO(2271): remove.
      * @default 0
      */
     storagePaidAt: number;
-    /** Format: uint64 */
+    /**
+     * Format: uint64
+     * @description Total storage used by the account, in bytes.
+     */
     storageUsage: number;
 };
 export type AccountWithPublicKey = {
@@ -387,7 +399,7 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         /** Format: uint64 */
         numberOfDeployActions: number;
     };
-};
+} | "FunctionCallEmptyMethodName";
 export type ActionView = "CreateAccount" | {
     DeployContract: {
         /** Format: bytes */
@@ -3862,12 +3874,13 @@ export type RpcTransactionError = {
     /** @enum {string} */
     name: "INTERNAL_ERROR";
 } | {
+    info?: TimeoutErrorCause | (null);
     /** @enum {string} */
     name: "TIMEOUT_ERROR";
 };
 export type RpcTransactionResponse = {
     finalExecutionStatus: TxExecutionStatus;
-} & (FinalExecutionOutcomeWithReceiptView | FinalExecutionOutcomeView | unknown);
+} & (FinalExecutionOutcomeWithReceiptView | FinalExecutionOutcomeView);
 export type RpcTransactionStatusRequest = {
     /** @default EXECUTED_OPTIMISTIC */
     waitUntil: TxExecutionStatus;
@@ -4047,8 +4060,12 @@ export type RpcViewAccessKeyResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
-    /** Format: uint64 */
+    /**
+     * Format: uint64
+     * @description Current nonce; each transaction signed with this key must use a strictly greater value.
+     */
     nonce: number;
+    /** @description Access scope: full access, or a function-call permission with an optional allowance and method/receiver limits. */
     permission: AccessKeyPermissionView;
 };
 export type RpcViewAccountError = {
@@ -4092,21 +4109,29 @@ export type RpcViewAccountRequest = {
     syncCheckpoint: SyncCheckpoint;
 });
 export type RpcViewAccountResponse = {
+    /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
     amount: NearToken;
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
+    /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
     codeHash: CryptoHash;
+    /** @description Set when the account uses a global contract referenced by the deploying account id. */
     globalContractAccountId?: AccountId | (null);
+    /** @description Set when the account uses a global contract referenced by code hash. */
     globalContractHash?: CryptoHash | (null);
+    /** @description Staked balance locked for validation, in yoctoNEAR. */
     locked: NearToken;
     /**
      * Format: uint64
-     * @description TODO(2271): deprecated.
+     * @description Deprecated and unused. TODO(2271): remove.
      * @default 0
      */
     storagePaidAt: number;
-    /** Format: uint64 */
+    /**
+     * Format: uint64
+     * @description Total storage used by the account, in bytes.
+     */
     storageUsage: number;
 };
 export type RpcViewCodeError = {
@@ -4207,12 +4232,16 @@ export type RpcViewStateError = {
 };
 export type RpcViewStateRequest = {
     accountId: AccountId;
-    /** @default null */
+    /**
+     * @description Resume listing after this key (exclusive); must start with `prefix`.
+     * @default null
+     */
     afterKeyBase64: StoreKey | (null);
     /** @default false */
     includeProof: boolean;
     /**
      * Format: uint32
+     * @description Maximum number of entries to return in this page.
      * @default null
      */
     limit: number | null;
@@ -4228,6 +4257,7 @@ export type RpcViewStateResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
+    /** @description Cursor to resume from: present when more entries remain, absent when the listing is complete. */
     lastKey?: StoreKey | (null);
     proof?: string[];
     values: StateItem[];
@@ -4460,18 +4490,26 @@ export type StateChangeWithCauseView = {
     /** @description A view of the account */
     change: {
         accountId: AccountId;
+        /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
         amount: NearToken;
+        /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
         codeHash: CryptoHash;
+        /** @description Set when the account uses a global contract referenced by the deploying account id. */
         globalContractAccountId?: AccountId | (null);
+        /** @description Set when the account uses a global contract referenced by code hash. */
         globalContractHash?: CryptoHash | (null);
+        /** @description Staked balance locked for validation, in yoctoNEAR. */
         locked: NearToken;
         /**
          * Format: uint64
-         * @description TODO(2271): deprecated.
+         * @description Deprecated and unused. TODO(2271): remove.
          * @default 0
          */
         storagePaidAt: number;
-        /** Format: uint64 */
+        /**
+         * Format: uint64
+         * @description Total storage used by the account, in bytes.
+         */
         storageUsage: number;
     };
     /** @enum {string} */
@@ -4626,6 +4664,22 @@ export type Tier1ProxyView = {
     addr: string;
     peerId: PublicKey;
 };
+export type TimeoutErrorCause = {
+    /** @enum {string} */
+    cause: "NOT_OBSERVED";
+} | {
+    /** @enum {string} */
+    cause: "PENDING";
+    status: RpcTransactionResponse;
+} | {
+    /** @enum {string} */
+    cause: "DOES_NOT_TRACK_SHARD";
+    shardId: ShardId;
+} | {
+    /** @enum {string} */
+    cause: "ERROR";
+    debugInfo: string;
+};
 export type TrackedShardsConfig = "NoShards" | {
     Shards: ShardUId[];
 } | "AllShards" | {
@@ -4745,6 +4799,7 @@ export type VersionedSignedDelegateAction = {
     signature: Signature;
 };
 export type ViewStateResult = {
+    /** @description Cursor to resume from: present when more entries remain, absent when the listing is complete. */
     lastKey?: StoreKey | (null);
     proof?: string[];
     values: StateItem[];
