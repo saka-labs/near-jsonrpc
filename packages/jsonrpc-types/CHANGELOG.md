@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.8.0...near-jsonrpc-types-v0.9.0) (2026-07-26)
+
+
+### Miscellaneous Chores
+
+* add homepage and bugs links to published packages ([de57b32](https://github.com/saka-labs/near-jsonrpc/commit/de57b32182b2253d40ab40fd00f2b47f1dc56567))
+
 ## [0.8.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.7.0...near-jsonrpc-types-v0.8.0) (2026-07-26)
 
 
