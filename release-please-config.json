@@ -18,15 +18,15 @@
       "type": "linked-versions",
       "groupName": "near-jsonrpc",
       "components": [
-        "packages/jsonrpc-types",
-        "packages/jsonrpc-client",
-        "packages/jsonrpc-react-query"
+        "near-jsonrpc-types",
+        "near-jsonrpc-client",
+        "near-jsonrpc-react-query"
       ]
     },
     {
       "type": "node-workspace",
       "updateAllPackages": true,
-      "merge": true
+      "merge": false
     }
   ]
 }
