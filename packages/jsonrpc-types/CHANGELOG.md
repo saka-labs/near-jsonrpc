@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.8.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.7.0...near-jsonrpc-types-v0.8.0) (2026-07-26)
+
+
+### Features
+
+* update generated JSONRPC types ([bbc5113](https://github.com/saka-labs/near-jsonrpc/commit/bbc5113974b5fcd39e0b7a5255d3ec0d848a4927))
+* update generated JSONRPC types ([c716df5](https://github.com/saka-labs/near-jsonrpc/commit/c716df5c58761a7a0dbd4d87b49f8877edda134b))
+* update generated JSONRPC types ([a8e028c](https://github.com/saka-labs/near-jsonrpc/commit/a8e028c714512ddeadd420e3af402481276771e9))
+* update generated JSONRPC types ([8637000](https://github.com/saka-labs/near-jsonrpc/commit/86370003f1ddd4ba6d36f29f2f9025d7c0e5f5da))
+* update generated JSONRPC types ([b3b2ffe](https://github.com/saka-labs/near-jsonrpc/commit/b3b2ffe6c42481b8d0126e52f161b55bdb55cff3))
+* update generated JSONRPC types ([7cb9263](https://github.com/saka-labs/near-jsonrpc/commit/7cb92631f0bb163389aa0969744aaf4053c3a81f))
+* update generated JSONRPC types ([827b72b](https://github.com/saka-labs/near-jsonrpc/commit/827b72be7b836774e1727d04c3920f15fe0cb8c0))
+* update generated JSONRPC types ([b413f88](https://github.com/saka-labs/near-jsonrpc/commit/b413f8816ec5fe9a838e0fcf4fbbc85376d6e526))
+* update generated JSONRPC types ([87849b3](https://github.com/saka-labs/near-jsonrpc/commit/87849b391a401eb4faabfbbe7c102463f7566f22))
+* update generated JSONRPC types ([17e51f1](https://github.com/saka-labs/near-jsonrpc/commit/17e51f192bd3a46af454dfcf512d5338998d9a83))
+* update generated JSONRPC types ([8fbf6a2](https://github.com/saka-labs/near-jsonrpc/commit/8fbf6a263a72da221c49409f276257cb05319535))
+* update generated JSONRPC types ([9dad6d6](https://github.com/saka-labs/near-jsonrpc/commit/9dad6d6e4d789ce0d027bf51f2d45ba50aecdcf0))
+
+
+### Bug Fixes
+
+* strip unknown union members and defer lazy tuples in generator ([d16d4fe](https://github.com/saka-labs/near-jsonrpc/commit/d16d4fe3ba4c455bb6475aaa49b379ec0e895ced))
+* strip unknown union members and defer lazy tuples in generator ([643eccc](https://github.com/saka-labs/near-jsonrpc/commit/643eccc1ca97a7dc548d2e748b4a990a6e58461c))
+
 ## [0.7.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.6.1...near-jsonrpc-types-v0.7.0) (2025-10-21)
 
 
