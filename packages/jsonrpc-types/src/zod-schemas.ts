@@ -950,6 +950,8 @@ export const ExtCostsConfigViewSchema = z.object({
     keccak512Byte: z.lazy(() => NearGasSchema).optional(),
     logBase: z.lazy(() => NearGasSchema).optional(),
     logByte: z.lazy(() => NearGasSchema).optional(),
+    mlDsaVerifyBase: z.lazy(() => NearGasSchema).optional(),
+    mlDsaVerifyByte: z.lazy(() => NearGasSchema).optional(),
     p256VerifyBase: z.lazy(() => NearGasSchema).optional(),
     p256VerifyByte: z.lazy(() => NearGasSchema).optional(),
     promiseAndBase: z.lazy(() => NearGasSchema).optional(),
@@ -1229,6 +1231,10 @@ export const HostErrorSchema = z.union([z.literal("BadUTF16"), z.literal("BadUTF
     P256VerifyInvalidInput: z.object({
         msg: z.string()
     })
+}), z.object({
+    MlDsaVerifyInvalidInput: z.object({
+        msg: z.string()
+    })
 })]);
 export const InternalErrorSchema = z.object({
     info: z.object({
@@ -1354,6 +1360,7 @@ export const LimitConfigSchema = z.object({
     maxFunctionBodySize: z.union([z.number(), z.null()]).optional(),
     maxFunctionsNumberPerContract: z.union([z.number(), z.null()]).optional(),
     maxGasBurnt: z.lazy(() => NearGasSchema).optional(),
+    maxGlobalsPerContract: z.union([z.number(), z.null()]).optional(),
     maxInstrumentedCodeSize: z.union([z.number(), z.null()]).optional(),
     maxLengthMethodName: z.number().optional(),
     maxLengthReturnedData: z.number().optional(),
@@ -1457,7 +1464,7 @@ export const PeerInfoViewSchema = z.object({
     sentBytesPerSec: z.number(),
     trackedShards: z.array(z.lazy(() => ShardIdSchema))
 });
-export const PrepareErrorSchema = z.union([z.literal("Serialization"), z.literal("Deserialization"), z.literal("InternalMemoryDeclared"), z.literal("GasInstrumentation"), z.literal("StackHeightInstrumentation"), z.literal("Instantiate"), z.literal("Memory"), z.literal("TooManyFunctions"), z.literal("TooManyLocals"), z.literal("TooManyTables"), z.literal("TooManyTableElements"), z.literal("FunctionBodyTooLarge"), z.literal("InstrumentedCodeTooLarge"), z.literal("TooManyBlocksPerFunction"), z.literal("TooManyBlocksPerContract"), z.literal("TooManyTypes"), z.literal("TooManyParamsPerFunction"), z.literal("TooManyParamsPerContract"), z.literal("OperandStackTooLarge")]);
+export const PrepareErrorSchema = z.union([z.literal("Serialization"), z.literal("Deserialization"), z.literal("InternalMemoryDeclared"), z.literal("GasInstrumentation"), z.literal("StackHeightInstrumentation"), z.literal("Instantiate"), z.literal("Memory"), z.literal("TooManyFunctions"), z.literal("TooManyLocals"), z.literal("TooManyTables"), z.literal("TooManyTableElements"), z.literal("FunctionBodyTooLarge"), z.literal("InstrumentedCodeTooLarge"), z.literal("TooManyBlocksPerFunction"), z.literal("TooManyBlocksPerContract"), z.literal("TooManyTypes"), z.literal("TooManyParamsPerFunction"), z.literal("TooManyParamsPerContract"), z.literal("OperandStackTooLarge"), z.literal("TooManyGlobals")]);
 export const ProtocolVersionCheckConfigSchema = z.union([z.literal("Next"), z.literal("NextNext")]);
 export const PublicKeySchema = z.string();
 export const PublicKeyHandleSchema = z.string();
@@ -3091,6 +3098,7 @@ export const VMConfigViewSchema = z.object({
     limitConfig: LimitConfigSchema.optional(),
     linearOpBaseCost: z.number().optional(),
     linearOpUnitCost: z.number().optional(),
+    mlDsaVerifyHostFn: z.boolean().optional(),
     oneYoctoOnPromise: z.boolean().optional(),
     p256VerifyHostFn: z.boolean().optional(),
     reftypesBulkMemory: z.boolean().optional(),

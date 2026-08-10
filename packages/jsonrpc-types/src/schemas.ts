@@ -1386,6 +1386,10 @@ export type ExtCostsConfigView = {
     logBase?: NearGas;
     /** @description Cost for logging per byte */
     logByte?: NearGas;
+    /** @description Cost of ML-DSA-65 signature verification base */
+    mlDsaVerifyBase?: NearGas;
+    /** @description Cost of ML-DSA-65 signature verification per byte */
+    mlDsaVerifyByte?: NearGas;
     /** @description Cost of P-256 ECDSA signature verification base */
     p256VerifyBase?: NearGas;
     /** @description Cost of P-256 ECDSA signature verification per byte */
@@ -1953,6 +1957,10 @@ export type HostError = "BadUTF16" | "BadUTF8" | "GasExceeded" | "GasLimitExceed
     P256VerifyInvalidInput: {
         msg: string;
     };
+} | {
+    MlDsaVerifyInvalidInput: {
+        msg: string;
+    };
 };
 export type InternalError = {
     info: {
@@ -2161,6 +2169,12 @@ export type LimitConfig = {
     maxFunctionsNumberPerContract?: number | null;
     /** @description Max amount of gas that can be used, excluding gas attached to promises. */
     maxGasBurnt?: NearGas;
+    /**
+     * Format: uint64
+     * @description If present, stores max number of globals (entries in the wasm global
+     *     section) a contract may declare.
+     */
+    maxGlobalsPerContract?: number | null;
     /**
      * Format: uint64
      * @description If present, stores max byte size of the wasm code after gas instrumentation.
@@ -2388,7 +2402,7 @@ export type PeerInfoView = {
     sentBytesPerSec: number;
     trackedShards: ShardId[];
 };
-export type PrepareError = "Serialization" | "Deserialization" | "InternalMemoryDeclared" | "GasInstrumentation" | "StackHeightInstrumentation" | "Instantiate" | "Memory" | "TooManyFunctions" | "TooManyLocals" | "TooManyTables" | "TooManyTableElements" | "FunctionBodyTooLarge" | "InstrumentedCodeTooLarge" | "TooManyBlocksPerFunction" | "TooManyBlocksPerContract" | "TooManyTypes" | "TooManyParamsPerFunction" | "TooManyParamsPerContract" | "OperandStackTooLarge";
+export type PrepareError = "Serialization" | "Deserialization" | "InternalMemoryDeclared" | "GasInstrumentation" | "StackHeightInstrumentation" | "Instantiate" | "Memory" | "TooManyFunctions" | "TooManyLocals" | "TooManyTables" | "TooManyTableElements" | "FunctionBodyTooLarge" | "InstrumentedCodeTooLarge" | "TooManyBlocksPerFunction" | "TooManyBlocksPerContract" | "TooManyTypes" | "TooManyParamsPerFunction" | "TooManyParamsPerContract" | "OperandStackTooLarge" | "TooManyGlobals";
 export type ProtocolVersionCheckConfig = "Next" | "NextNext";
 export type PublicKey = string;
 export type PublicKeyHandle = string;
@@ -4843,6 +4857,8 @@ export type VMConfigView = {
      * @description Unit gas cost of a linear operation
      */
     linearOpUnitCost?: number;
+    /** @description See [VMConfig::ml_dsa_verify_host_fn](crate::vm::Config::ml_dsa_verify_host_fn). */
+    mlDsaVerifyHostFn?: boolean;
     /** @description See [VMConfig::one_yocto_on_promise](crate::vm::Config::one_yocto_on_promise). */
     oneYoctoOnPromise?: boolean;
     /** @description See [VMConfig::p256_verify_host_fn](crate::vm::Config::p256_verify_host_fn). */
