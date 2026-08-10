@@ -227,6 +227,11 @@ export const ActionErrorKindSchema = z.union([z.object({
         nonceIndex: z.number(),
         numNonces: z.number()
     })
+}), z.object({
+    TotalPromiseInputSizeExceeded: z.object({
+        limit: z.number(),
+        size: z.number()
+    })
 })]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
@@ -401,6 +406,7 @@ export const BandwidthRequestsV1Schema = z.object({
 });
 export const BlockHeaderInnerLiteViewSchema = z.object({
     blockMerkleRoot: z.lazy(() => CryptoHashSchema),
+    chunkExecutionRoot: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
     epochId: z.lazy(() => CryptoHashSchema),
     height: z.number(),
     nextBpHash: z.lazy(() => CryptoHashSchema),
@@ -418,6 +424,7 @@ export const BlockHeaderViewSchema = z.object({
     challengesResult: z.array(z.lazy(() => SlashedValidatorSchema)),
     challengesRoot: z.lazy(() => CryptoHashSchema),
     chunkEndorsements: z.union([z.array(z.array(z.number())), z.null()]).optional(),
+    chunkExecutionRoot: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
     chunkHeadersRoot: z.lazy(() => CryptoHashSchema),
     chunkMask: z.array(z.boolean()),
     chunkReceiptsRoot: z.lazy(() => CryptoHashSchema),
@@ -508,6 +515,7 @@ export const ChunkHeaderViewSchema = z.object({
 });
 export const CloudArchivalWriterConfigSchema = z.object({
     archiveBlockData: z.boolean(),
+    catchUpThrottle: z.lazy(() => DurationAsStdSchemaProviderSchema),
     pollingInterval: z.lazy(() => DurationAsStdSchemaProviderSchema),
     snapshotEveryNEpochs: z.number()
 });
@@ -1377,6 +1385,7 @@ export const LimitConfigSchema = z.object({
     maxParamsPerFunction: z.union([z.number(), z.null()]).optional(),
     maxPromisesPerFunctionCallAction: z.number().optional(),
     maxReceiptSize: z.number().optional(),
+    maxReceiptTotalInputSize: z.number().optional(),
     maxRegisterSize: z.number().optional(),
     maxStackHeight: z.number().optional(),
     maxTablesPerContract: z.union([z.number(), z.null()]).optional(),

@@ -300,6 +300,13 @@ export type ActionErrorKind = {
         /** Format: uint16 */
         numNonces: number;
     };
+} | {
+    TotalPromiseInputSizeExceeded: {
+        /** Format: uint64 */
+        limit: number;
+        /** Format: uint64 */
+        size: number;
+    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -508,6 +515,9 @@ export type BandwidthRequestsV1 = {
 export type BlockHeaderInnerLiteView = {
     /** @description The merkle root of all the block hashes */
     blockMerkleRoot: CryptoHash;
+    /** @description Merkle root over the block's certified chunk execution results.
+     *     `None` for pre-spice headers. */
+    chunkExecutionRoot?: CryptoHash | (null);
     /** @description The epoch to which the block that is the current known head belongs */
     epochId: CryptoHash;
     /** Format: uint64 */
@@ -534,6 +544,7 @@ export type BlockHeaderView = {
     challengesResult: SlashedValidator[];
     challengesRoot: CryptoHash;
     chunkEndorsements?: number[][] | null;
+    chunkExecutionRoot?: CryptoHash | (null);
     chunkHeadersRoot: CryptoHash;
     chunkMask: boolean[];
     chunkReceiptsRoot: CryptoHash;
@@ -665,6 +676,15 @@ export type CloudArchivalWriterConfig = {
      * @default false
      */
     archiveBlockData: boolean;
+    /**
+     * @description Delay between consecutive batches while the writer is catching up, pacing
+     *     how fast it uploads to the storage backend.
+     * @default {
+     *       "nanos": 100000000,
+     *       "secs": 1
+     *     }
+     */
+    catchUpThrottle: DurationAsStdSchemaProvider;
     /**
      * @description Interval at which the system checks for new blocks or chunks to archive.
      * @default {
@@ -2260,6 +2280,12 @@ export type LimitConfig = {
     maxReceiptSize?: number;
     /**
      * Format: uint64
+     * @description Max combined size (in bytes) of the resolved promise inputs a single
+     *     receipt may consume.
+     */
+    maxReceiptTotalInputSize?: number;
+    /**
+     * Format: uint64
      * @description Maximum number of bytes that can be stored in a single register.
      */
     maxRegisterSize?: number;
@@ -2667,7 +2693,7 @@ export type RpcClientConfigResponse = {
      * Format: uint64
      * @description Height horizon for the chunk cache. A chunk is removed from the cache
      *     if its height + chunks_cache_height_horizon < largest_seen_height.
-     *     The default value is DEFAULT_CHUNKS_CACHE_HEIGHT_HORIZON.
+     *     The default value is given by default_chunks_cache_height_horizon().
      */
     chunksCacheHeightHorizon?: number;
     /**
