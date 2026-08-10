@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.10.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.9.0...near-jsonrpc-types-v0.10.0) (2026-08-10)
+
+
+### Features
+
+* update generated JSONRPC types ([ddf8347](https://github.com/saka-labs/near-jsonrpc/commit/ddf8347b7d50dbf28c51f621b6001eeacac2c534))
+* update generated JSONRPC types ([902c7c1](https://github.com/saka-labs/near-jsonrpc/commit/902c7c17f19f661c844032dde2c121ea1b492848))
+
 ## [0.9.0](https://github.com/saka-labs/near-jsonrpc/compare/near-jsonrpc-types-v0.8.0...near-jsonrpc-types-v0.9.0) (2026-07-26)
 
 
