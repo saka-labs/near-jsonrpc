@@ -227,6 +227,15 @@ export const ActionErrorKindSchema = z.union([z.object({
         nonceIndex: z.number(),
         numNonces: z.number()
     })
+}), z.object({
+    TotalPromiseInputSizeExceeded: z.object({
+        limit: z.number(),
+        size: z.number()
+    })
+}), z.object({
+    ReceiptStorageProofSizeExceeded: z.object({
+        limit: z.number()
+    })
 })]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
@@ -401,6 +410,7 @@ export const BandwidthRequestsV1Schema = z.object({
 });
 export const BlockHeaderInnerLiteViewSchema = z.object({
     blockMerkleRoot: z.lazy(() => CryptoHashSchema),
+    chunkExecutionRoot: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
     epochId: z.lazy(() => CryptoHashSchema),
     height: z.number(),
     nextBpHash: z.lazy(() => CryptoHashSchema),
@@ -418,6 +428,7 @@ export const BlockHeaderViewSchema = z.object({
     challengesResult: z.array(z.lazy(() => SlashedValidatorSchema)),
     challengesRoot: z.lazy(() => CryptoHashSchema),
     chunkEndorsements: z.union([z.array(z.array(z.number())), z.null()]).optional(),
+    chunkExecutionRoot: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
     chunkHeadersRoot: z.lazy(() => CryptoHashSchema),
     chunkMask: z.array(z.boolean()),
     chunkReceiptsRoot: z.lazy(() => CryptoHashSchema),
@@ -482,6 +493,21 @@ export const ChunkDistributionUrisSchema = z.object({
     get: z.string().optional(),
     set: z.string().optional()
 });
+export const ChunkExecutionProofViewSchema = z.object({
+    certifyingBlockHeaderLite: z.lazy(() => LightClientBlockLiteViewSchema),
+    certifyingBlockProof: z.array(z.lazy(() => MerklePathItemSchema)),
+    roots: z.lazy(() => ChunkExecutionRootsSchema),
+    rootsProof: z.array(z.lazy(() => MerklePathItemSchema))
+});
+export const ChunkExecutionRootsSchema = z.object({
+    V1: z.lazy(() => ChunkExecutionRootsV1Schema)
+});
+export const ChunkExecutionRootsV1Schema = z.object({
+    chunkId: z.lazy(() => SpiceChunkIdSchema),
+    outcomeRoot: z.lazy(() => CryptoHashSchema),
+    outgoingReceiptsRoot: z.lazy(() => CryptoHashSchema),
+    stateRoot: z.lazy(() => CryptoHashSchema)
+});
 export const ChunkHashSchema = z.lazy(() => CryptoHashSchema);
 export const ChunkHeaderViewSchema = z.object({
     balanceBurnt: z.lazy(() => NearTokenSchema),
@@ -508,6 +534,7 @@ export const ChunkHeaderViewSchema = z.object({
 });
 export const CloudArchivalWriterConfigSchema = z.object({
     archiveBlockData: z.boolean(),
+    catchUpThrottle: z.lazy(() => DurationAsStdSchemaProviderSchema),
     pollingInterval: z.lazy(() => DurationAsStdSchemaProviderSchema),
     snapshotEveryNEpochs: z.number()
 });
@@ -1377,6 +1404,7 @@ export const LimitConfigSchema = z.object({
     maxParamsPerFunction: z.union([z.number(), z.null()]).optional(),
     maxPromisesPerFunctionCallAction: z.number().optional(),
     maxReceiptSize: z.number().optional(),
+    maxReceiptTotalInputSize: z.number().optional(),
     maxRegisterSize: z.number().optional(),
     maxStackHeight: z.number().optional(),
     maxTablesPerContract: z.union([z.number(), z.null()]).optional(),
@@ -1664,6 +1692,7 @@ export const RpcClientConfigResponseSchema = z.object({
     archive: z.boolean().optional(),
     blockHeaderFetchHorizon: z.number().optional(),
     blockProductionTrackingDelay: MutableConfigValueSchema.optional(),
+    blockRequestTimeout: z.array(z.number()).optional(),
     catchupStepPeriod: z.array(z.number()).optional(),
     chainId: z.string().optional(),
     chunkDistributionNetwork: z.union([ChunkDistributionNetworkConfigSchema, z.null()]).optional(),
@@ -1716,7 +1745,6 @@ export const RpcClientConfigResponseSchema = z.object({
     stateRequestThrottlePeriod: z.array(z.number()).optional(),
     stateRequestsPerThrottlePeriod: z.number().optional(),
     stateSync: z.lazy(() => StateSyncConfigSchema).optional(),
-    stateSyncExternalTimeout: z.array(z.number()).optional(),
     stateSyncP2pTimeout: z.array(z.number()).optional(),
     stateSyncRetryBackoff: z.array(z.number()).optional(),
     syncCheckPeriod: z.array(z.number()).optional(),
@@ -1772,6 +1800,28 @@ export const RpcLightClientBlockProofRequestSchema = z.object({
 export const RpcLightClientBlockProofResponseSchema = z.object({
     blockHeaderLite: LightClientBlockLiteViewSchema,
     blockProof: z.array(MerklePathItemSchema)
+});
+export const RpcLightClientChunkExecutionProofRequestSchema = z.object({
+    chunkId: z.lazy(() => SpiceChunkIdSchema),
+    lightClientHead: CryptoHashSchema
+});
+export const RpcLightClientChunkExecutionProofResponseSchema = z.object({
+    chunkExecutionProof: ChunkExecutionProofViewSchema
+});
+export const RpcLightClientExecutionOutcomeProofRequestSchema = z.object({
+    lightClientHead: CryptoHashSchema
+}).and(z.union([z.object({
+    senderId: AccountIdSchema,
+    transactionHash: CryptoHashSchema,
+    type: z.literal("transaction")
+}), z.object({
+    receiptId: CryptoHashSchema,
+    receiverId: AccountIdSchema,
+    type: z.literal("receipt")
+})]));
+export const RpcLightClientExecutionOutcomeProofResponseSchema = z.object({
+    chunkExecutionProof: ChunkExecutionProofViewSchema,
+    outcomeProof: ExecutionOutcomeWithIdViewSchema
 });
 export const RpcLightClientExecutionProofRequestSchema = z.object({
     lightClientHead: CryptoHashSchema
@@ -1842,10 +1892,48 @@ export const RpcLightClientProofErrorSchema = z.union([z.object({
     name: z.literal("UNAVAILABLE_SHARD")
 }), z.object({
     info: z.object({
+        shardId: z.lazy(() => ShardIdSchema)
+    }),
+    name: z.literal("SHARD_NOT_TRACKED")
+}), z.object({
+    info: z.object({
+        accountId: AccountIdSchema,
+        accountShardId: z.lazy(() => ShardIdSchema),
+        requestedShardId: z.lazy(() => ShardIdSchema)
+    }),
+    name: z.literal("TARGET_SHARD_MISMATCH")
+}), z.object({
+    info: z.object({
+        chunkId: z.lazy(() => SpiceChunkIdSchema)
+    }),
+    name: z.literal("STATE_NOT_AVAILABLE")
+}), z.object({
+    info: z.object({
+        chunkId: z.lazy(() => SpiceChunkIdSchema)
+    }),
+    name: z.literal("CHUNK_NOT_CERTIFIED")
+}), z.object({
+    info: z.object({
+        certifyingBlockHeight: z.number(),
+        chunkId: z.lazy(() => SpiceChunkIdSchema),
+        headHeight: z.number()
+    }),
+    name: z.literal("LIGHT_CLIENT_HEAD_TOO_OLD")
+}), z.object({
+    info: z.object({
         errorMessage: z.string()
     }),
     name: z.literal("INTERNAL_ERROR")
 })]);
+export const RpcLightClientStateProofRequestSchema = z.object({
+    chunkId: z.lazy(() => SpiceChunkIdSchema),
+    lightClientHead: CryptoHashSchema,
+    target: z.lazy(() => StateProofTargetSchema)
+});
+export const RpcLightClientStateProofResponseSchema = z.object({
+    chunkExecutionProof: ChunkExecutionProofViewSchema,
+    stateProof: z.lazy(() => StateProofViewSchema)
+});
 export const RpcMaintenanceWindowsErrorSchema = z.object({
     info: z.object({
         errorMessage: z.string()
@@ -2813,6 +2901,10 @@ export const SpiceChunkEndorsementStatsSchema = z.object({
     expected: z.number(),
     produced: z.number()
 });
+export const SpiceChunkIdSchema = z.object({
+    blockHash: CryptoHashSchema,
+    shardId: ShardIdSchema
+});
 export const StakeActionSchema = z.object({
     publicKey: PublicKeySchema,
     stake: NearTokenSchema
@@ -2926,6 +3018,25 @@ export const StateChangeWithCauseViewSchema = z.object({
 export const StateItemSchema = z.object({
     key: z.lazy(() => StoreKeySchema),
     value: z.lazy(() => StoreValueSchema)
+});
+export const StateProofTargetSchema = z.union([z.object({
+    accountId: AccountIdSchema,
+    targetType: z.literal("account")
+}), z.object({
+    accountId: AccountIdSchema,
+    targetType: z.literal("local_contract_code")
+}), z.object({
+    accountId: AccountIdSchema,
+    key: z.lazy(() => StoreKeySchema),
+    targetType: z.literal("contract_data")
+}), z.object({
+    accountId: AccountIdSchema,
+    publicKey: PublicKeySchema,
+    targetType: z.literal("access_key")
+})]);
+export const StateProofViewSchema = z.object({
+    nodes: z.array(z.string()),
+    value: z.union([z.lazy(() => StoreValueSchema), z.null()]).optional()
 });
 export const StateSyncConfigSchema = z.object({
     concurrency: z.lazy(() => SyncConcurrencySchema).optional(),

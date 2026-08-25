@@ -300,6 +300,18 @@ export type ActionErrorKind = {
         /** Format: uint16 */
         numNonces: number;
     };
+} | {
+    TotalPromiseInputSizeExceeded: {
+        /** Format: uint64 */
+        limit: number;
+        /** Format: uint64 */
+        size: number;
+    };
+} | {
+    ReceiptStorageProofSizeExceeded: {
+        /** Format: uint64 */
+        limit: number;
+    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -508,6 +520,9 @@ export type BandwidthRequestsV1 = {
 export type BlockHeaderInnerLiteView = {
     /** @description The merkle root of all the block hashes */
     blockMerkleRoot: CryptoHash;
+    /** @description Merkle root over the block's certified chunk execution results.
+     *     `None` for pre-spice headers. */
+    chunkExecutionRoot?: CryptoHash | (null);
     /** @description The epoch to which the block that is the current known head belongs */
     epochId: CryptoHash;
     /** Format: uint64 */
@@ -534,6 +549,7 @@ export type BlockHeaderView = {
     challengesResult: SlashedValidator[];
     challengesRoot: CryptoHash;
     chunkEndorsements?: number[][] | null;
+    chunkExecutionRoot?: CryptoHash | (null);
     chunkHeadersRoot: CryptoHash;
     chunkMask: boolean[];
     chunkReceiptsRoot: CryptoHash;
@@ -620,6 +636,21 @@ export type ChunkDistributionUris = {
     /** @description URI for publishing chunks to the stream. */
     set?: string;
 };
+export type ChunkExecutionProofView = {
+    certifyingBlockHeaderLite: LightClientBlockLiteView;
+    certifyingBlockProof: MerklePathItem[];
+    roots: ChunkExecutionRoots;
+    rootsProof: MerklePathItem[];
+};
+export type ChunkExecutionRoots = {
+    V1: ChunkExecutionRootsV1;
+};
+export type ChunkExecutionRootsV1 = {
+    chunkId: SpiceChunkId;
+    outcomeRoot: CryptoHash;
+    outgoingReceiptsRoot: CryptoHash;
+    stateRoot: CryptoHash;
+};
 export type ChunkHash = CryptoHash;
 export type ChunkHeaderView = {
     balanceBurnt: NearToken;
@@ -665,6 +696,15 @@ export type CloudArchivalWriterConfig = {
      * @default false
      */
     archiveBlockData: boolean;
+    /**
+     * @description Delay between consecutive batches while the writer is catching up, pacing
+     *     how fast it uploads to the storage backend.
+     * @default {
+     *       "nanos": 100000000,
+     *       "secs": 1
+     *     }
+     */
+    catchUpThrottle: DurationAsStdSchemaProvider;
     /**
      * @description Interval at which the system checks for new blocks or chunks to archive.
      * @default {
@@ -2260,6 +2300,12 @@ export type LimitConfig = {
     maxReceiptSize?: number;
     /**
      * Format: uint64
+     * @description Max combined size (in bytes) of the resolved promise inputs a single
+     *     receipt may consume.
+     */
+    maxReceiptTotalInputSize?: number;
+    /**
+     * Format: uint64
      * @description Maximum number of bytes that can be stored in a single register.
      */
     maxRegisterSize?: number;
@@ -2645,6 +2691,8 @@ export type RpcClientConfigResponse = {
     blockHeaderFetchHorizon?: number;
     /** @description Duration to check for producing / skipping block. */
     blockProductionTrackingDelay?: MutableConfigValue;
+    /** @description How long to wait for a state sync block request response */
+    blockRequestTimeout?: number[];
     /** @description Time between check to perform catchup. */
     catchupStepPeriod?: number[];
     /** @description Chain id for status. */
@@ -2667,7 +2715,7 @@ export type RpcClientConfigResponse = {
      * Format: uint64
      * @description Height horizon for the chunk cache. A chunk is removed from the cache
      *     if its height + chunks_cache_height_horizon < largest_seen_height.
-     *     The default value is DEFAULT_CHUNKS_CACHE_HEIGHT_HORIZON.
+     *     The default value is given by default_chunks_cache_height_horizon().
      */
     chunksCacheHeightHorizon?: number;
     /**
@@ -2837,8 +2885,6 @@ export type RpcClientConfigResponse = {
     stateRequestsPerThrottlePeriod?: number;
     /** @description Options for syncing state. */
     stateSync?: StateSyncConfig;
-    /** @description How long to wait for a state sync block request response */
-    stateSyncExternalTimeout?: number[];
     /** @description How long to wait for a response from p2p state sync */
     stateSyncP2pTimeout?: number[];
     /** @description How long to wait after a failed state sync request */
@@ -2942,6 +2988,30 @@ export type RpcLightClientBlockProofResponse = {
     blockHeaderLite: LightClientBlockLiteView;
     blockProof: MerklePathItem[];
 };
+export type RpcLightClientChunkExecutionProofRequest = {
+    chunkId: SpiceChunkId;
+    lightClientHead: CryptoHash;
+};
+export type RpcLightClientChunkExecutionProofResponse = {
+    chunkExecutionProof: ChunkExecutionProofView;
+};
+export type RpcLightClientExecutionOutcomeProofRequest = {
+    lightClientHead: CryptoHash;
+} & ({
+    senderId: AccountId;
+    transactionHash: CryptoHash;
+    /** @enum {string} */
+    type: "transaction";
+} | {
+    receiptId: CryptoHash;
+    receiverId: AccountId;
+    /** @enum {string} */
+    type: "receipt";
+});
+export type RpcLightClientExecutionOutcomeProofResponse = {
+    chunkExecutionProof: ChunkExecutionProofView;
+    outcomeProof: ExecutionOutcomeWithIdView;
+};
 export type RpcLightClientExecutionProofRequest = {
     lightClientHead: CryptoHash;
 } & ({
@@ -3024,10 +3094,55 @@ export type RpcLightClientProofError = {
     name: "UNAVAILABLE_SHARD";
 } | {
     info: {
+        shardId: ShardId;
+    };
+    /** @enum {string} */
+    name: "SHARD_NOT_TRACKED";
+} | {
+    info: {
+        accountId: AccountId;
+        accountShardId: ShardId;
+        requestedShardId: ShardId;
+    };
+    /** @enum {string} */
+    name: "TARGET_SHARD_MISMATCH";
+} | {
+    info: {
+        chunkId: SpiceChunkId;
+    };
+    /** @enum {string} */
+    name: "STATE_NOT_AVAILABLE";
+} | {
+    info: {
+        chunkId: SpiceChunkId;
+    };
+    /** @enum {string} */
+    name: "CHUNK_NOT_CERTIFIED";
+} | {
+    info: {
+        /** Format: uint64 */
+        certifyingBlockHeight: number;
+        chunkId: SpiceChunkId;
+        /** Format: uint64 */
+        headHeight: number;
+    };
+    /** @enum {string} */
+    name: "LIGHT_CLIENT_HEAD_TOO_OLD";
+} | {
+    info: {
         errorMessage: string;
     };
     /** @enum {string} */
     name: "INTERNAL_ERROR";
+};
+export type RpcLightClientStateProofRequest = {
+    chunkId: SpiceChunkId;
+    lightClientHead: CryptoHash;
+    target: StateProofTarget;
+};
+export type RpcLightClientStateProofResponse = {
+    chunkExecutionProof: ChunkExecutionProofView;
+    stateProof: StateProofView;
 };
 export type RpcMaintenanceWindowsError = {
     info: {
@@ -4436,6 +4551,10 @@ export type SpiceChunkEndorsementStats = {
     /** Format: uint32 */
     produced: number;
 };
+export type SpiceChunkId = {
+    blockHash: CryptoHash;
+    shardId: ShardId;
+};
 export type StakeAction = {
     /** @description Validator key which will be used to sign transactions on behalf of signer_id */
     publicKey: PublicKey;
@@ -4592,6 +4711,29 @@ export type StateChangeWithCauseView = {
 export type StateItem = {
     key: StoreKey;
     value: StoreValue;
+};
+export type StateProofTarget = {
+    accountId: AccountId;
+    /** @enum {string} */
+    targetType: "account";
+} | {
+    accountId: AccountId;
+    /** @enum {string} */
+    targetType: "local_contract_code";
+} | {
+    accountId: AccountId;
+    key: StoreKey;
+    /** @enum {string} */
+    targetType: "contract_data";
+} | {
+    accountId: AccountId;
+    publicKey: PublicKey;
+    /** @enum {string} */
+    targetType: "access_key";
+};
+export type StateProofView = {
+    nodes: string[];
+    value?: StoreValue | (null);
 };
 export type StateSyncConfig = {
     concurrency?: SyncConcurrency;
