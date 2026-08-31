@@ -88,6 +88,8 @@ export const sendTx = defineMethod<RpcSendTransactionRequest, RpcTransactionResp
 export const status = defineMethod<RpcStatusRequest, RpcStatusResponse, ErrorWrapper_for_RpcStatusError>("status", RpcStatusRequestSchema, RpcStatusResponseSchema, ErrorWrapper_for_RpcStatusErrorSchema);
 /** Method definition for tx RPC call */
 export const tx = defineMethod<RpcTransactionStatusRequest, RpcTransactionResponse, ErrorWrapper_for_RpcTransactionError>("tx", RpcTransactionStatusRequestSchema, RpcTransactionResponseSchema, ErrorWrapper_for_RpcTransactionErrorSchema);
+/** Method definition for txStatus RPC call */
+export const txStatus = defineMethod<RpcTransactionStatusRequest, RpcTransactionResponse, ErrorWrapper_for_RpcTransactionError>("tx_status", RpcTransactionStatusRequestSchema, RpcTransactionResponseSchema, ErrorWrapper_for_RpcTransactionErrorSchema);
 /** Method definition for validators RPC call */
 export const validators = defineMethod<RpcValidatorRequest, RpcValidatorResponse, ErrorWrapper_for_RpcValidatorError>("validators", RpcValidatorRequestSchema, RpcValidatorResponseSchema, ErrorWrapper_for_RpcValidatorErrorSchema);
 /** Method definition for changesAccountChanges RPC call */

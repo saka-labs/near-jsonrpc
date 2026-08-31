@@ -312,7 +312,7 @@ export type ActionErrorKind = {
         /** Format: uint64 */
         limit: number;
     };
-};
+} | "MalformedUniversalStateInit";
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
         limit: NearGas;
@@ -411,7 +411,32 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         /** Format: uint64 */
         numberOfDeployActions: number;
     };
-} | "FunctionCallEmptyMethodName";
+} | "FunctionCallEmptyMethodName" | {
+    InvalidUniversalStateInitReceiver: {
+        derivedId: AccountId;
+        receiverId: AccountId;
+    };
+} | {
+    UniversalStateInitKeyLengthExceeded: {
+        /** Format: uint64 */
+        length: number;
+        /** Format: uint64 */
+        limit: number;
+    };
+} | {
+    UniversalStateInitValueLengthExceeded: {
+        /** Format: uint64 */
+        length: number;
+        /** Format: uint64 */
+        limit: number;
+    };
+} | "MalformedUniversalStateInit" | {
+    RemovedProtocolFeature: {
+        protocolFeature: string;
+        /** Format: uint32 */
+        version: number;
+    };
+} | "WithdrawFromGasKeyNotAllowedInDelegate";
 export type ActionView = "CreateAccount" | {
     DeployContract: {
         /** Format: bytes */
@@ -491,6 +516,11 @@ export type ActionView = "CreateAccount" | {
     WithdrawFromGasKey: {
         amount: NearToken;
         publicKey: PublicKey;
+    };
+} | {
+    UniversalStateInit: {
+        deposit: NearToken;
+        stateInit: RawStateInit;
     };
 };
 export type AddKeyAction = {
@@ -1516,6 +1546,10 @@ export type ExtCostsConfigView = {
     storageWriteValueByte?: NearGas;
     /** @description Cost per reading trie node from DB */
     touchingTrieNode?: NearGas;
+    /** @description Base cost of deriving a `0u` account id from a raw state init. */
+    universalStateInitToAccountIdBase?: NearGas;
+    /** @description Per byte of the raw state init. */
+    universalStateInitToAccountIdByte?: NearGas;
     /** @description Base cost of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
     utf8DecodingBase?: NearGas;
     /** @description Cost per byte of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
@@ -2419,6 +2453,8 @@ export type NonDelegateAction = {
     TransferToGasKey: TransferToGasKeyAction;
 } | {
     WithdrawFromGasKey: WithdrawFromGasKeyAction;
+} | {
+    UniversalStateInit: UniversalStateInitAction;
 };
 export type PeerId = PublicKey;
 export type PeerInfoView = {
@@ -2458,6 +2494,7 @@ export type Range_of_uint64 = {
     /** Format: uint64 */
     start: number;
 };
+export type RawStateInit = string;
 export type ReceiptEnumView = {
     Action: {
         actions: ActionView[];
@@ -4887,6 +4924,10 @@ export type TxExecutionError = {
     InvalidTxError: InvalidTxError;
 };
 export type TxExecutionStatus = "NONE" | "INCLUDED" | "EXECUTED_OPTIMISTIC" | "INCLUDED_FINAL" | "EXECUTED" | "FINAL";
+export type UniversalStateInitAction = {
+    deposit: NearToken;
+    stateInit: RawStateInit;
+};
 export type UseGlobalContractAction = {
     contractIdentifier: GlobalContractIdentifier;
 };
@@ -5016,6 +5057,8 @@ export type VMConfigView = {
     sha3HostFns?: boolean;
     /** @description See [VMConfig::storage_get_mode](crate::vm::Config::storage_get_mode). */
     storageGetMode?: StorageGetMode;
+    /** @description See [VMConfig::universal_accounts](crate::vm::Config::universal_accounts). */
+    universalAccounts?: boolean;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
     vmKind?: VMKind;
     /** @description See [VMConfig::yield_with_id_host_fns](crate::vm::Config::yield_with_id_host_fns). */

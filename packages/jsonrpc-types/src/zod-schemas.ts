@@ -236,7 +236,7 @@ export const ActionErrorKindSchema = z.union([z.object({
     ReceiptStorageProofSizeExceeded: z.object({
         limit: z.number()
     })
-})]);
+}), z.literal("MalformedUniversalStateInit")]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
         limit: z.lazy(() => NearGasSchema),
@@ -314,7 +314,27 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         limit: z.number(),
         numberOfDeployActions: z.number()
     })
-}), z.literal("FunctionCallEmptyMethodName")]);
+}), z.literal("FunctionCallEmptyMethodName"), z.object({
+    InvalidUniversalStateInitReceiver: z.object({
+        derivedId: AccountIdSchema,
+        receiverId: AccountIdSchema
+    })
+}), z.object({
+    UniversalStateInitKeyLengthExceeded: z.object({
+        length: z.number(),
+        limit: z.number()
+    })
+}), z.object({
+    UniversalStateInitValueLengthExceeded: z.object({
+        length: z.number(),
+        limit: z.number()
+    })
+}), z.literal("MalformedUniversalStateInit"), z.object({
+    RemovedProtocolFeature: z.object({
+        protocolFeature: z.string(),
+        version: z.number()
+    })
+}), z.literal("WithdrawFromGasKeyNotAllowedInDelegate")]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
         code: z.string()
@@ -389,6 +409,11 @@ export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     WithdrawFromGasKey: z.object({
         amount: z.lazy(() => NearTokenSchema),
         publicKey: z.lazy(() => PublicKeySchema)
+    })
+}), z.object({
+    UniversalStateInit: z.object({
+        deposit: z.lazy(() => NearTokenSchema),
+        stateInit: z.lazy(() => RawStateInitSchema)
     })
 })]);
 export const AddKeyActionSchema = z.object({
@@ -1022,6 +1047,8 @@ export const ExtCostsConfigViewSchema = z.object({
     storageWriteKeyByte: z.lazy(() => NearGasSchema).optional(),
     storageWriteValueByte: z.lazy(() => NearGasSchema).optional(),
     touchingTrieNode: z.lazy(() => NearGasSchema).optional(),
+    universalStateInitToAccountIdBase: z.lazy(() => NearGasSchema).optional(),
+    universalStateInitToAccountIdByte: z.lazy(() => NearGasSchema).optional(),
     utf8DecodingBase: z.lazy(() => NearGasSchema).optional(),
     utf8DecodingByte: z.lazy(() => NearGasSchema).optional(),
     utf16DecodingBase: z.lazy(() => NearGasSchema).optional(),
@@ -1473,6 +1500,8 @@ export const NonDelegateActionSchema = z.union([z.object({
     TransferToGasKey: z.lazy(() => TransferToGasKeyActionSchema)
 }), z.object({
     WithdrawFromGasKey: z.lazy(() => WithdrawFromGasKeyActionSchema)
+}), z.object({
+    UniversalStateInit: z.lazy(() => UniversalStateInitActionSchema)
 })]);
 export const PeerIdSchema = z.lazy(() => PublicKeySchema);
 export const PeerInfoViewSchema = z.object({
@@ -1500,6 +1529,7 @@ export const Range_of_uint64Schema = z.object({
     end: z.number(),
     start: z.number()
 });
+export const RawStateInitSchema = z.string();
 export const ReceiptEnumViewSchema = z.union([z.object({
     Action: z.object({
         actions: z.array(ActionViewSchema),
@@ -3133,6 +3163,10 @@ export const TxExecutionErrorSchema = z.union([z.object({
     InvalidTxError: InvalidTxErrorSchema
 })]);
 export const TxExecutionStatusSchema = z.union([z.literal("NONE"), z.literal("INCLUDED"), z.literal("EXECUTED_OPTIMISTIC"), z.literal("INCLUDED_FINAL"), z.literal("EXECUTED"), z.literal("FINAL")]);
+export const UniversalStateInitActionSchema = z.object({
+    deposit: NearTokenSchema,
+    stateInit: RawStateInitSchema
+});
 export const UseGlobalContractActionSchema = z.object({
     contractIdentifier: GlobalContractIdentifierSchema
 });
@@ -3216,6 +3250,7 @@ export const VMConfigViewSchema = z.object({
     regularOpCost: z.number().optional(),
     sha3HostFns: z.boolean().optional(),
     storageGetMode: StorageGetModeSchema.optional(),
+    universalAccounts: z.boolean().optional(),
     vmKind: z.lazy(() => VMKindSchema).optional(),
     yieldWithIdHostFns: z.boolean().optional()
 });
