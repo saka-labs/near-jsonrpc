@@ -112,9 +112,18 @@ export type AccountInfo = {
     amount: NearToken;
     publicKey: PublicKey;
 };
+export type AccountState = "initialized" | "uninitialized";
 export type AccountView = {
     /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
     amount: NearToken;
+    /**
+     * Format: uint64
+     * @description The nonce an uninitialized account's own transactions must use, present
+     *     only while it is uninitialized. A self-signed state init is the one
+     *     transaction such an account can send, and this is the only way for a
+     *     client to learn the nonce it must carry: there is no access key to query.
+     */
+    bootstrapNonce?: number | null;
     /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
     codeHash: CryptoHash;
     /** @description Set when the account uses a global contract referenced by the deploying account id. */
@@ -123,6 +132,10 @@ export type AccountView = {
     globalContractHash?: CryptoHash | (null);
     /** @description Staked balance locked for validation, in yoctoNEAR. */
     locked: NearToken;
+    /** @description Whether the account is initialized. Only a universal account can be
+     *     uninitialized: it has no access keys, code or data until a
+     *     `UniversalStateInit` arrives. Omitted for initialized accounts. */
+    state?: AccountState;
     /**
      * Format: uint64
      * @description Deprecated and unused. TODO(2271): remove.
@@ -312,6 +325,10 @@ export type ActionErrorKind = {
         /** Format: uint64 */
         limit: number;
     };
+} | "MalformedUniversalStateInit" | {
+    AccountNotInitialized: {
+        accountId: AccountId;
+    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -411,7 +428,32 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         /** Format: uint64 */
         numberOfDeployActions: number;
     };
-} | "FunctionCallEmptyMethodName";
+} | "FunctionCallEmptyMethodName" | {
+    InvalidUniversalStateInitReceiver: {
+        derivedId: AccountId;
+        receiverId: AccountId;
+    };
+} | {
+    UniversalStateInitKeyLengthExceeded: {
+        /** Format: uint64 */
+        length: number;
+        /** Format: uint64 */
+        limit: number;
+    };
+} | {
+    UniversalStateInitValueLengthExceeded: {
+        /** Format: uint64 */
+        length: number;
+        /** Format: uint64 */
+        limit: number;
+    };
+} | "MalformedUniversalStateInit" | {
+    RemovedProtocolFeature: {
+        protocolFeature: string;
+        /** Format: uint32 */
+        version: number;
+    };
+} | "WithdrawFromGasKeyNotAllowedInDelegate";
 export type ActionView = "CreateAccount" | {
     DeployContract: {
         /** Format: bytes */
@@ -491,6 +533,11 @@ export type ActionView = "CreateAccount" | {
     WithdrawFromGasKey: {
         amount: NearToken;
         publicKey: PublicKey;
+    };
+} | {
+    UniversalStateInit: {
+        deposit: NearToken;
+        stateInit: RawStateInit;
     };
 };
 export type AddKeyAction = {
@@ -709,7 +756,7 @@ export type CloudArchivalWriterConfig = {
      * @description Interval at which the system checks for new blocks or chunks to archive.
      * @default {
      *       "nanos": 0,
-     *       "secs": 1
+     *       "secs": 5
      *     }
      */
     pollingInterval: DurationAsStdSchemaProvider;
@@ -1516,6 +1563,10 @@ export type ExtCostsConfigView = {
     storageWriteValueByte?: NearGas;
     /** @description Cost per reading trie node from DB */
     touchingTrieNode?: NearGas;
+    /** @description Base cost of deriving a `0u` account id from a raw state init. */
+    universalStateInitToAccountIdBase?: NearGas;
+    /** @description Per byte of the raw state init. */
+    universalStateInitToAccountIdByte?: NearGas;
     /** @description Base cost of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
     utf8DecodingBase?: NearGas;
     /** @description Cost per byte of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
@@ -2346,6 +2397,11 @@ export type LimitConfig = {
      */
     maxYieldPayloadSize?: number;
     /**
+     * Format: uint64
+     * @description If present, requires at least this many bytes of contract code per local.
+     */
+    minContractSizePerLocal?: number | null;
+    /**
      * Format: uint
      * @description Hard limit on the size of storage proof generated while executing a single receipt.
      */
@@ -2419,6 +2475,8 @@ export type NonDelegateAction = {
     TransferToGasKey: TransferToGasKeyAction;
 } | {
     WithdrawFromGasKey: WithdrawFromGasKeyAction;
+} | {
+    UniversalStateInit: UniversalStateInitAction;
 };
 export type PeerId = PublicKey;
 export type PeerInfoView = {
@@ -2458,6 +2516,7 @@ export type Range_of_uint64 = {
     /** Format: uint64 */
     start: number;
 };
+export type RawStateInit = string;
 export type ReceiptEnumView = {
     Action: {
         actions: ActionView[];
@@ -4243,6 +4302,14 @@ export type RpcViewAccountResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
+    /**
+     * Format: uint64
+     * @description The nonce an uninitialized account's own transactions must use, present
+     *     only while it is uninitialized. A self-signed state init is the one
+     *     transaction such an account can send, and this is the only way for a
+     *     client to learn the nonce it must carry: there is no access key to query.
+     */
+    bootstrapNonce?: number | null;
     /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
     codeHash: CryptoHash;
     /** @description Set when the account uses a global contract referenced by the deploying account id. */
@@ -4251,6 +4318,10 @@ export type RpcViewAccountResponse = {
     globalContractHash?: CryptoHash | (null);
     /** @description Staked balance locked for validation, in yoctoNEAR. */
     locked: NearToken;
+    /** @description Whether the account is initialized. Only a universal account can be
+     *     uninitialized: it has no access keys, code or data until a
+     *     `UniversalStateInit` arrives. Omitted for initialized accounts. */
+    state?: AccountState;
     /**
      * Format: uint64
      * @description Deprecated and unused. TODO(2271): remove.
@@ -4625,6 +4696,14 @@ export type StateChangeWithCauseView = {
         accountId: AccountId;
         /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
         amount: NearToken;
+        /**
+         * Format: uint64
+         * @description The nonce an uninitialized account's own transactions must use, present
+         *     only while it is uninitialized. A self-signed state init is the one
+         *     transaction such an account can send, and this is the only way for a
+         *     client to learn the nonce it must carry: there is no access key to query.
+         */
+        bootstrapNonce?: number | null;
         /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
         codeHash: CryptoHash;
         /** @description Set when the account uses a global contract referenced by the deploying account id. */
@@ -4633,6 +4712,10 @@ export type StateChangeWithCauseView = {
         globalContractHash?: CryptoHash | (null);
         /** @description Staked balance locked for validation, in yoctoNEAR. */
         locked: NearToken;
+        /** @description Whether the account is initialized. Only a universal account can be
+         *     uninitialized: it has no access keys, code or data until a
+         *     `UniversalStateInit` arrives. Omitted for initialized accounts. */
+        state?: AccountState;
         /**
          * Format: uint64
          * @description Deprecated and unused. TODO(2271): remove.
@@ -4887,6 +4970,10 @@ export type TxExecutionError = {
     InvalidTxError: InvalidTxError;
 };
 export type TxExecutionStatus = "NONE" | "INCLUDED" | "EXECUTED_OPTIMISTIC" | "INCLUDED_FINAL" | "EXECUTED" | "FINAL";
+export type UniversalStateInitAction = {
+    deposit: NearToken;
+    stateInit: RawStateInit;
+};
 export type UseGlobalContractAction = {
     contractIdentifier: GlobalContractIdentifier;
 };
@@ -5016,6 +5103,8 @@ export type VMConfigView = {
     sha3HostFns?: boolean;
     /** @description See [VMConfig::storage_get_mode](crate::vm::Config::storage_get_mode). */
     storageGetMode?: StorageGetMode;
+    /** @description See [VMConfig::universal_accounts](crate::vm::Config::universal_accounts). */
+    universalAccounts?: boolean;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
     vmKind?: VMKind;
     /** @description See [VMConfig::yield_with_id_host_fns](crate::vm::Config::yield_with_id_host_fns). */
