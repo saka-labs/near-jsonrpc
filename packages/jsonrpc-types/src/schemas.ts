@@ -112,9 +112,18 @@ export type AccountInfo = {
     amount: NearToken;
     publicKey: PublicKey;
 };
+export type AccountState = "initialized" | "uninitialized";
 export type AccountView = {
     /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
     amount: NearToken;
+    /**
+     * Format: uint64
+     * @description The nonce an uninitialized account's own transactions must use, present
+     *     only while it is uninitialized. A self-signed state init is the one
+     *     transaction such an account can send, and this is the only way for a
+     *     client to learn the nonce it must carry: there is no access key to query.
+     */
+    bootstrapNonce?: number | null;
     /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
     codeHash: CryptoHash;
     /** @description Set when the account uses a global contract referenced by the deploying account id. */
@@ -123,6 +132,10 @@ export type AccountView = {
     globalContractHash?: CryptoHash | (null);
     /** @description Staked balance locked for validation, in yoctoNEAR. */
     locked: NearToken;
+    /** @description Whether the account is initialized. Only a universal account can be
+     *     uninitialized: it has no access keys, code or data until a
+     *     `UniversalStateInit` arrives. Omitted for initialized accounts. */
+    state?: AccountState;
     /**
      * Format: uint64
      * @description Deprecated and unused. TODO(2271): remove.
@@ -312,6 +325,10 @@ export type ActionErrorKind = {
         /** Format: uint64 */
         limit: number;
     };
+} | "MalformedUniversalStateInit" | {
+    AccountNotInitialized: {
+        accountId: AccountId;
+    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -411,7 +428,46 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         /** Format: uint64 */
         numberOfDeployActions: number;
     };
-} | "FunctionCallEmptyMethodName";
+} | "FunctionCallEmptyMethodName" | {
+    InvalidUniversalStateInitReceiver: {
+        derivedId: AccountId;
+        receiverId: AccountId;
+    };
+} | {
+    UniversalStateInitKeyLengthExceeded: {
+        /** Format: uint64 */
+        length: number;
+        /** Format: uint64 */
+        limit: number;
+    };
+} | {
+    UniversalStateInitValueLengthExceeded: {
+        /** Format: uint64 */
+        length: number;
+        /** Format: uint64 */
+        limit: number;
+    };
+} | "MalformedUniversalStateInit" | {
+    RemovedProtocolFeature: {
+        protocolFeature: string;
+        /** Format: uint32 */
+        version: number;
+    };
+} | "WithdrawFromGasKeyNotAllowedInDelegate" | {
+    UniversalStateInitTooManyKeys: {
+        /** Format: uint64 */
+        limit: number;
+        /** Format: uint64 */
+        numberOfKeys: number;
+    };
+} | {
+    TotalNumberOfStateInitEntriesExceeded: {
+        /** Format: uint64 */
+        limit: number;
+        /** Format: uint64 */
+        numberOfEntries: number;
+    };
+};
 export type ActionView = "CreateAccount" | {
     DeployContract: {
         /** Format: bytes */
@@ -491,6 +547,11 @@ export type ActionView = "CreateAccount" | {
     WithdrawFromGasKey: {
         amount: NearToken;
         publicKey: PublicKey;
+    };
+} | {
+    UniversalStateInit: {
+        deposit: NearToken;
+        stateInit: RawStateInit;
     };
 };
 export type AddKeyAction = {
@@ -615,6 +676,12 @@ export type BlockStatusView = {
     /** Format: uint64 */
     height: number;
 };
+export type BlockView = {
+    /** @description The AccountId of the author of the Block */
+    author: AccountId;
+    chunks: ChunkHeaderView[];
+    header: BlockHeaderView;
+};
 export type CallResult = {
     logs: string[];
     result: number[];
@@ -709,7 +776,7 @@ export type CloudArchivalWriterConfig = {
      * @description Interval at which the system checks for new blocks or chunks to archive.
      * @default {
      *       "nanos": 0,
-     *       "secs": 1
+     *       "secs": 5
      *     }
      */
     pollingInterval: DurationAsStdSchemaProvider;
@@ -1077,6 +1144,19 @@ export type ErrorWrapper_for_RpcGasPriceError = {
     name: "REQUEST_VALIDATION_ERROR";
 } | {
     cause: RpcGasPriceError;
+    /** @enum {string} */
+    name: "HANDLER_ERROR";
+} | {
+    cause: InternalError;
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type ErrorWrapper_for_RpcIndexerBlockError = {
+    cause: RpcRequestValidationErrorKind;
+    /** @enum {string} */
+    name: "REQUEST_VALIDATION_ERROR";
+} | {
+    cause: RpcIndexerBlockError;
     /** @enum {string} */
     name: "HANDLER_ERROR";
 } | {
@@ -1516,6 +1596,10 @@ export type ExtCostsConfigView = {
     storageWriteValueByte?: NearGas;
     /** @description Cost per reading trie node from DB */
     touchingTrieNode?: NearGas;
+    /** @description Base cost of deriving a `0u` account id from a raw state init. */
+    universalStateInitToAccountIdBase?: NearGas;
+    /** @description Per byte of the raw state init. */
+    universalStateInitToAccountIdByte?: NearGas;
     /** @description Base cost of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
     utf8DecodingBase?: NearGas;
     /** @description Cost per byte of decoding utf8. It's used for `log_utf8` and `panic_utf8`. */
@@ -2002,6 +2086,44 @@ export type HostError = "BadUTF16" | "BadUTF8" | "GasExceeded" | "GasLimitExceed
         msg: string;
     };
 };
+export type IndexerChunkView = {
+    author: AccountId;
+    header: ChunkHeaderView;
+    /**
+     * @description Receipts that were processed instantly in the same chunk they were created.
+     * @default []
+     */
+    instantReceipts: ReceiptView[];
+    /**
+     * @description Receipts generated in this chunk from transactions with `signer_id`
+     *     equal to `receiver_id`.
+     * @default []
+     */
+    localReceipts: ReceiptView[];
+    /** @description Represents receipts generated by execution of the previous chunk.
+     *     Note that those are not the receipts executed by this chunk or even
+     *     targeting that shard. */
+    receipts: ReceiptView[];
+    transactions: IndexerTransactionWithOutcome[];
+};
+export type IndexerExecutionOutcomeWithOptionalReceipt = {
+    executionOutcome: ExecutionOutcomeWithIdView;
+    receipt?: ReceiptView | (null);
+};
+export type IndexerExecutionOutcomeWithReceipt = {
+    executionOutcome: ExecutionOutcomeWithIdView;
+    receipt: ReceiptView;
+};
+export type IndexerShard = {
+    chunk?: IndexerChunkView | (null);
+    receiptExecutionOutcomes: IndexerExecutionOutcomeWithReceipt[];
+    shardId: ShardId;
+    stateChanges: StateChangeWithCauseView[];
+};
+export type IndexerTransactionWithOutcome = {
+    outcome: IndexerExecutionOutcomeWithOptionalReceipt;
+    transaction: SignedTransactionView;
+};
 export type InternalError = {
     info: {
         errorMessage: string;
@@ -2318,6 +2440,18 @@ export type LimitConfig = {
      */
     maxStackHeight?: number;
     /**
+     * Format: uint64
+     * @description Max number of storage entries a `DeterministicStateInit` or
+     *     `UniversalStateInit` action may carry.
+     *
+     *     Each entry costs `..._state_init_per_entry` to execute, which is counted
+     *     into the receipt's congestion gas whether or not it is ever burnt. Without
+     *     a cap one receipt reserves several times `max_congestion_outgoing_gas`,
+     *     pinning the sending shard at full outgoing congestion, which stops it
+     *     accepting transactions.
+     */
+    maxStateInitEntries?: number;
+    /**
      * Format: uint32
      * @description If present, stores max number of tables declared globally in one contract
      */
@@ -2342,9 +2476,25 @@ export type LimitConfig = {
     maxTypesPerContract?: number | null;
     /**
      * Format: uint64
+     * @description Max number of access keys a `UniversalStateInit` action may commit to.
+     *
+     *     Each committed key is priced as a full `AddKey`, at the send rate, so the
+     *     whole cost lands when a transaction is converted to a receipt. Without a
+     *     cap one transaction converts for more gas than a chunk has, and since
+     *     conversion happens before anything is charged, transaction selection
+     *     admits it anyway.
+     */
+    maxUniversalStateInitKeys?: number;
+    /**
+     * Format: uint64
      * @description Maximum number of bytes for payload passed over a yield resume.
      */
     maxYieldPayloadSize?: number;
+    /**
+     * Format: uint64
+     * @description If present, requires at least this many bytes of contract code per local.
+     */
+    minContractSizePerLocal?: number | null;
     /**
      * Format: uint
      * @description Hard limit on the size of storage proof generated while executing a single receipt.
@@ -2419,6 +2569,8 @@ export type NonDelegateAction = {
     TransferToGasKey: TransferToGasKeyAction;
 } | {
     WithdrawFromGasKey: WithdrawFromGasKeyAction;
+} | {
+    UniversalStateInit: UniversalStateInitAction;
 };
 export type PeerId = PublicKey;
 export type PeerInfoView = {
@@ -2458,6 +2610,7 @@ export type Range_of_uint64 = {
     /** Format: uint64 */
     start: number;
 };
+export type RawStateInit = string;
 export type ReceiptEnumView = {
     Action: {
         actions: ActionView[];
@@ -2975,6 +3128,47 @@ export type RpcGasPriceResponse = {
 };
 export type RpcHealthRequest = null;
 export type RpcHealthResponse = null;
+export type RpcIndexerBlockError = {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "DATA_UNAVAILABLE";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INCOMPLETE_DATA";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "UNSUPPORTED";
+} | {
+    /** @enum {string} */
+    name: "LIMIT_EXCEEDED";
+} | {
+    /** @enum {string} */
+    name: "BUSY";
+} | {
+    info: {
+        errorMessage: string;
+    };
+    /** @enum {string} */
+    name: "INTERNAL_ERROR";
+};
+export type RpcIndexerBlockRequest = {
+    blockHash: CryptoHash;
+};
+export type RpcIndexerBlockResponse = {
+    block: BlockView;
+    shards: IndexerShard[];
+    /** @description The node's configured chunk and execution coverage, in block layout order.
+     *     Carried chunks remain None inside the message even for tracked shards. */
+    trackedShards: ShardId[];
+};
 export type RpcKnownProducer = {
     accountId: AccountId;
     addr?: string | null;
@@ -4243,6 +4437,14 @@ export type RpcViewAccountResponse = {
     blockHash: CryptoHash;
     /** Format: uint64 */
     blockHeight: number;
+    /**
+     * Format: uint64
+     * @description The nonce an uninitialized account's own transactions must use, present
+     *     only while it is uninitialized. A self-signed state init is the one
+     *     transaction such an account can send, and this is the only way for a
+     *     client to learn the nonce it must carry: there is no access key to query.
+     */
+    bootstrapNonce?: number | null;
     /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
     codeHash: CryptoHash;
     /** @description Set when the account uses a global contract referenced by the deploying account id. */
@@ -4251,6 +4453,10 @@ export type RpcViewAccountResponse = {
     globalContractHash?: CryptoHash | (null);
     /** @description Staked balance locked for validation, in yoctoNEAR. */
     locked: NearToken;
+    /** @description Whether the account is initialized. Only a universal account can be
+     *     uninitialized: it has no access keys, code or data until a
+     *     `UniversalStateInit` arrives. Omitted for initialized accounts. */
+    state?: AccountState;
     /**
      * Format: uint64
      * @description Deprecated and unused. TODO(2271): remove.
@@ -4625,6 +4831,14 @@ export type StateChangeWithCauseView = {
         accountId: AccountId;
         /** @description Liquid (non-staked) account balance, in yoctoNEAR. */
         amount: NearToken;
+        /**
+         * Format: uint64
+         * @description The nonce an uninitialized account's own transactions must use, present
+         *     only while it is uninitialized. A self-signed state init is the one
+         *     transaction such an account can send, and this is the only way for a
+         *     client to learn the nonce it must carry: there is no access key to query.
+         */
+        bootstrapNonce?: number | null;
         /** @description Hash of the deployed contract code; the all-`1`s hash when no contract is deployed. */
         codeHash: CryptoHash;
         /** @description Set when the account uses a global contract referenced by the deploying account id. */
@@ -4633,6 +4847,10 @@ export type StateChangeWithCauseView = {
         globalContractHash?: CryptoHash | (null);
         /** @description Staked balance locked for validation, in yoctoNEAR. */
         locked: NearToken;
+        /** @description Whether the account is initialized. Only a universal account can be
+         *     uninitialized: it has no access keys, code or data until a
+         *     `UniversalStateInit` arrives. Omitted for initialized accounts. */
+        state?: AccountState;
         /**
          * Format: uint64
          * @description Deprecated and unused. TODO(2271): remove.
@@ -4887,6 +5105,10 @@ export type TxExecutionError = {
     InvalidTxError: InvalidTxError;
 };
 export type TxExecutionStatus = "NONE" | "INCLUDED" | "EXECUTED_OPTIMISTIC" | "INCLUDED_FINAL" | "EXECUTED" | "FINAL";
+export type UniversalStateInitAction = {
+    deposit: NearToken;
+    stateInit: RawStateInit;
+};
 export type UseGlobalContractAction = {
     contractIdentifier: GlobalContractIdentifier;
 };
@@ -5016,6 +5238,8 @@ export type VMConfigView = {
     sha3HostFns?: boolean;
     /** @description See [VMConfig::storage_get_mode](crate::vm::Config::storage_get_mode). */
     storageGetMode?: StorageGetMode;
+    /** @description See [VMConfig::universal_accounts](crate::vm::Config::universal_accounts). */
+    universalAccounts?: boolean;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
     vmKind?: VMKind;
     /** @description See [VMConfig::yield_with_id_host_fns](crate::vm::Config::yield_with_id_host_fns). */
