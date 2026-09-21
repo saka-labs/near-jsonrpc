@@ -81,12 +81,15 @@ export const AccountInfoSchema = z.object({
     amount: z.lazy(() => NearTokenSchema),
     publicKey: z.lazy(() => PublicKeySchema)
 });
+export const AccountStateSchema = z.union([z.literal("initialized"), z.literal("uninitialized")]);
 export const AccountViewSchema = z.object({
     amount: z.lazy(() => NearTokenSchema),
+    bootstrapNonce: z.union([z.number(), z.null()]).optional(),
     codeHash: z.lazy(() => CryptoHashSchema),
     globalContractAccountId: z.union([AccountIdSchema, z.null()]).optional(),
     globalContractHash: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional(),
     locked: z.lazy(() => NearTokenSchema),
+    state: AccountStateSchema.optional(),
     storagePaidAt: z.number(),
     storageUsage: z.number()
 });
@@ -236,6 +239,10 @@ export const ActionErrorKindSchema = z.union([z.object({
     ReceiptStorageProofSizeExceeded: z.object({
         limit: z.number()
     })
+}), z.literal("MalformedUniversalStateInit"), z.object({
+    AccountNotInitialized: z.object({
+        accountId: AccountIdSchema
+    })
 })]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
@@ -314,7 +321,37 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         limit: z.number(),
         numberOfDeployActions: z.number()
     })
-}), z.literal("FunctionCallEmptyMethodName")]);
+}), z.literal("FunctionCallEmptyMethodName"), z.object({
+    InvalidUniversalStateInitReceiver: z.object({
+        derivedId: AccountIdSchema,
+        receiverId: AccountIdSchema
+    })
+}), z.object({
+    UniversalStateInitKeyLengthExceeded: z.object({
+        length: z.number(),
+        limit: z.number()
+    })
+}), z.object({
+    UniversalStateInitValueLengthExceeded: z.object({
+        length: z.number(),
+        limit: z.number()
+    })
+}), z.literal("MalformedUniversalStateInit"), z.object({
+    RemovedProtocolFeature: z.object({
+        protocolFeature: z.string(),
+        version: z.number()
+    })
+}), z.literal("WithdrawFromGasKeyNotAllowedInDelegate"), z.object({
+    TotalNumberOfStateInitKeysExceeded: z.object({
+        limit: z.number(),
+        numberOfKeys: z.number()
+    })
+}), z.object({
+    TotalNumberOfStateInitEntriesExceeded: z.object({
+        limit: z.number(),
+        numberOfEntries: z.number()
+    })
+})]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
         code: z.string()
@@ -389,6 +426,11 @@ export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     WithdrawFromGasKey: z.object({
         amount: z.lazy(() => NearTokenSchema),
         publicKey: z.lazy(() => PublicKeySchema)
+    })
+}), z.object({
+    UniversalStateInit: z.object({
+        deposit: z.lazy(() => NearTokenSchema),
+        stateInit: z.lazy(() => RawStateInitSchema)
     })
 })]);
 export const AddKeyActionSchema = z.object({
@@ -474,6 +516,11 @@ export const BlockReferenceSchema = z.union([z.object({
 export const BlockStatusViewSchema = z.object({
     hash: z.lazy(() => CryptoHashSchema),
     height: z.number()
+});
+export const BlockViewSchema = z.object({
+    author: AccountIdSchema,
+    chunks: z.array(z.lazy(() => ChunkHeaderViewSchema)),
+    header: BlockHeaderViewSchema
 });
 export const CallResultSchema = z.object({
     logs: z.array(z.string()),
@@ -726,6 +773,16 @@ export const ErrorWrapper_for_RpcGasPriceErrorSchema = z.union([z.object({
     name: z.literal("REQUEST_VALIDATION_ERROR")
 }), z.object({
     cause: z.lazy(() => RpcGasPriceErrorSchema),
+    name: z.literal("HANDLER_ERROR")
+}), z.object({
+    cause: z.lazy(() => InternalErrorSchema),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const ErrorWrapper_for_RpcIndexerBlockErrorSchema = z.union([z.object({
+    cause: z.lazy(() => RpcRequestValidationErrorKindSchema),
+    name: z.literal("REQUEST_VALIDATION_ERROR")
+}), z.object({
+    cause: z.lazy(() => RpcIndexerBlockErrorSchema),
     name: z.literal("HANDLER_ERROR")
 }), z.object({
     cause: z.lazy(() => InternalErrorSchema),
@@ -1022,6 +1079,8 @@ export const ExtCostsConfigViewSchema = z.object({
     storageWriteKeyByte: z.lazy(() => NearGasSchema).optional(),
     storageWriteValueByte: z.lazy(() => NearGasSchema).optional(),
     touchingTrieNode: z.lazy(() => NearGasSchema).optional(),
+    universalStateInitToAccountIdBase: z.lazy(() => NearGasSchema).optional(),
+    universalStateInitToAccountIdByte: z.lazy(() => NearGasSchema).optional(),
     utf8DecodingBase: z.lazy(() => NearGasSchema).optional(),
     utf8DecodingByte: z.lazy(() => NearGasSchema).optional(),
     utf16DecodingBase: z.lazy(() => NearGasSchema).optional(),
@@ -1263,6 +1322,32 @@ export const HostErrorSchema = z.union([z.literal("BadUTF16"), z.literal("BadUTF
         msg: z.string()
     })
 })]);
+export const IndexerChunkViewSchema = z.object({
+    author: AccountIdSchema,
+    header: ChunkHeaderViewSchema,
+    instantReceipts: z.array(z.lazy(() => ReceiptViewSchema)),
+    localReceipts: z.array(z.lazy(() => ReceiptViewSchema)),
+    receipts: z.array(z.lazy(() => ReceiptViewSchema)),
+    transactions: z.array(z.lazy(() => IndexerTransactionWithOutcomeSchema))
+});
+export const IndexerExecutionOutcomeWithOptionalReceiptSchema = z.object({
+    executionOutcome: ExecutionOutcomeWithIdViewSchema,
+    receipt: z.union([z.lazy(() => ReceiptViewSchema), z.null()]).optional()
+});
+export const IndexerExecutionOutcomeWithReceiptSchema = z.object({
+    executionOutcome: ExecutionOutcomeWithIdViewSchema,
+    receipt: z.lazy(() => ReceiptViewSchema)
+});
+export const IndexerShardSchema = z.object({
+    chunk: z.union([IndexerChunkViewSchema, z.null()]).optional(),
+    receiptExecutionOutcomes: z.array(IndexerExecutionOutcomeWithReceiptSchema),
+    shardId: z.lazy(() => ShardIdSchema),
+    stateChanges: z.array(z.lazy(() => StateChangeWithCauseViewSchema))
+});
+export const IndexerTransactionWithOutcomeSchema = z.object({
+    outcome: IndexerExecutionOutcomeWithOptionalReceiptSchema,
+    transaction: z.lazy(() => SignedTransactionViewSchema)
+});
 export const InternalErrorSchema = z.object({
     info: z.object({
         errorMessage: z.string()
@@ -1407,12 +1492,15 @@ export const LimitConfigSchema = z.object({
     maxReceiptTotalInputSize: z.number().optional(),
     maxRegisterSize: z.number().optional(),
     maxStackHeight: z.number().optional(),
+    maxStateInitEntries: z.number().optional(),
     maxTablesPerContract: z.union([z.number(), z.null()]).optional(),
     maxTotalLogLength: z.number().optional(),
     maxTotalPrepaidGas: z.lazy(() => NearGasSchema).optional(),
     maxTransactionSize: z.number().optional(),
     maxTypesPerContract: z.union([z.number(), z.null()]).optional(),
+    maxUniversalStateInitKeys: z.number().optional(),
     maxYieldPayloadSize: z.number().optional(),
+    minContractSizePerLocal: z.union([z.number(), z.null()]).optional(),
     perReceiptStorageProofSizeLimit: z.number().optional(),
     registersMemoryLimit: z.number().optional(),
     yieldTimeoutLengthInBlocks: z.number().optional()
@@ -1473,6 +1561,8 @@ export const NonDelegateActionSchema = z.union([z.object({
     TransferToGasKey: z.lazy(() => TransferToGasKeyActionSchema)
 }), z.object({
     WithdrawFromGasKey: z.lazy(() => WithdrawFromGasKeyActionSchema)
+}), z.object({
+    UniversalStateInit: z.lazy(() => UniversalStateInitActionSchema)
 })]);
 export const PeerIdSchema = z.lazy(() => PublicKeySchema);
 export const PeerInfoViewSchema = z.object({
@@ -1500,6 +1590,7 @@ export const Range_of_uint64Schema = z.object({
     end: z.number(),
     start: z.number()
 });
+export const RawStateInitSchema = z.string();
 export const ReceiptEnumViewSchema = z.union([z.object({
     Action: z.object({
         actions: z.array(ActionViewSchema),
@@ -1788,6 +1879,39 @@ export const RpcGasPriceResponseSchema = z.object({
 });
 export const RpcHealthRequestSchema = z.null();
 export const RpcHealthResponseSchema = z.null();
+export const RpcIndexerBlockErrorSchema = z.union([z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("DATA_UNAVAILABLE")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INCOMPLETE_DATA")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("UNSUPPORTED")
+}), z.object({
+    name: z.literal("LIMIT_EXCEEDED")
+}), z.object({
+    name: z.literal("BUSY")
+}), z.object({
+    info: z.object({
+        errorMessage: z.string()
+    }),
+    name: z.literal("INTERNAL_ERROR")
+})]);
+export const RpcIndexerBlockRequestSchema = z.object({
+    blockHash: CryptoHashSchema
+});
+export const RpcIndexerBlockResponseSchema = z.object({
+    block: BlockViewSchema,
+    shards: z.array(IndexerShardSchema),
+    trackedShards: z.array(z.lazy(() => ShardIdSchema))
+});
 export const RpcKnownProducerSchema = z.object({
     accountId: AccountIdSchema,
     addr: z.union([z.string(), z.null()]).optional(),
@@ -2710,10 +2834,12 @@ export const RpcViewAccountResponseSchema = z.object({
     amount: NearTokenSchema,
     blockHash: CryptoHashSchema,
     blockHeight: z.number(),
+    bootstrapNonce: z.union([z.number(), z.null()]).optional(),
     codeHash: CryptoHashSchema,
     globalContractAccountId: z.union([AccountIdSchema, z.null()]).optional(),
     globalContractHash: z.union([CryptoHashSchema, z.null()]).optional(),
     locked: NearTokenSchema,
+    state: AccountStateSchema.optional(),
     storagePaidAt: z.number(),
     storageUsage: z.number()
 });
@@ -2956,10 +3082,12 @@ export const StateChangeWithCauseViewSchema = z.object({
     change: z.object({
         accountId: AccountIdSchema,
         amount: NearTokenSchema,
+        bootstrapNonce: z.union([z.number(), z.null()]).optional(),
         codeHash: CryptoHashSchema,
         globalContractAccountId: z.union([AccountIdSchema, z.null()]).optional(),
         globalContractHash: z.union([CryptoHashSchema, z.null()]).optional(),
         locked: NearTokenSchema,
+        state: AccountStateSchema.optional(),
         storagePaidAt: z.number(),
         storageUsage: z.number()
     }),
@@ -3133,6 +3261,10 @@ export const TxExecutionErrorSchema = z.union([z.object({
     InvalidTxError: InvalidTxErrorSchema
 })]);
 export const TxExecutionStatusSchema = z.union([z.literal("NONE"), z.literal("INCLUDED"), z.literal("EXECUTED_OPTIMISTIC"), z.literal("INCLUDED_FINAL"), z.literal("EXECUTED"), z.literal("FINAL")]);
+export const UniversalStateInitActionSchema = z.object({
+    deposit: NearTokenSchema,
+    stateInit: RawStateInitSchema
+});
 export const UseGlobalContractActionSchema = z.object({
     contractIdentifier: GlobalContractIdentifierSchema
 });
@@ -3216,6 +3348,7 @@ export const VMConfigViewSchema = z.object({
     regularOpCost: z.number().optional(),
     sha3HostFns: z.boolean().optional(),
     storageGetMode: StorageGetModeSchema.optional(),
+    universalAccounts: z.boolean().optional(),
     vmKind: z.lazy(() => VMKindSchema).optional(),
     yieldWithIdHostFns: z.boolean().optional()
 });
