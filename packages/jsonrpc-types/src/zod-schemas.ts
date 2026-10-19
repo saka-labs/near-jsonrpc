@@ -539,21 +539,6 @@ export const ChunkDistributionUrisSchema = z.object({
     get: z.string().optional(),
     set: z.string().optional()
 });
-export const ChunkExecutionProofViewSchema = z.object({
-    certifyingBlockHeaderLite: z.lazy(() => LightClientBlockLiteViewSchema),
-    certifyingBlockProof: z.array(z.lazy(() => MerklePathItemSchema)),
-    roots: z.lazy(() => ChunkExecutionRootsSchema),
-    rootsProof: z.array(z.lazy(() => MerklePathItemSchema))
-});
-export const ChunkExecutionRootsSchema = z.object({
-    V1: z.lazy(() => ChunkExecutionRootsV1Schema)
-});
-export const ChunkExecutionRootsV1Schema = z.object({
-    chunkId: z.lazy(() => SpiceChunkIdSchema),
-    outcomeRoot: z.lazy(() => CryptoHashSchema),
-    outgoingReceiptsRoot: z.lazy(() => CryptoHashSchema),
-    stateRoot: z.lazy(() => CryptoHashSchema)
-});
 export const ChunkHashSchema = z.lazy(() => CryptoHashSchema);
 export const ChunkHeaderViewSchema = z.object({
     balanceBurnt: z.lazy(() => NearTokenSchema),
@@ -605,8 +590,6 @@ export const CongestionControlConfigViewSchema = z.object({
     maxTxGas: z.lazy(() => NearGasSchema).optional(),
     minOutgoingGas: z.lazy(() => NearGasSchema).optional(),
     minTxGas: z.lazy(() => NearGasSchema).optional(),
-    outgoingReceiptsBigSizeLimit: z.number().optional(),
-    outgoingReceiptsUsualSizeLimit: z.number().optional(),
     rejectTxCongestionThreshold: z.number().optional()
 });
 export const CongestionInfoViewSchema = z.object({
@@ -711,6 +694,11 @@ export const DumpConfigSchema = z.object({
 export const DurationAsStdSchemaProviderSchema = z.object({
     nanos: z.number(),
     secs: z.number()
+});
+export const EccTransactionViewSchema = z.object({
+    contractId: AccountIdSchema,
+    hash: CryptoHashSchema,
+    payload: z.string()
 });
 export const EpochIdSchema = CryptoHashSchema;
 export const EpochSyncConfigSchema = z.object({
@@ -1769,7 +1757,7 @@ export const RpcChunkResponseSchema = z.object({
     author: AccountIdSchema,
     header: ChunkHeaderViewSchema,
     receipts: z.array(ReceiptViewSchema),
-    transactions: z.array(z.lazy(() => SignedTransactionViewSchema))
+    transactions: z.array(z.lazy(() => TransactionEnvelopeViewSchema))
 });
 export const RpcClientConfigErrorSchema = z.object({
     info: z.object({
@@ -1924,28 +1912,6 @@ export const RpcLightClientBlockProofResponseSchema = z.object({
     blockHeaderLite: LightClientBlockLiteViewSchema,
     blockProof: z.array(MerklePathItemSchema)
 });
-export const RpcLightClientChunkExecutionProofRequestSchema = z.object({
-    chunkId: z.lazy(() => SpiceChunkIdSchema),
-    lightClientHead: CryptoHashSchema
-});
-export const RpcLightClientChunkExecutionProofResponseSchema = z.object({
-    chunkExecutionProof: ChunkExecutionProofViewSchema
-});
-export const RpcLightClientExecutionOutcomeProofRequestSchema = z.object({
-    lightClientHead: CryptoHashSchema
-}).and(z.union([z.object({
-    senderId: AccountIdSchema,
-    transactionHash: CryptoHashSchema,
-    type: z.literal("transaction")
-}), z.object({
-    receiptId: CryptoHashSchema,
-    receiverId: AccountIdSchema,
-    type: z.literal("receipt")
-})]));
-export const RpcLightClientExecutionOutcomeProofResponseSchema = z.object({
-    chunkExecutionProof: ChunkExecutionProofViewSchema,
-    outcomeProof: ExecutionOutcomeWithIdViewSchema
-});
 export const RpcLightClientExecutionProofRequestSchema = z.object({
     lightClientHead: CryptoHashSchema
 }).and(z.union([z.object({
@@ -2048,15 +2014,6 @@ export const RpcLightClientProofErrorSchema = z.union([z.object({
     }),
     name: z.literal("INTERNAL_ERROR")
 })]);
-export const RpcLightClientStateProofRequestSchema = z.object({
-    chunkId: z.lazy(() => SpiceChunkIdSchema),
-    lightClientHead: CryptoHashSchema,
-    target: z.lazy(() => StateProofTargetSchema)
-});
-export const RpcLightClientStateProofResponseSchema = z.object({
-    chunkExecutionProof: ChunkExecutionProofViewSchema,
-    stateProof: z.lazy(() => StateProofViewSchema)
-});
 export const RpcMaintenanceWindowsErrorSchema = z.object({
     info: z.object({
         errorMessage: z.string()
@@ -3146,25 +3103,6 @@ export const StateItemSchema = z.object({
     key: z.lazy(() => StoreKeySchema),
     value: z.lazy(() => StoreValueSchema)
 });
-export const StateProofTargetSchema = z.union([z.object({
-    accountId: AccountIdSchema,
-    targetType: z.literal("account")
-}), z.object({
-    accountId: AccountIdSchema,
-    targetType: z.literal("local_contract_code")
-}), z.object({
-    accountId: AccountIdSchema,
-    key: z.lazy(() => StoreKeySchema),
-    targetType: z.literal("contract_data")
-}), z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    targetType: z.literal("access_key")
-})]);
-export const StateProofViewSchema = z.object({
-    nodes: z.array(z.string()),
-    value: z.union([z.lazy(() => StoreValueSchema), z.null()]).optional()
-});
 export const StateSyncConfigSchema = z.object({
     concurrency: z.lazy(() => SyncConcurrencySchema).optional(),
     dump: z.union([DumpConfigSchema, z.null()]).optional(),
@@ -3232,6 +3170,7 @@ export const TrackedShardsConfigSchema = z.union([z.literal("NoShards"), z.objec
 }), z.object({
     Accounts: z.array(AccountIdSchema)
 })]);
+export const TransactionEnvelopeViewSchema = z.union([SignedTransactionViewSchema, EccTransactionViewSchema]);
 export const TransactionNonceSchema = z.union([z.object({
     Nonce: z.object({
         nonce: z.number()
