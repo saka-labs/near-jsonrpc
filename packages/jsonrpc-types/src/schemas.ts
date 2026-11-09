@@ -8,7 +8,8 @@ export type AccessKey = {
     /**
      * Format: uint64
      * @description Nonce for this access key, used for tx nonce generation. When access key is created, nonce
-     *     is set to `(block_height - 1) * 1e6` to avoid tx hash collision on access key re-creation.
+     *     is set to `block_height * 1e6 - 1` (`(block_height - 1) * 1e6` before protocol version 89)
+     *     to avoid tx hash collision on access key re-creation.
      *     See <https://github.com/near/nearcore/issues/3779> for more details.
      */
     nonce: number;
@@ -328,6 +329,10 @@ export type ActionErrorKind = {
     AccountNotInitialized: {
         accountId: AccountId;
     };
+} | {
+    ReservedMethodName: {
+        methodName: string;
+    };
 };
 export type ActionsValidationError = "DeleteActionMustBeFinal" | {
     TotalPrepaidGasExceeded: {
@@ -465,6 +470,10 @@ export type ActionsValidationError = "DeleteActionMustBeFinal" | {
         limit: number;
         /** Format: uint64 */
         numberOfEntries: number;
+    };
+} | {
+    TransferToUniversalAccountNotAllowed: {
+        accountId: AccountId;
     };
 };
 export type ActionView = "CreateAccount" | {
@@ -702,21 +711,6 @@ export type ChunkDistributionUris = {
     /** @description URI for publishing chunks to the stream. */
     set?: string;
 };
-export type ChunkExecutionProofView = {
-    certifyingBlockHeaderLite: LightClientBlockLiteView;
-    certifyingBlockProof: MerklePathItem[];
-    roots: ChunkExecutionRoots;
-    rootsProof: MerklePathItem[];
-};
-export type ChunkExecutionRoots = {
-    V1: ChunkExecutionRootsV1;
-};
-export type ChunkExecutionRootsV1 = {
-    chunkId: SpiceChunkId;
-    outcomeRoot: CryptoHash;
-    outgoingReceiptsRoot: CryptoHash;
-    stateRoot: CryptoHash;
-};
 export type ChunkHash = CryptoHash;
 export type ChunkHeaderView = {
     balanceBurnt: NearToken;
@@ -844,20 +838,6 @@ export type CongestionControlConfigView = {
      *
      *     See [`CongestionControlConfig`] for more details. */
     minTxGas?: NearGas;
-    /**
-     * Format: uint64
-     * @description Large size limit for outgoing receipts to a shard, used when it's safe
-     *     to send a lot of receipts without making the state witness too large.
-     *     It limits the total sum of outgoing receipts, not individual receipts.
-     */
-    outgoingReceiptsBigSizeLimit?: number;
-    /**
-     * Format: uint64
-     * @description The standard size limit for outgoing receipts aimed at a single shard.
-     *     This limit is pretty small to keep the size of source_receipt_proofs under control.
-     *     It limits the total sum of outgoing receipts, not individual receipts.
-     */
-    outgoingReceiptsUsualSizeLimit?: number;
     /**
      * Format: double
      * @description How much congestion a shard can tolerate before it stops all shards from
@@ -1057,6 +1037,12 @@ export type DurationAsStdSchemaProvider = {
     nanos: number;
     /** Format: int64 */
     secs: number;
+};
+export type EccTransaction = string;
+export type EccTransactionView = {
+    contractId: AccountId;
+    hash: CryptoHash;
+    payload: string;
 };
 export type EpochId = CryptoHash;
 export type EpochSyncConfig = {
@@ -1481,8 +1467,6 @@ export type ExtCostsConfigView = {
     bls12381P2SumElement?: NearGas;
     bls12381PairingBase?: NearGas;
     bls12381PairingElement?: NearGas;
-    contractCompileBase?: NearGas;
-    contractCompileBytes?: NearGas;
     /** @description Base cost of loading a pre-compiled contract */
     contractLoadingBase?: NearGas;
     /** @description Cost per byte of loading a pre-compiled contract */
@@ -2084,7 +2068,11 @@ export type HostError = "BadUTF16" | "BadUTF8" | "GasExceeded" | "GasLimitExceed
     MlDsaVerifyInvalidInput: {
         msg: string;
     };
-};
+} | {
+    ProhibitedInExternalCall: {
+        methodName: string;
+    };
+} | "DepositInExternalCall";
 export type IndexerChunkView = {
     author: AccountId;
     header: ChunkHeaderView;
@@ -2256,6 +2244,10 @@ export type InvalidTxError = {
         reason: DepositCostFailureReason;
         signerId: AccountId;
     };
+} | {
+    ContractNotFound: {
+        contractId: AccountId;
+    };
 };
 export type KnownProducerView = {
     accountId: AccountId;
@@ -2268,13 +2260,6 @@ export type LightClientBlockLiteView = {
     prevBlockHash: CryptoHash;
 };
 export type LimitConfig = {
-    /**
-     * Format: uint64
-     * @description Deprecated: full account id validation is always enforced, so this is
-     *     always `2`.
-     * @default 2
-     */
-    accountIdValidityRulesVersion: number;
     /**
      * Format: uint32
      * @description The initial number of memory pages.
@@ -2331,6 +2316,9 @@ export type LimitConfig = {
     maxFunctionsNumberPerContract?: number | null;
     /** @description Max amount of gas that can be used, excluding gas attached to promises. */
     maxGasBurnt?: NearGas;
+    /** @description Max amount of gas that can be burnt by an external contract call,
+     *     excluding gas attached to promises. */
+    maxGasBurntExternal?: NearGas;
     /**
      * Format: uint64
      * @description If present, stores max number of globals (entries in the wasm global
@@ -2755,6 +2743,15 @@ export type RpcCallFunctionError = {
         blockHash: CryptoHash;
         /** Format: uint64 */
         blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNINITIALIZED_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
         contractAccountId: AccountId;
     };
     /** @enum {string} */
@@ -2826,7 +2823,7 @@ export type RpcChunkResponse = {
     author: AccountId;
     header: ChunkHeaderView;
     receipts: ReceiptView[];
-    transactions: SignedTransactionView[];
+    transactions: TransactionEnvelopeView[];
 };
 export type RpcClientConfigError = {
     info: {
@@ -3079,8 +3076,6 @@ export type RpcClientConfigResponse = {
      * @description Upper bound of the byte size of contract state that is still viewable. None is no limit
      */
     trieViewerStateSizeLimit?: number | null;
-    /** @description Time to persist Accounts Id in the router without removing them. */
-    ttlAccountIdRouter?: number[];
     /**
      * Format: uint64
      * @description If the node is not a chunk producer within that many blocks, then route
@@ -3183,30 +3178,6 @@ export type RpcLightClientBlockProofRequest = {
 export type RpcLightClientBlockProofResponse = {
     blockHeaderLite: LightClientBlockLiteView;
     blockProof: MerklePathItem[];
-};
-export type RpcLightClientChunkExecutionProofRequest = {
-    chunkId: SpiceChunkId;
-    lightClientHead: CryptoHash;
-};
-export type RpcLightClientChunkExecutionProofResponse = {
-    chunkExecutionProof: ChunkExecutionProofView;
-};
-export type RpcLightClientExecutionOutcomeProofRequest = {
-    lightClientHead: CryptoHash;
-} & ({
-    senderId: AccountId;
-    transactionHash: CryptoHash;
-    /** @enum {string} */
-    type: "transaction";
-} | {
-    receiptId: CryptoHash;
-    receiverId: AccountId;
-    /** @enum {string} */
-    type: "receipt";
-});
-export type RpcLightClientExecutionOutcomeProofResponse = {
-    chunkExecutionProof: ChunkExecutionProofView;
-    outcomeProof: ExecutionOutcomeWithIdView;
 };
 export type RpcLightClientExecutionProofRequest = {
     lightClientHead: CryptoHash;
@@ -3330,15 +3301,6 @@ export type RpcLightClientProofError = {
     };
     /** @enum {string} */
     name: "INTERNAL_ERROR";
-};
-export type RpcLightClientStateProofRequest = {
-    chunkId: SpiceChunkId;
-    lightClientHead: CryptoHash;
-    target: StateProofTarget;
-};
-export type RpcLightClientStateProofResponse = {
-    chunkExecutionProof: ChunkExecutionProofView;
-    stateProof: StateProofView;
 };
 export type RpcMaintenanceWindowsError = {
     info: {
@@ -3546,6 +3508,15 @@ export type RpcQueryError = {
     };
     /** @enum {string} */
     name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNINITIALIZED_ACCOUNT";
 } | {
     info: {
         blockHash: CryptoHash;
@@ -3961,7 +3932,10 @@ export type RpcRequestValidationErrorKind = {
     name: "PARSE_ERROR";
 };
 export type RpcSendTransactionRequest = {
-    signedTxBase64: SignedTransaction;
+    /** @description An external contract call (ECC). Exactly one of this and `signed_tx_base64` is expected. */
+    eccBase64?: EccTransaction | (null);
+    /** @description A signed transaction. Exactly one of this and `ecc_base64` is expected. */
+    signedTxBase64?: SignedTransaction | (null);
     /** @default EXECUTED_OPTIMISTIC */
     waitUntil: TxExecutionStatus;
 };
@@ -4302,6 +4276,15 @@ export type RpcViewAccessKeyError = {
         blockHash: CryptoHash;
         /** Format: uint64 */
         blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNINITIALIZED_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
         publicKey: PublicKey;
     };
     /** @enum {string} */
@@ -4337,6 +4320,26 @@ export type RpcViewAccessKeyListError = {
     };
     /** @enum {string} */
     name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNINITIALIZED_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        /** Format: uint32 */
+        limit: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "TOO_MANY_ACCESS_KEYS";
 } | {
     info: {
         errorMessage: string;
@@ -4500,6 +4503,15 @@ export type RpcViewCodeError = {
         blockHash: CryptoHash;
         /** Format: uint64 */
         blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNINITIALIZED_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
         contractAccountId: AccountId;
     };
     /** @enum {string} */
@@ -4551,6 +4563,15 @@ export type RpcViewStateError = {
     };
     /** @enum {string} */
     name: "UNKNOWN_ACCOUNT";
+} | {
+    info: {
+        blockHash: CryptoHash;
+        /** Format: uint64 */
+        blockHeight: number;
+        requestedAccountId: AccountId;
+    };
+    /** @enum {string} */
+    name: "UNINITIALIZED_ACCOUNT";
 } | {
     info: {
         blockHash: CryptoHash;
@@ -4807,6 +4828,9 @@ export type StateChangeCauseView = {
 } | {
     /** @enum {string} */
     type: "bandwidth_scheduler_state_update";
+} | {
+    /** @enum {string} */
+    type: "contract_compilation_status_update";
 };
 export type StateChangeKindView = {
     accountId: AccountId;
@@ -4932,29 +4956,6 @@ export type StateItem = {
     key: StoreKey;
     value: StoreValue;
 };
-export type StateProofTarget = {
-    accountId: AccountId;
-    /** @enum {string} */
-    targetType: "account";
-} | {
-    accountId: AccountId;
-    /** @enum {string} */
-    targetType: "local_contract_code";
-} | {
-    accountId: AccountId;
-    key: StoreKey;
-    /** @enum {string} */
-    targetType: "contract_data";
-} | {
-    accountId: AccountId;
-    publicKey: PublicKey;
-    /** @enum {string} */
-    targetType: "access_key";
-};
-export type StateProofView = {
-    nodes: string[];
-    value?: StoreValue | (null);
-};
 export type StateSyncConfig = {
     concurrency?: SyncConcurrency;
     /** @description `none` value disables state dump to external storage. */
@@ -4991,7 +4992,6 @@ export type StorageError = "StorageInternalError" | {
 } | {
     MemTrieLoadingError: string;
 };
-export type StorageGetMode = "FlatStorage" | "Trie";
 export type StorageUsageConfigView = {
     /**
      * Format: uint64
@@ -5065,6 +5065,7 @@ export type TrackedShardsConfig = "NoShards" | {
 } | {
     Accounts: AccountId[];
 };
+export type TransactionEnvelopeView = SignedTransactionView | EccTransactionView;
 export type TransactionNonce = {
     Nonce: {
         /** Format: uint64 */
@@ -5187,28 +5188,15 @@ export type ViewStateResult = {
 export type VMConfigView = {
     /** @description See [VMConfig::bls12381_not_in_group_fix](crate::vm::Config::bls12381_not_in_group_fix). */
     bls12381NotInGroupFix?: boolean;
-    /** @description See [VMConfig::chain_id_host_fn](crate::vm::Config::chain_id_host_fn). */
-    chainIdHostFn?: boolean;
-    /** @description Deprecated: custom sections are always discarded, so this is always `true`. */
-    discardCustomSections?: boolean;
-    /** @description Deprecated: ETH-implicit accounts are always enabled, so this is always `true`. */
-    ethImplicitAccounts?: boolean;
     /** @description Costs for runtime externals */
     extCosts?: ExtCostsConfigView;
     /** @description See [VMConfig::fix_contract_loading_cost](crate::vm::Config::fix_contract_loading_cost). */
     fixContractLoadingCost?: boolean;
-    /** @description See [VMConfig::gas_key_host_fns](crate::vm::Config::gas_key_host_fns). */
-    gasKeyHostFns?: boolean;
-    /** @description Deprecated: the global contract host functions are always enabled, so this is
-     *     always `true`. */
-    globalContractHostFns?: boolean;
     /**
      * Format: uint32
      * @description Gas cost of a growing memory by single page.
      */
     growMemCost?: number;
-    /** @description Deprecated */
-    implicitAccountCreation?: boolean;
     /** @description Describes limits for VM and Runtime.
      *
      *     TODO: Consider changing this to `VMLimitConfigView` to avoid dependency
@@ -5226,13 +5214,6 @@ export type VMConfigView = {
     linearOpUnitCost?: number;
     /** @description See [VMConfig::ml_dsa_verify_host_fn](crate::vm::Config::ml_dsa_verify_host_fn). */
     mlDsaVerifyHostFn?: boolean;
-    /** @description See [VMConfig::one_yocto_on_promise](crate::vm::Config::one_yocto_on_promise). */
-    oneYoctoOnPromise?: boolean;
-    /** @description See [VMConfig::p256_verify_host_fn](crate::vm::Config::p256_verify_host_fn). */
-    p256VerifyHostFn?: boolean;
-    /** @description Deprecated: reference types and bulk memory wasm extensions are always
-     *     enabled, so this is always `true`. */
-    reftypesBulkMemory?: boolean;
     /**
      * Format: uint32
      * @description Gas cost of a regular operation.
@@ -5240,15 +5221,10 @@ export type VMConfigView = {
     regularOpCost?: number;
     /** @description See [VMConfig::sha3_host_fns](crate::vm::Config::sha3_host_fns). */
     sha3HostFns?: boolean;
-    /** @description Deprecated: contract storage is always read through flat storage, so this is
-     *     always `FlatStorage`. */
-    storageGetMode?: StorageGetMode;
     /** @description See [VMConfig::universal_accounts](crate::vm::Config::universal_accounts). */
     universalAccounts?: boolean;
     /** @description See [VMConfig::vm_kind](crate::vm::Config::vm_kind). */
     vmKind?: VMKind;
-    /** @description See [VMConfig::yield_with_id_host_fns](crate::vm::Config::yield_with_id_host_fns). */
-    yieldWithIdHostFns?: boolean;
 };
 export type VMKind = "Wasmer0" | "Wasmtime" | "Wasmer2" | "NearVm";
 export type WasmTrap = "Unreachable" | "IncorrectCallIndirectSignature" | "MemoryOutOfBounds" | "CallIndirectOOB" | "IllegalArithmetic" | "MisalignedAtomicAccess" | "IndirectCallToNull" | "StackOverflow" | "GenericTrap";
@@ -5692,5 +5668,23 @@ export function DiscriminateRpcTransactionResponse(obj: RpcTransactionResponse):
     return {
         FinalExecutionOutcomeWithReceiptView,
         FinalExecutionOutcomeView
+    };
+}
+
+export function DiscriminateTransactionEnvelopeView(obj: TransactionEnvelopeView): {
+    SignedTransactionView?: SignedTransactionView;
+    EccTransactionView?: EccTransactionView;
+} {
+    let SignedTransactionView: ReturnType<typeof DiscriminateTransactionEnvelopeView>['SignedTransactionView'] = undefined
+    let EccTransactionView: ReturnType<typeof DiscriminateTransactionEnvelopeView>['EccTransactionView'] = undefined
+    if ("actions" in obj && "hash" in obj && "nonce" in obj && "priorityFee" in obj && "publicKey" in obj && "receiverId" in obj && "signature" in obj && "signerId" in obj) {
+        SignedTransactionView = obj;
+    }
+    if ("contractId" in obj && "hash" in obj && "payload" in obj) {
+        EccTransactionView = obj;
+    }
+    return {
+        SignedTransactionView,
+        EccTransactionView
     };
 }
