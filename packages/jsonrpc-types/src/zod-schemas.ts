@@ -242,6 +242,15 @@ export const ActionErrorKindSchema = z.union([z.object({
     AccountNotInitialized: z.object({
         accountId: AccountIdSchema
     })
+}), z.object({
+    ReservedMethodName: z.object({
+        methodName: z.string()
+    })
+}), z.object({
+    TotalNumberOfGasKeyNoncesRemovedExceeded: z.object({
+        limit: z.number(),
+        numberOfNonces: z.number()
+    })
 })]);
 export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMustBeFinal"), z.object({
     TotalPrepaidGasExceeded: z.object({
@@ -350,6 +359,15 @@ export const ActionsValidationErrorSchema = z.union([z.literal("DeleteActionMust
         limit: z.number(),
         numberOfEntries: z.number()
     })
+}), z.object({
+    TransferToUniversalAccountNotAllowed: z.object({
+        accountId: AccountIdSchema
+    })
+}), z.object({
+    TotalNumberOfGasKeyNoncesAddedExceeded: z.object({
+        limit: z.number(),
+        numberOfNonces: z.number()
+    })
 })]);
 export const ActionViewSchema = z.union([z.literal("CreateAccount"), z.object({
     DeployContract: z.object({
@@ -436,6 +454,9 @@ export const AddKeyActionSchema = z.object({
     accessKey: AccessKeySchema,
     publicKey: z.lazy(() => PublicKeySchema)
 });
+export const AuthorizationContextSchema = z.union([z.literal("ExternalContractCall"), z.object({
+    AccessKey: z.lazy(() => PublicKeySchema)
+})]);
 export const BandwidthRequestSchema = z.object({
     requestedValuesBitmap: z.lazy(() => BandwidthRequestBitmapSchema),
     toShard: z.number()
@@ -539,20 +560,11 @@ export const ChunkDistributionUrisSchema = z.object({
     get: z.string().optional(),
     set: z.string().optional()
 });
-export const ChunkExecutionProofViewSchema = z.object({
-    certifyingBlockHeaderLite: z.lazy(() => LightClientBlockLiteViewSchema),
-    certifyingBlockProof: z.array(z.lazy(() => MerklePathItemSchema)),
-    roots: z.lazy(() => ChunkExecutionRootsSchema),
-    rootsProof: z.array(z.lazy(() => MerklePathItemSchema))
-});
-export const ChunkExecutionRootsSchema = z.object({
-    V1: z.lazy(() => ChunkExecutionRootsV1Schema)
-});
-export const ChunkExecutionRootsV1Schema = z.object({
-    chunkId: z.lazy(() => SpiceChunkIdSchema),
-    outcomeRoot: z.lazy(() => CryptoHashSchema),
-    outgoingReceiptsRoot: z.lazy(() => CryptoHashSchema),
-    stateRoot: z.lazy(() => CryptoHashSchema)
+export const ChunkEccTransactionViewSchema = z.object({
+    contractId: AccountIdSchema,
+    payload: z.string(),
+    stateInit: z.union([z.string(), z.null()]),
+    transactionId: z.union([z.lazy(() => CryptoHashSchema), z.null()]).optional()
 });
 export const ChunkHashSchema = z.lazy(() => CryptoHashSchema);
 export const ChunkHeaderViewSchema = z.object({
@@ -578,6 +590,11 @@ export const ChunkHeaderViewSchema = z.object({
     validatorProposals: z.array(z.lazy(() => ValidatorStakeViewSchema)),
     validatorReward: z.lazy(() => NearTokenSchema)
 });
+export const ChunkTransactionViewSchema = z.union([z.object({
+    kind: z.literal("signed")
+}).and(z.lazy(() => SignedTransactionViewSchema)), z.object({
+    kind: z.literal("external_call")
+}).and(ChunkEccTransactionViewSchema)]);
 export const CloudArchivalWriterConfigSchema = z.object({
     archiveBlockData: z.boolean(),
     catchUpThrottle: z.lazy(() => DurationAsStdSchemaProviderSchema),
@@ -605,8 +622,6 @@ export const CongestionControlConfigViewSchema = z.object({
     maxTxGas: z.lazy(() => NearGasSchema).optional(),
     minOutgoingGas: z.lazy(() => NearGasSchema).optional(),
     minTxGas: z.lazy(() => NearGasSchema).optional(),
-    outgoingReceiptsBigSizeLimit: z.number().optional(),
-    outgoingReceiptsUsualSizeLimit: z.number().optional(),
     rejectTxCongestionThreshold: z.number().optional()
 });
 export const CongestionInfoViewSchema = z.object({
@@ -711,6 +726,13 @@ export const DumpConfigSchema = z.object({
 export const DurationAsStdSchemaProviderSchema = z.object({
     nanos: z.number(),
     secs: z.number()
+});
+export const EccTransactionSchema = z.string();
+export const EccTransactionViewSchema = z.object({
+    contractId: AccountIdSchema,
+    payload: z.string(),
+    stateInit: z.union([z.string(), z.null()]).optional(),
+    transactionId: CryptoHashSchema
 });
 export const EpochIdSchema = CryptoHashSchema;
 export const EpochSyncConfigSchema = z.object({
@@ -1020,8 +1042,6 @@ export const ExtCostsConfigViewSchema = z.object({
     bls12381P2SumElement: z.lazy(() => NearGasSchema).optional(),
     bls12381PairingBase: z.lazy(() => NearGasSchema).optional(),
     bls12381PairingElement: z.lazy(() => NearGasSchema).optional(),
-    contractCompileBase: z.lazy(() => NearGasSchema).optional(),
-    contractCompileBytes: z.lazy(() => NearGasSchema).optional(),
     contractLoadingBase: z.lazy(() => NearGasSchema).optional(),
     contractLoadingBytes: z.lazy(() => NearGasSchema).optional(),
     ecrecoverBase: z.lazy(() => NearGasSchema).optional(),
@@ -1096,6 +1116,25 @@ export const ExtCostsConfigViewSchema = z.object({
     yieldResumeBase: z.lazy(() => NearGasSchema).optional(),
     yieldResumeByte: z.lazy(() => NearGasSchema).optional()
 });
+export const ExternalCallChunkLimitSchema = z.union([z.object({
+    Compute: z.object({
+        limit: z.number(),
+        used: z.number()
+    })
+}), z.object({
+    StorageProof: z.object({
+        limit: z.number(),
+        used: z.number()
+    })
+})]);
+export const ExternalCallsConfigViewSchema = z.object({
+    chunkComputeShare: z.array(z.number()),
+    chunkStorageProofShare: z.array(z.number()),
+    chunkTransactionsSizeShare: z.array(z.number()),
+    maxCallRecordedSize: z.number(),
+    maxCallSize: z.number(),
+    maxCallsPerChunk: z.number()
+});
 export const ExternalStorageLocationSchema = z.union([z.object({
     S3: z.object({
         bucket: z.string(),
@@ -1118,14 +1157,14 @@ export const FeeSchema = z.object({
 export const FinalExecutionOutcomeViewSchema = z.object({
     receiptsOutcome: z.array(ExecutionOutcomeWithIdViewSchema),
     status: z.lazy(() => FinalExecutionStatusSchema),
-    transaction: z.lazy(() => SignedTransactionViewSchema),
+    transaction: z.lazy(() => TransactionEnvelopeViewSchema),
     transactionOutcome: ExecutionOutcomeWithIdViewSchema
 });
 export const FinalExecutionOutcomeWithReceiptViewSchema = z.object({
     receipts: z.array(z.lazy(() => ReceiptViewSchema)),
     receiptsOutcome: z.array(ExecutionOutcomeWithIdViewSchema),
     status: z.lazy(() => FinalExecutionStatusSchema),
-    transaction: z.lazy(() => SignedTransactionViewSchema),
+    transaction: z.lazy(() => TransactionEnvelopeViewSchema),
     transactionOutcome: ExecutionOutcomeWithIdViewSchema
 });
 export const FinalExecutionStatusSchema = z.union([z.literal("NotStarted"), z.literal("Started"), z.object({
@@ -1320,7 +1359,11 @@ export const HostErrorSchema = z.union([z.literal("BadUTF16"), z.literal("BadUTF
     MlDsaVerifyInvalidInput: z.object({
         msg: z.string()
     })
-})]);
+}), z.object({
+    ProhibitedInExternalCall: z.object({
+        methodName: z.string()
+    })
+}), z.literal("DepositInExternalCall")]);
 export const IndexerChunkViewSchema = z.object({
     author: AccountIdSchema,
     header: ChunkHeaderViewSchema,
@@ -1345,7 +1388,7 @@ export const IndexerShardSchema = z.object({
 });
 export const IndexerTransactionWithOutcomeSchema = z.object({
     outcome: IndexerExecutionOutcomeWithOptionalReceiptSchema,
-    transaction: z.lazy(() => SignedTransactionViewSchema)
+    transaction: z.lazy(() => TransactionEnvelopeViewSchema)
 });
 export const InternalErrorSchema = z.object({
     info: z.object({
@@ -1447,6 +1490,14 @@ export const InvalidTxErrorSchema = z.union([z.object({
         reason: DepositCostFailureReasonSchema,
         signerId: AccountIdSchema
     })
+}), z.object({
+    ContractNotFound: z.object({
+        contractId: AccountIdSchema
+    })
+}), z.object({
+    ExternalCallChunkShareReached: z.object({
+        share: ExternalCallChunkLimitSchema
+    })
 })]);
 export const KnownProducerViewSchema = z.object({
     accountId: AccountIdSchema,
@@ -1459,7 +1510,6 @@ export const LightClientBlockLiteViewSchema = z.object({
     prevBlockHash: CryptoHashSchema
 });
 export const LimitConfigSchema = z.object({
-    accountIdValidityRulesVersion: z.number(),
     initialMemoryPages: z.number().optional(),
     maxActionsPerReceipt: z.number().optional(),
     maxArgumentsLength: z.number().optional(),
@@ -1471,6 +1521,9 @@ export const LimitConfigSchema = z.object({
     maxFunctionBodySize: z.union([z.number(), z.null()]).optional(),
     maxFunctionsNumberPerContract: z.union([z.number(), z.null()]).optional(),
     maxGasBurnt: z.lazy(() => NearGasSchema).optional(),
+    maxGasBurntExternal: z.lazy(() => NearGasSchema).optional(),
+    maxGasKeyNoncesAddedPerReceipt: z.number().optional(),
+    maxGasKeyNoncesRemovedPerReceipt: z.number().optional(),
     maxGlobalsPerContract: z.union([z.number(), z.null()]).optional(),
     maxInstrumentedCodeSize: z.union([z.number(), z.null()]).optional(),
     maxLengthMethodName: z.number().optional(),
@@ -1593,13 +1646,15 @@ export const RawStateInitSchema = z.string();
 export const ReceiptEnumViewSchema = z.union([z.object({
     Action: z.object({
         actions: z.array(ActionViewSchema),
+        authorizationContext: z.union([AuthorizationContextSchema, z.null()]).optional(),
+        creationProtocolVersion: z.union([z.number(), z.null()]).optional(),
         gasPrice: NearTokenSchema,
         inputDataIds: z.array(CryptoHashSchema),
         isPromiseYield: z.boolean(),
         outputDataReceivers: z.array(DataReceiverViewSchema),
         refundTo: z.union([AccountIdSchema, z.null()]).optional(),
         signerId: AccountIdSchema,
-        signerPublicKey: PublicKeySchema
+        signerPublicKey: z.union([PublicKeySchema, z.null()]).optional()
     })
 }), z.object({
     Data: z.object({
@@ -1652,6 +1707,14 @@ export const ReceiptValidationErrorSchema = z.union([z.object({
 }), z.object({
     InvalidRefundTo: z.object({
         accountId: z.string()
+    })
+}), z.object({
+    InvalidPromiseYieldInputDataCount: z.object({
+        numberOfInputDataDependencies: z.number()
+    })
+}), z.object({
+    DuplicateInputDataId: z.object({
+        dataId: CryptoHashSchema
     })
 })]);
 export const ReceiptViewSchema = z.object({
@@ -1707,9 +1770,30 @@ export const RpcCallFunctionErrorSchema = z.union([z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
         blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNINITIALIZED_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        error: ActionsValidationErrorSchema
+    }),
+    name: z.literal("INVALID_STATE_INIT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
         contractAccountId: AccountIdSchema
     }),
     name: z.literal("NO_CONTRACT_CODE")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        identifier: GlobalContractIdentifierSchema
+    }),
+    name: z.literal("NO_GLOBAL_CONTRACT_CODE")
 }), z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
@@ -1719,6 +1803,14 @@ export const RpcCallFunctionErrorSchema = z.union([z.object({
     name: z.literal("CONTRACT_EXECUTION_ERROR")
 }), z.object({
     info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        error: z.lazy(() => TxExecutionErrorSchema),
+        logs: z.array(z.string())
+    }),
+    name: z.literal("EXTERNAL_CALL_REFUSED")
+}), z.object({
+    info: z.object({
         errorMessage: z.string()
     }),
     name: z.literal("INTERNAL_ERROR")
@@ -1726,7 +1818,8 @@ export const RpcCallFunctionErrorSchema = z.union([z.object({
 export const RpcCallFunctionRequestSchema = z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
-    methodName: z.string()
+    methodName: z.string(),
+    stateInit: z.union([z.lazy(() => StateInitViewSchema), z.null()]).optional()
 }).and(z.union([z.object({
     blockId: BlockIdSchema
 }), z.object({
@@ -1769,7 +1862,7 @@ export const RpcChunkResponseSchema = z.object({
     author: AccountIdSchema,
     header: ChunkHeaderViewSchema,
     receipts: z.array(ReceiptViewSchema),
-    transactions: z.array(z.lazy(() => SignedTransactionViewSchema))
+    transactions: z.array(ChunkTransactionViewSchema)
 });
 export const RpcClientConfigErrorSchema = z.object({
     info: z.object({
@@ -1794,6 +1887,8 @@ export const RpcClientConfigResponseSchema = z.object({
     cloudArchivalWriter: z.union([CloudArchivalWriterConfigSchema, z.null()]).optional(),
     disableTxRouting: z.boolean().optional(),
     doomslugStepPeriod: MutableConfigValueSchema.optional(),
+    eccPoolSizeShare: z.array(z.number()).optional(),
+    eccTimeShare: MutableConfigValueSchema.optional(),
     enableEarlyPrepareTransactions: z.boolean().optional(),
     enableMultilineLogging: z.boolean().optional(),
     enableStatisticsExport: z.boolean().optional(),
@@ -1846,7 +1941,6 @@ export const RpcClientConfigResponseSchema = z.object({
     transactionPoolStrictNonceTtlBlocks: z.number().optional(),
     transactionRequestHandlerThreads: z.number().optional(),
     trieViewerStateSizeLimit: z.union([z.number(), z.null()]).optional(),
-    ttlAccountIdRouter: z.array(z.number()).optional(),
     txRoutingHeightHorizon: z.number().optional(),
     version: z.lazy(() => VersionSchema).optional(),
     viewAccessKeysLimit: z.number().optional(),
@@ -1923,28 +2017,6 @@ export const RpcLightClientBlockProofRequestSchema = z.object({
 export const RpcLightClientBlockProofResponseSchema = z.object({
     blockHeaderLite: LightClientBlockLiteViewSchema,
     blockProof: z.array(MerklePathItemSchema)
-});
-export const RpcLightClientChunkExecutionProofRequestSchema = z.object({
-    chunkId: z.lazy(() => SpiceChunkIdSchema),
-    lightClientHead: CryptoHashSchema
-});
-export const RpcLightClientChunkExecutionProofResponseSchema = z.object({
-    chunkExecutionProof: ChunkExecutionProofViewSchema
-});
-export const RpcLightClientExecutionOutcomeProofRequestSchema = z.object({
-    lightClientHead: CryptoHashSchema
-}).and(z.union([z.object({
-    senderId: AccountIdSchema,
-    transactionHash: CryptoHashSchema,
-    type: z.literal("transaction")
-}), z.object({
-    receiptId: CryptoHashSchema,
-    receiverId: AccountIdSchema,
-    type: z.literal("receipt")
-})]));
-export const RpcLightClientExecutionOutcomeProofResponseSchema = z.object({
-    chunkExecutionProof: ChunkExecutionProofViewSchema,
-    outcomeProof: ExecutionOutcomeWithIdViewSchema
 });
 export const RpcLightClientExecutionProofRequestSchema = z.object({
     lightClientHead: CryptoHashSchema
@@ -2048,15 +2120,6 @@ export const RpcLightClientProofErrorSchema = z.union([z.object({
     }),
     name: z.literal("INTERNAL_ERROR")
 })]);
-export const RpcLightClientStateProofRequestSchema = z.object({
-    chunkId: z.lazy(() => SpiceChunkIdSchema),
-    lightClientHead: CryptoHashSchema,
-    target: z.lazy(() => StateProofTargetSchema)
-});
-export const RpcLightClientStateProofResponseSchema = z.object({
-    chunkExecutionProof: ChunkExecutionProofViewSchema,
-    stateProof: z.lazy(() => StateProofViewSchema)
-});
 export const RpcMaintenanceWindowsErrorSchema = z.object({
     info: z.object({
         errorMessage: z.string()
@@ -2171,6 +2234,20 @@ export const RpcQueryErrorSchema = z.union([z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
         blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNINITIALIZED_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        error: ActionsValidationErrorSchema
+    }),
+    name: z.literal("INVALID_STATE_INIT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
         contractAccountId: AccountIdSchema
     }),
     name: z.literal("NO_CONTRACT_CODE")
@@ -2211,6 +2288,14 @@ export const RpcQueryErrorSchema = z.union([z.object({
         vmError: z.string()
     }),
     name: z.literal("CONTRACT_EXECUTION_ERROR")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        error: z.lazy(() => TxExecutionErrorSchema),
+        logs: z.array(z.string())
+    }),
+    name: z.literal("EXTERNAL_CALL_REFUSED")
 }), z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
@@ -2268,7 +2353,8 @@ export const RpcQueryRequestSchema = z.union([z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
-    requestType: z.literal("call_function")
+    requestType: z.literal("call_function"),
+    stateInit: z.union([z.lazy(() => StateInitViewSchema), z.null()]).optional()
 })), z.object({
     blockId: BlockIdSchema
 }).and(z.object({
@@ -2323,7 +2409,8 @@ export const RpcQueryRequestSchema = z.union([z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
-    requestType: z.literal("call_function")
+    requestType: z.literal("call_function"),
+    stateInit: z.union([z.lazy(() => StateInitViewSchema), z.null()]).optional()
 })), z.object({
     finality: FinalitySchema
 }).and(z.object({
@@ -2378,7 +2465,8 @@ export const RpcQueryRequestSchema = z.union([z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
-    requestType: z.literal("call_function")
+    requestType: z.literal("call_function"),
+    stateInit: z.union([z.lazy(() => StateInitViewSchema), z.null()]).optional()
 })), z.object({
     syncCheckpoint: z.lazy(() => SyncCheckpointSchema)
 }).and(z.object({
@@ -2478,7 +2566,8 @@ export const RpcRequestValidationErrorKindSchema = z.union([z.object({
     name: z.literal("PARSE_ERROR")
 })]);
 export const RpcSendTransactionRequestSchema = z.object({
-    signedTxBase64: z.lazy(() => SignedTransactionSchema),
+    externalCallBase64: z.union([EccTransactionSchema, z.null()]).optional(),
+    signedTxBase64: z.union([z.lazy(() => SignedTransactionSchema), z.null()]).optional(),
     waitUntil: z.lazy(() => TxExecutionStatusSchema)
 });
 export const RpcSplitStorageInfoErrorSchema = z.object({
@@ -2728,6 +2817,13 @@ export const RpcViewAccessKeyErrorSchema = z.union([z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
         blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNINITIALIZED_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
         publicKey: PublicKeySchema
     }),
     name: z.literal("UNKNOWN_ACCESS_KEY")
@@ -2756,6 +2852,21 @@ export const RpcViewAccessKeyListErrorSchema = z.union([z.object({
         requestedAccountId: AccountIdSchema
     }),
     name: z.literal("UNKNOWN_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNINITIALIZED_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
+        limit: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("TOO_MANY_ACCESS_KEYS")
 }), z.object({
     info: z.object({
         errorMessage: z.string()
@@ -2865,6 +2976,13 @@ export const RpcViewCodeErrorSchema = z.union([z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
         blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNINITIALIZED_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
         contractAccountId: AccountIdSchema
     }),
     name: z.literal("NO_CONTRACT_CODE")
@@ -2912,6 +3030,13 @@ export const RpcViewStateErrorSchema = z.union([z.object({
     info: z.object({
         blockHash: CryptoHashSchema,
         blockHeight: z.number(),
+        requestedAccountId: AccountIdSchema
+    }),
+    name: z.literal("UNINITIALIZED_ACCOUNT")
+}), z.object({
+    info: z.object({
+        blockHash: CryptoHashSchema,
+        blockHeight: z.number(),
         contractAccountId: AccountIdSchema
     }),
     name: z.literal("TOO_LARGE_CONTRACT_STATE")
@@ -2945,6 +3070,7 @@ export const RuntimeConfigViewSchema = z.object({
     accountCreationCharge: NearTokenSchema,
     accountCreationConfig: AccountCreationConfigViewSchema.optional(),
     congestionControlConfig: CongestionControlConfigViewSchema.optional(),
+    externalCallsConfig: ExternalCallsConfigViewSchema,
     minGasPurchasePrice: NearTokenSchema,
     storageAmountPerByte: NearTokenSchema.optional(),
     transactionCosts: z.lazy(() => RuntimeFeesConfigViewSchema).optional(),
@@ -3061,6 +3187,11 @@ export const StateChangeCauseViewSchema = z.union([z.object({
     type: z.literal("migration")
 }), z.object({
     type: z.literal("bandwidth_scheduler_state_update")
+}), z.object({
+    type: z.literal("contract_compilation_status_update")
+}), z.object({
+    transactionId: CryptoHashSchema,
+    type: z.literal("external_call_processing")
 })]);
 export const StateChangeKindViewSchema = z.union([z.object({
     accountId: AccountIdSchema,
@@ -3142,28 +3273,17 @@ export const StateChangeWithCauseViewSchema = z.object({
     }),
     type: z.literal("contract_code_deletion")
 })]));
+export const StateInitViewSchema = z.union([z.object({
+    deterministic: z.object({
+        code: GlobalContractIdentifierViewSchema,
+        data: z.record(z.string(), z.string())
+    })
+}), z.object({
+    universal: RawStateInitSchema
+})]);
 export const StateItemSchema = z.object({
     key: z.lazy(() => StoreKeySchema),
     value: z.lazy(() => StoreValueSchema)
-});
-export const StateProofTargetSchema = z.union([z.object({
-    accountId: AccountIdSchema,
-    targetType: z.literal("account")
-}), z.object({
-    accountId: AccountIdSchema,
-    targetType: z.literal("local_contract_code")
-}), z.object({
-    accountId: AccountIdSchema,
-    key: z.lazy(() => StoreKeySchema),
-    targetType: z.literal("contract_data")
-}), z.object({
-    accountId: AccountIdSchema,
-    publicKey: PublicKeySchema,
-    targetType: z.literal("access_key")
-})]);
-export const StateProofViewSchema = z.object({
-    nodes: z.array(z.string()),
-    value: z.union([z.lazy(() => StoreValueSchema), z.null()]).optional()
 });
 export const StateSyncConfigSchema = z.object({
     concurrency: z.lazy(() => SyncConcurrencySchema).optional(),
@@ -3191,8 +3311,11 @@ export const StorageErrorSchema = z.union([z.literal("StorageInternalError"), z.
     FlatStorageBlockNotSupported: z.string()
 }), z.object({
     MemTrieLoadingError: z.string()
+}), z.object({
+    RecordingBudgetExceeded: z.object({
+        limit: z.number()
+    })
 })]);
-export const StorageGetModeSchema = z.union([z.literal("FlatStorage"), z.literal("Trie")]);
 export const StorageUsageConfigViewSchema = z.object({
     numBytesAccount: z.number().optional(),
     numExtraBytesRecord: z.number().optional()
@@ -3232,6 +3355,11 @@ export const TrackedShardsConfigSchema = z.union([z.literal("NoShards"), z.objec
 }), z.object({
     Accounts: z.array(AccountIdSchema)
 })]);
+export const TransactionEnvelopeViewSchema = z.union([z.object({
+    kind: z.literal("signed")
+}).and(SignedTransactionViewSchema), z.object({
+    kind: z.literal("external_call")
+}).and(EccTransactionViewSchema)]);
 export const TransactionNonceSchema = z.union([z.object({
     Nonce: z.object({
         nonce: z.number()
@@ -3328,28 +3456,17 @@ export const ViewStateResultSchema = z.object({
 });
 export const VMConfigViewSchema = z.object({
     bls12381NotInGroupFix: z.boolean().optional(),
-    chainIdHostFn: z.boolean().optional(),
-    discardCustomSections: z.boolean().optional(),
-    ethImplicitAccounts: z.boolean().optional(),
     extCosts: ExtCostsConfigViewSchema.optional(),
     fixContractLoadingCost: z.boolean().optional(),
-    gasKeyHostFns: z.boolean().optional(),
-    globalContractHostFns: z.boolean().optional(),
     growMemCost: z.number().optional(),
-    implicitAccountCreation: z.boolean().optional(),
     limitConfig: LimitConfigSchema.optional(),
     linearOpBaseCost: z.number().optional(),
     linearOpUnitCost: z.number().optional(),
     mlDsaVerifyHostFn: z.boolean().optional(),
-    oneYoctoOnPromise: z.boolean().optional(),
-    p256VerifyHostFn: z.boolean().optional(),
-    reftypesBulkMemory: z.boolean().optional(),
     regularOpCost: z.number().optional(),
     sha3HostFns: z.boolean().optional(),
-    storageGetMode: StorageGetModeSchema.optional(),
     universalAccounts: z.boolean().optional(),
-    vmKind: z.lazy(() => VMKindSchema).optional(),
-    yieldWithIdHostFns: z.boolean().optional()
+    vmKind: z.lazy(() => VMKindSchema).optional()
 });
 export const VMKindSchema = z.union([z.literal("Wasmer0"), z.literal("Wasmtime"), z.literal("Wasmer2"), z.literal("NearVm")]);
 export const WasmTrapSchema = z.union([z.literal("Unreachable"), z.literal("IncorrectCallIndirectSignature"), z.literal("MemoryOutOfBounds"), z.literal("CallIndirectOOB"), z.literal("IllegalArithmetic"), z.literal("MisalignedAtomicAccess"), z.literal("IndirectCallToNull"), z.literal("StackOverflow"), z.literal("GenericTrap")]);
@@ -3362,6 +3479,7 @@ export const WitnessConfigViewSchema = z.object({
     mainStorageProofSizeSoftLimit: z.number().optional(),
     newTransactionsValidationStateSizeSoftLimit: z.number().optional()
 });
+export const JsonRpcResponseForNullableCryptoHashAndRpcTransactionErrorResponseSchema = z.union([CryptoHashSchema, z.null()]);
 export const JsonRpcResponseForArrayOfRangeOfUint64AndRpcMaintenanceWindowsErrorResponseSchema = z.array(Range_of_uint64Schema);
 export const JsonRpcResponseForArrayOfValidatorStakeViewAndRpcValidatorErrorResponseSchema = z.array(ValidatorStakeViewSchema);
 export const JsonRpcResponseForNullableRpcHealthResponseAndRpcStatusErrorResponseSchema = z.union([RpcHealthResponseSchema, z.null()]);
@@ -3574,21 +3692,24 @@ export const RpcQueryRequestCallFunctionSchema = z.union([z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
-    requestType: z.literal("call_function")
+    requestType: z.literal("call_function"),
+    stateInit: z.union([StateInitViewSchema, z.null()]).optional()
 })), z.object({
     finality: FinalitySchema
 }).and(z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
-    requestType: z.literal("call_function")
+    requestType: z.literal("call_function"),
+    stateInit: z.union([StateInitViewSchema, z.null()]).optional()
 })), z.object({
     syncCheckpoint: SyncCheckpointSchema
 }).and(z.object({
     accountId: AccountIdSchema,
     argsBase64: FunctionArgsSchema,
     methodName: z.string(),
-    requestType: z.literal("call_function")
+    requestType: z.literal("call_function"),
+    stateInit: z.union([StateInitViewSchema, z.null()]).optional()
 }))]);
 export const RpcQueryRequestViewGlobalContractCodeSchema = z.union([z.object({
     blockId: BlockIdSchema
